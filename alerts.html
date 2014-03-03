@@ -220,15 +220,26 @@ function editAlert(id, body) {
     }
 }
 
+function getJsonFromUrl() {
+  var query = location.search.substr(1);
+  var data = query.split("&");
+  var result = {};
+  for(var i=0; i<data.length; i++) {
+    var item = data[i].split("=");
+    result[item[0]] = item[1];
+  }
+  return result;
+}
+
+
 // parse get parameters
 document.title = 'Talos Alerts';
 
-var showAll = 0;
-try {
-    showAll = document.location.search.split('=')[1]; // ?showall=1
-    showAll = 1;
-} catch (ex) {}
-
+var results = getJsonFromUrl();
+var showAll = 1;
+if (parseInt(results['showAll']) != 1) {
+  showAll = 0;
+}
 loadAllAlerts(showAll);
 
     </script>
