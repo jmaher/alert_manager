@@ -8,6 +8,8 @@ import rfc822
 import urllib
 import base64
 import os
+import ConfigParser
+from optparse import OptionParser
 
 trees = ['Mozilla-Inbound', 
          'Mozilla-Inbound-Non-PGO', 
@@ -87,6 +89,9 @@ subject_trans_table = string.maketrans("\t", " ")
 def getRevisions(changeseturl):
     cpart = changeseturl.split('?')[-1].replace('&', '_')
 
+    if not os.path.exists(os.path.abspath('tmpcset')):
+        os.mkdir('tmpcset')
+
     cacheFile = os.path.join(os.path.abspath('tmpcset'), cpart)
     if not os.path.exists(cacheFile):
         opener = urllib.FancyURLopener({})
@@ -109,11 +114,11 @@ def getRevisions(changeseturl):
 
     return revisions
 
-def getCSets():
-    db = MySQLdb.connect(host="localhost",
-                         user="root",
-                         passwd="testing",
-                         db="alerts")
+def getCSets(config):
+    db = MySQLdb.connect(host=config['host'],
+                         user=config['username'],
+                         passwd=config['password'],
+                         db=config['database'])
 
     #TODO: optimize to last 2 weeks of data
     sql = "select id, keyrevision, changesets from alerts";
@@ -127,11 +132,11 @@ def getCSets():
 
     return results
 
-def markMerged(id, originalKeyRevision):
-    db = MySQLdb.connect(host="localhost",
-                         user="root",
-                         passwd="testing",
-                         db="alerts")
+def markMerged(config, id, originalKeyRevision):
+    db = MySQLdb.connect(host=config['host'],
+                         user=config['username'],
+                         passwd=config['password'],
+                         db=config['database'])
 
     sql = "select mergedfrom from alerts where id=%s" % id;
     cur = db.cursor()
@@ -183,20 +188,24 @@ def validSubject(subject):
         print "INVALID TEST NAME: %s" % parts[1]
         return [None, None, None, None]
 
+    parts[3] = "%s%s" % (sign, parts[3])
     return parts
 
-#TODO: make this configurable
-mbox_dir = '/var/spool/news/mozilla/dev/tree-management/new'
-mbox = mailbox.MHMailbox(mbox_dir)
 
-while 1:
-    msg = mbox.next()
-    if not msg:
-        break
+def parseMailbox(config):
+    mbox = mailbox.MHMailbox(config['maildir'])
+    while 1:
+        msg = mbox.next()
+        if not msg:
+            break
+
+        parseMessage(config, msg)
+
+def parseMessage(config, msg):
     parts = validSubject(subject_of(msg))
 
     if not parts[0]:
-        continue
+        return
 
     branch = parts[0]
     test = parts[1]
@@ -205,7 +214,7 @@ while 1:
     body = msg.fp.read()
 
     if not body:
-        continue
+        return
 
     graphurl = None
     changeset = None
@@ -265,7 +274,7 @@ while 1:
 
     if not graphurl or not changeset:
         print "INVALID BODY: no graphurl or changeset"
-        continue
+        return
 
     csets = getRevisions(changeset)
 
@@ -273,9 +282,9 @@ while 1:
     parsed = rfc822.parsedate(date)
 
     merged = ''
-    if bugCount > 10:
+    if bugCount > 5:
         # search for csets in existing 
-        db_csets = getCSets()
+        db_csets = getCSets(config)
         merged = ''
         for i, k, c in db_csets:
             if k in csets:
@@ -289,15 +298,14 @@ while 1:
                         break
 
             if merged:
-#                print "found original regression: keyrevision: %s, csets: %s" % (k, c)
                 break
 
     datestring = "%s-%s-%s %s:%s:%s" % (str(parsed[0]).zfill(4), str(parsed[1]).zfill(2), str(parsed[2]).zfill(2), str(parsed[3]).zfill(2), str(parsed[4]).zfill(2), str(parsed[5]).zfill(2))
 
-    db = MySQLdb.connect(host="localhost",
-                         user="root",
-                         passwd="testing",
-                         db="alerts")
+    db = MySQLdb.connect(host=config['host'],
+                         user=config['username'],
+                         passwd=config['password'],
+                         db=config['database'])
 
     # TODO: figure out if we should set these fields to a specific value
     comment = ''
@@ -316,8 +324,8 @@ while 1:
     cur.close()
     if foundDuplicate:
         if merged:
-            markMerged(foundDuplicate, merged)
-        continue
+            markMerged(config, foundDuplicate, merged)
+        return
 
     print "branch: %s" % branch
     print "test: %s" % test
@@ -350,4 +358,28 @@ while 1:
 
     cur.execute(sql)
     cur.close()
+
+
+if __name__ == "__main__":
+    op = OptionParser()
+    op.add_option("--config",
+                    action = "store", type = "string", dest = "config",
+                    default = 'config.ini',
+                    help = "path to the config file [config.ini]")
+
+    options, args = op.parse_args()
+
+    if not os.path.exists(options.config):
+        print "ERROR: %s doesn't exist" % (options.config)
+        sys.exit(1)
+
+    parser = ConfigParser.RawConfigParser()
+    parser.read(options.config)
+
+    config = {'username': parser.get('alerts', 'username'), 
+              'password': parser.get('alerts', 'password'), 
+              'host': parser.get('alerts', 'host'), 
+              'database': parser.get('alerts', 'database'), 
+              'maildir': parser.get('alerts', 'maildir')}
+    parseMailbox(config)
 

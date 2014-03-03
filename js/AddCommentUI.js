@@ -74,7 +74,7 @@ var AddCommentUI = {
 
   _postOneTBPLNote: function AddCommentUI__postOneTBPLNote(alertID, email, comment, status, bugid) {
     $.ajax({
-      url: "http://localhost:8157/data/submit",
+      url: "/data/submit",
       type: "POST",
       data: {
         id: alertID,
@@ -117,7 +117,7 @@ var AddDuplicateUI = {
 
   _postDuplicate: function addDuplicateUI__postDuplicate(alertID, duprev) {
     $.ajax({
-      url: "http://localhost:8157/data/submitduplicate",
+      url: "/data/submitduplicate",
       type: "POST",
       data: {
         id: alertID,
@@ -164,7 +164,7 @@ var AddBugUI = {
 
   _postBug: function addBugUI__postBug(alertID, bugID, status) {
     $.ajax({
-      url: "http://localhost:8157/data/submitbug",
+      url: "/data/submitbug",
       type: "POST",
       data: {
         id: alertID,

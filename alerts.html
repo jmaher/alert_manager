@@ -7,202 +7,229 @@
     <script src="/js/AddCommentUI.js"></script>
     <script type="text/javascript">
 
-        function hideMerged(originalkeyrev) {
-            var req = new XMLHttpRequest();
-            req.onload = function(e) {
-                var raw_data = JSON.parse(req.response);
+function hideMerged(originalkeyrev, showall) {
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
 
-                var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
-                var alerts = raw_data.alerts;   
-             
-                var keyrev = "";
-                var tbl = "";
-                // insert revisions into lower table
-                for (var alert in alerts) {
-                    if (alerts[alert]["mergedfrom"] == originalkeyrev) {
-                        tbl = document.getElementById(originalkeyrev + "-tbl");
-                    } else {
-                        continue;
-                    }
-                    var row = $("#" + alerts[alert]["id"] + "-" + originalkeyrev);
-                    if (row) {
-                        row.remove();
-                    }
-                }
-                var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "');\">show merged alerts</span>";
-                $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
-            }
-            req.open('get', '/data/mergedalerts?keyrev=' + originalkeyrev, true);
-            req.send();
-        }
-
-        function showMerged(originalkeyrev) {
-            var req = new XMLHttpRequest();
-            req.onload = function(e) {
-                var raw_data = JSON.parse(req.response);
-                var alerts = raw_data.alerts;   
-             
-                var tbl = "";
-                // insert revisions into lower table
-                for (var alert in alerts) {
-                    if (alerts[alert]["mergedfrom"] != originalkeyrev) {
-                        continue;
-                    }
-                    tbl = document.getElementById(originalkeyrev + "-tbl");
-                    addAlertToUI(tbl, alerts[alert], originalkeyrev);
-                }
-                var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "');\">hide merged alerts</span>";
-                $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
-            }
-            req.open('get', '/data/mergedalerts?keyrev=' + originalkeyrev, true);
-            req.send();
-        }
-
-        function addMergedLinks(alerts) {
-            var req = new XMLHttpRequest();
-            req.onload = function(e) {
-                var raw_data = JSON.parse(req.response);
-
-                var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
-                var alerts = raw_data.alerts;   
-
-                var count = 0;
-                for (var alert in alerts) {
-                    if (alerts[alert]['mergedfrom'] != '') {
-                        var mf = alerts[alert]['mergedfrom'];
-                        var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "');\">view merged alerts</span>";
-                        $("#" + mf + "-hdr").html("<h3>" + mf + "</h3>" + mergedfromhtml);
-                    }
-                }
-            }
-            req.open('get', '/data/mergedids', true);
-            req.send();
-        }
-
-        function updateStatus(alertid, duplicate, mergedfrom) {
-            var status = $("#" + alertid + "-status").val();
-            if (status == 'Duplicate') {
-                // popup window with field for duplicate, seeded with alert['duplicate']
-                // consider merged rev if needed
-                suggestedDuplicate = duplicate;
-                if (suggestedDuplicate == 'null' || suggestedDuplicate == '') {
-                    suggestedDuplicate = mergedfrom;
-                }
-
-                AddDuplicateUI.openDuplicateBox(alertid, suggestedDuplicate);
+        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
+        var alerts = raw_data.alerts;   
+     
+        var keyrev = "";
+        var tbl = "";
+        // insert revisions into lower table
+        for (var alert in alerts) {
+            if (alerts[alert]["mergedfrom"] == originalkeyrev) {
+                tbl = document.getElementById(originalkeyrev + "-tbl");
             } else {
-                $.ajax({
-                  url: "http://localhost:8159/data/updatestatus",
-                  type: "POST",
-                  data: {
-                    id: alertid,
-                    status: status,
-                  }
-                });
+                continue;
+            }
+            var row = $("#" + alerts[alert]["id"] + "-" + originalkeyrev);
+            if (row) {
+                row.remove();
             }
         }
+        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
+        $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
+    }
+    req.open('get', '/data/mergedalerts?keyrev=' + originalkeyrev, true);
+    req.send();
+}
 
-        function updateBug(alertid, bugid, status) {
-            var bug = bugid;
-            if (bug == '') {
-                bug = $("#" + alertid + "-bug").val();
+function showMerged(originalkeyrev, showall) {
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        var alerts = raw_data.alerts;   
+     
+        var tbl = "";
+        // insert revisions into lower table
+        for (var alert in alerts) {
+            if (alerts[alert]["mergedfrom"] != originalkeyrev) {
+                continue;
             }
-            if (status == '') {
-                status = 'NEW';
-            }
-
-            AddBugUI.openBugBox(alertid, bug, status);
+            tbl = document.getElementById(originalkeyrev + "-tbl");
+            addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
+        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
+        $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
+    }
+    req.open('get', '/data/mergedalerts?keyrev=' + originalkeyrev, true);
+    req.send();
+}
 
-        function addAlertToUI(tbl, alert, originalKeyRevision="") {
-//            var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
-            var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "bug", "status"]
-            var row = tbl.insertRow(-1);
-            row.id = alert["id"] + "-" + originalKeyRevision;
-            var rev = row.insertCell(0);
+function addMergedLinks(showall) {
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
 
-            var cname = "data";
-            // using a simple heuristic here to weed out alerts- we should ensure this alert has a set of changes in a previous alert
-            if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
-                cname = "mergeddata";
-            }
-            for (var i=0; i < fields.length; i++) {
-                var test = fields[i];
-                cell = row.insertCell(-1);
-                cell.className = cname;
-                cell.onclick = editAlert(alert["id"], alert["body"]);
-                var value = alert[test];
-                if (fields[i] == "graphurl" || fields[i] == "changeset") {
-                    value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
-                    cell.onclick = "";
-                } else if (fields[i] == "status") {
-                    value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['mergedfrom'] + "');\">";
-                    var options = ["NEW", "Investigating", "Duplicate", "Resolved", "False Alarm"]
-                    for (var j=0; j < options.length; j++) {
-                        value += "<option ";
-                        if (alert['status'] == options[j]) {
-                            value += "selected";
-                        }
-                        value += ">" + options[j] + "</option>";
-                    }
-                    value += "</select>";
-                    cell.onclick = "";
-                } else if (fields[i] == "bug") {
-                    var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
-                    if (alert['bug'] != "") {
-                        defaultValue = "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + alert['bug'] + "\">" + alert['bug'] + "</a>";
-                    }
+        var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
+        var alerts = raw_data.alerts;   
 
-                    value = defaultValue;
-                    cell.onclick = "";
+        var count = 0;
+        for (var alert in alerts) {
+            if (alerts[alert]['mergedfrom'] != '') {
+                var mf = alerts[alert]['mergedfrom'];
+                if ($("#" + mf + "-hdr").html() == "") {
+                    continue;
                 }
-                textNode = value || 0;
-                cell.innerHTML = textNode;
+
+                var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
+                $("#" + mf + "-hdr").html("<h3>" + mf + "</h3>" + mergedfromhtml);
             }
         }
+    }
+    req.open('get', '/data/mergedids', true);
+    req.send();
+}
 
-        // parse get parameters
-        document.title = 'Talos Alerts';
+function updateStatus(alertid, duplicate, mergedfrom) {
+    var status = $("#" + alertid + "-status").val();
+    if (status == 'Duplicate') {
+        // popup window with field for duplicate, seeded with alert['duplicate']
+        // consider merged rev if needed
+        suggestedDuplicate = duplicate;
+        if (suggestedDuplicate == 'null' || suggestedDuplicate == '') {
+            suggestedDuplicate = mergedfrom;
+        }
 
-        var req = new XMLHttpRequest();
-        req.onload = function(e) {
-            var raw_data = JSON.parse(req.response);
-            var alerts = raw_data.alerts;   
-         
-            var keyrev = "";
-            var tbl = "";
-            // insert revisions into lower table
-            for (var alert in alerts) {
-                if (alerts[alert]["keyrevision"] != keyrev) {
-                    keyrev = alerts[alert]["keyrevision"];
+        AddDuplicateUI.openDuplicateBox(alertid, suggestedDuplicate);
+    } else {
+        $.ajax({
+          url: "data/updatestatus",
+          type: "POST",
+          data: {
+            id: alertid,
+            status: status,
+          }
+        });
+    }
+}
+
+function updateBug(alertid, bugid, status) {
+    var bug = bugid;
+    if (bug == '') {
+        bug = $("#" + alertid + "-bug").val();
+    }
+    if (status == '') {
+        status = 'NEW';
+    }
+
+    AddBugUI.openBugBox(alertid, bug, status);
+}
+
+function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
+//    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
+    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "bug", "status"]
+
+    var cname = "data";
+    if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
+        cname = "mergeddata";
+    }
+    if (parseInt(alert["percent"]) > 0) {
+        if (showall != 1) {
+            return 0;
+        }
+        cname = "improvement";
+    }
+
+    var row = tbl.insertRow(-1);
+    row.id = alert["id"] + "-" + originalKeyRevision;
+    var rev = row.insertCell(0);
+
+    for (var i=0; i < fields.length; i++) {
+        var test = fields[i];
+        cell = row.insertCell(-1);
+        cell.className = cname;
+        cell.onclick = editAlert(alert["id"], alert["body"]);
+        var value = alert[test];
+        if (fields[i] == "graphurl" || fields[i] == "changeset") {
+            value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
+            cell.onclick = "";
+        } else if (fields[i] == "status") {
+            value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['mergedfrom'] + "');\">";
+            var options = ["NEW", "Investigating", "Duplicate", "Resolved", "False Alarm"]
+            for (var j=0; j < options.length; j++) {
+                value += "<option ";
+                if (alert['status'] == options[j]) {
+                    value += "selected";
+                }
+                value += ">" + options[j] + "</option>";
+            }
+            value += "</select>";
+            cell.onclick = "";
+        } else if (fields[i] == "bug") {
+            var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
+            if (alert['bug'] != "") {
+                defaultValue = "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + alert['bug'] + "\">" + alert['bug'] + "</a>";
+            }
+
+            value = defaultValue;
+            cell.onclick = "";
+        }
+        textNode = value || 0;
+        cell.innerHTML = textNode;
+    }
+    return 1
+}
+
+function loadAllAlerts(showall) {
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        var alerts = raw_data.alerts;   
+ 
+        var keyrev = "";
+        var tbl = "";
+        // insert revisions into lower table
+        for (var alert in alerts) {
+            if (alerts[alert]["keyrevision"] != keyrev) {
+                keyrev = alerts[alert]["keyrevision"];
+                if ($("#" + keyrev + "-hdr").html() == null) {
                     var newdiv = document.createElement("div");
                     newdiv.id = keyrev;
                     $("#revisions").append(newdiv);
+                    $("#" + keyrev).append("<span id=\"" + keyrev + "-hdr\"><h3>" + keyrev + "</h3></span>");
+                }
+                if ($("#" + keyrev + "-tbl").html() == null) {
                     var kdiv = document.getElementById(keyrev);
                     var newtbl = document.createElement("table");
                     newtbl.id = keyrev + '-tbl';
-                    
-                    $("#" + keyrev).append("<span id=\"" + keyrev + "-hdr\"><h3>" + keyrev + "</h3></span>");
                     $("#" + keyrev).append(newtbl);
-                    tbl = document.getElementById(keyrev + "-tbl");
                 }
-                addAlertToUI(tbl, alerts[alert]);
+                $("#" + keyrev + "-hdr").html("<h3>" + keyrev + "</h3>");
+                tbl = document.getElementById(keyrev + "-tbl");
             }
-
-            addMergedLinks();
-            AddCommentUI.init();
-            AddDuplicateUI.init();
-            AddBugUI.init();
+            var r = addAlertToUI(tbl, alerts[alert], showall);
+            if ($("#" + keyrev + '-tbl tr').size() == 0) {
+                $("#" + keyrev + "-hdr").html("");
+            }
         }
-
-        req.open('get', '/data/alertsbyrev', true);
-        req.send();
-
-    function editAlert(id, body) {
-        return function() {
-          AddCommentUI.openCommentBox(id, body);
-        }
+        addMergedLinks(showall);
+        AddCommentUI.init();
+        AddDuplicateUI.init();
+        AddBugUI.init();
     }
+    req.open('get', '/data/alertsbyrev', true);
+    req.send();
+}
+
+function editAlert(id, body) {
+    return function() {
+      AddCommentUI.openCommentBox(id, body);
+    }
+}
+
+// parse get parameters
+document.title = 'Talos Alerts';
+
+var showAll = 0;
+try {
+    showAll = document.location.search.split('=')[1]; // ?showall=1
+    showAll = 1;
+} catch (ex) {}
+
+loadAllAlerts(showAll);
 
     </script>
 </head>

@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+import os
 import json
 import re
+import sys
 from datetime import datetime, timedelta
 from itertools import groupby
 from collections import Counter
@@ -10,12 +12,22 @@ from wsgiref.simple_server import make_server
 from wsgiref.util import request_uri
 
 import MySQLdb
+import ConfigParser
+from optparse import OptionParser
+
+global config
 
 def create_db_connnection():
-    return MySQLdb.connect(host="localhost",
-                           user="root",
-                           passwd="testing",
-                           db="alerts")
+    global config
+    try:
+        print config
+    except:
+        getConfig()
+
+    return MySQLdb.connect(host=config['host'],
+                           user=config['username'],
+                           passwd=config['password'],
+                           db=config['database'])
 
 
 def serialize_to_json(object):
@@ -144,7 +156,6 @@ def run_submitbug_data(query_dict, body):
     for item in d:
         data[item] = d[item][0]
 
-    print data
     sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
 
     db = create_db_connnection()
@@ -212,6 +223,30 @@ def application(environ, start_response):
     return response_body
 
 
+def getConfig():
+    global config
+    op = OptionParser()
+    op.add_option("--config",
+                    action = "store", type = "string", dest = "config",
+                    default = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.ini'),
+                    help = "path to the config file [config.ini]")
+
+    options, args = op.parse_args()
+
+    if not os.path.exists(options.config):
+        print "ERROR: %s doesn't exist" % (os.path.abspath(options.config))
+        sys.exit(1)
+
+    parser = ConfigParser.RawConfigParser()
+    parser.read(options.config)
+
+    config = {'username': parser.get('alerts', 'username'), 
+              'password': parser.get('alerts', 'password'), 
+              'host': parser.get('alerts', 'host'), 
+              'database': parser.get('alerts', 'database'), 
+              'maildir': parser.get('alerts', 'maildir')}
+
 if __name__ == '__main__':
+    getConfig()
     httpd = make_server("0.0.0.0", 8159, application)
     httpd.serve_forever()
