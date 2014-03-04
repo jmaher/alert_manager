@@ -78,21 +78,21 @@ def run_alert_query(query_dict, body):
 @json_response
 def run_mergedids_query(query_dict, body):
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
-    where_clause = "where mergedfrom != '' and (status='' or status='Investigating') order by date,keyrevision";
+    where_clause = "where mergedfrom != '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
 
 @json_response
 def run_alertsbyrev_query(query_dict, body):
-    where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date,keyrevision";
+    where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
 @json_response
 def run_mergedalerts_query(query_dict, body):
     keyrev = query_dict['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='' or status='Investigating') order by date,keyrevision" % keyrev;
+    where_clause = "where mergedfrom='%s' and (status='' or status='Investigating') order by date,keyrevision ASC" % keyrev;
     return { 'alerts': run_query(where_clause) }
 
 @json_response
