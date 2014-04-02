@@ -404,8 +404,8 @@ def parseMessage(config, msg):
                 # found the key revision in the merged changeset, see if others are there
                 for originalrev in c:
                     if originalrev not in csets:
-                        print "OH NO: found keyrevision %s, but not other cset: %s from original in current set: %s" % (k, originalrev, c)
-                        print "       platform: %s, branch: %s, test %s, keyrevision %s, csets: %s\n" % (platform, branch, test, keyrevision, csets)
+#                        print "OH NO: found keyrevision %s, but not other cset: %s from original in current set: %s" % (k, originalrev, c)
+#                        print "       platform: %s, branch: %s, test %s, keyrevision %s, csets: %s\n" % (platform, branch, test, keyrevision, csets)
                         merged = ''
                         break
 
@@ -440,15 +440,16 @@ def parseMessage(config, msg):
             markMerged(config, foundDuplicate, merged)
         return
 
-    print "branch: %s" % branch
-    print "test: %s" % test
-    print "platform: %s" % platform
-    print "percent: %s" % percent
-    print "graphurl: %s" % graphurl
-    print "changeset: %s" % changeset
-    print "keyrevision: %s" % keyrevision
-    print "bugcount: %s" % bugCount
-    print "changesets: %s" % csets
+    if 1 == 0:
+        print "branch: %s" % branch
+        print "test: %s" % test
+        print "platform: %s" % platform
+        print "percent: %s" % percent
+        print "graphurl: %s" % graphurl
+        print "changeset: %s" % changeset
+        print "keyrevision: %s" % keyrevision
+        print "bugcount: %s" % bugCount
+        print "changesets: %s" % csets
 
     #TODO: is branch valid?
     dzdata = getDatazillaData(branch)
