@@ -10,6 +10,8 @@ import base64
 import os
 import ConfigParser
 from optparse import OptionParser
+import httplib
+import json
 
 trees = ['Mozilla-Inbound', 
          'Mozilla-Inbound-Non-PGO', 
@@ -31,6 +33,79 @@ platforms = ['XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
 #             'CentOS release 5 (Final)', 'CentOS (x86_64) release 5 (Final)',
              'MacOSX 10.7', 'MacOSX 10.8', 'MacOSX 10.6 (rev4)', 
              'Android 2.2 (Native)', 'Android 4.0.4']
+
+tbpl_platforms = {'WINNT 5.1 (ix)': 'Windows XP 32-bit',
+                  'WINNT 6.1 (ix)': 'Windows 8 32-bit',
+                  'WINNT 6.2 x64': 'WINNT 6.2',
+                  'Ubuntu HW 12.04': 'Ubuntu HW 12.04',
+                  'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
+                  'MacOSX 10.6 (rev4)': 'Rev 4 MacOSX Snow Leopard 10.6',
+                  'MacOSX 10.8': 'Rev 5 MacOSX Mountain Lion 10.8',
+                  'Android 2.2 (Native)': 'Android 2.2 Tegra',
+                  'Android 4.0.4': 'Android 4.0 Tegra'
+                  }
+
+# oh the hacks continue, osx runs on the pgo branch without the pgo tag
+tbpl_trees = {'Mozilla-Inbound': 'mozilla-inbound pgo',
+              'Mozilla-Inbound-Non-PGO': 'mozilla-inbound',
+              'Fx-Team': 'fx-team pgo',
+              'Fx-Team-Non-PGO': 'fx-team',
+              'Firefox': 'mozilla-central pgo',
+              'Firefox-Non-PGO': 'mozilla-central',
+              'Mozilla-Aurora': 'mozilla-aurora pgo',
+              'Mozilla-Aurora-Non-PGO': 'mozilla-aurora',
+              'Mozilla-Beta': 'mozilla-beta pgo',
+              'Mozilla-Beta-Non-PGO': 'mozilla-beta',
+              'B2g-Inbound': 'b2g-inbound pgo',
+              'B2g-Inbound-Non-PGO': 'b2g-inbound',
+              'mobile': 'mozilla-central'
+             }
+
+tbpl_tests = {'SVG No Chrome': 'svgr',
+        'SVG Row Major': 'svgr',
+        'SVG, Opacity Row Major': 'svgr',
+        'Dromaeo (DOM)': 'dromaeojs',
+        'Dromaeo (CSS)': 'dromaeojs',
+        'Kraken Benchmark': 'dromaeojs',
+        'V8': 'dromaeojs',
+        'V8 Version 7': 'dromaeojs',
+        'Paint': 'other',
+        'tscroll Row Major': 'svgr',
+        'TResize': 'chromez',
+        'Tp5 Optimized': 'tp5o',
+        'Tp5 Optimized (Private Bytes)': 'tp5o',
+        'Tp5 Optimized (Main RSS)': 'tp5o',
+        'Tp5 Optimized (Content RSS)': 'tp5o',
+        'Tp5 Optimized (%CPU)': 'tp5o',
+        'Tp5 No Network Row major MozAfterPaint (Main Startup File I/O Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Non-Main Startup File IO Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal Network IO Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Main Normal File IO Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Main Startup File IO Bytes)': 'tp5o',
+        'Tp5 Optimized (Modified Page List Bytes)': 'tp5o',
+        'Tp5 Optimized Responsiveness': 'tp5o',
+        'Tp5 Optimized MozAfterPaint': 'tp5o',
+        'a11y Row Major MozAfterPaint': 'other',
+        'Tp4 Mobile': 'remote-tp4m_nochrome',
+        'LibXUL Memory during link': '',
+        'Ts, Paint': 'other',
+        'Robocop Pan Benchmark': 'remote-trobopan',
+        'Robocop Database Benchmark': 'remote-troboprovider',
+        'Robocop Checkerboarding No Snapshot Benchmark': 'remote-trobocheck2',
+        'Robocop Checkerboarding Real User Benchmark': 'remote-trobocheck2',
+        'Customization Animation Tests': 'svgr',
+        'Latency Performance Tests': '',
+        'WebRTC Media Performance Tests': '',
+        'Tab Animation Test, NoChrome': 'svgr',
+        'Tab Animation Test': 'svgr',
+        'Canvasmark, NoChrome': 'chromez',
+        'Canvasmark': 'chromez',
+        'Tab Animation Test, NoChrome': 'svgr',
+        'tscroll-ASAP': 'svgr',
+        'SVG-ASAP, NoChrome': 'svgr',
+        'SVG-ASAP': 'svgr',
+        'tscroll-ASAP MozAfterPaint': 'svgr'
+             }
 
 tests = ['SVG No Chrome',
         'SVG Row Major',
@@ -72,13 +147,50 @@ tests = ['SVG No Chrome',
         'Canvasmark, NoChrome',
         'Canvasmark',
         'Tab Animation Test, NoChrome',
-        'CanvasMark, NoChrome',
-        'CanvasMark',
         'tscroll-ASAP',
         'SVG-ASAP, NoChrome',
         'SVG-ASAP',
-        'V8 version 7',
         'tscroll-ASAP MozAfterPaint' ]
+
+
+def getDatazillaData(branchid):
+    fname = "%s-%s.revs" % (branchid, int(time.time()))
+    if os.path.exists(fname):
+        data = '{}'
+        with open(fname, 'r') as fhandle:
+            data = fhandle.read()
+    else:
+    # https://datazilla.mozilla.org/refdata/pushlog/list/?days_ago=7&branches=Mozilla-Inbound
+        conn = httplib.HTTPSConnection('datazilla.mozilla.org')
+        cset = "/refdata/pushlog/list/?days_ago=30&branches=%s" % branchid
+        conn.request("GET", cset)
+        response = conn.getresponse()
+        data = response.read()
+        with open(fname, 'w+') as fhandle:
+            fhandle.write(data)
+    
+    return json.loads(data)
+
+def getRevisionRange(dzdata, revision):
+    revid = None
+    for item in dzdata:
+        if revision in dzdata['%s' % item]['revisions']:
+            revid = item
+            break
+
+    if not revid:
+        print "unable to find revision: %s" % revision
+        return None
+    low = '%s' % (int(revid) - 6)
+    high = '%s' % (int(revid) + 6)
+    if low not in dzdata:
+        print "unable to get range, missing id: %s" % low
+        return None
+    if high not in dzdata:
+        print "unable to get range, missing id: %s" % high
+        return None
+
+    return dzdata[low]['revisions'][-1], dzdata[high]['revisions'][-1]
 
 #subject = "(Improvement) Firefox-Non-PGO - Customization Animation Tests - WINNT 6.2 x64 - 5.84%"
 subre = re.compile("^(<Regression>|\(Improvement\))(.*)")
@@ -315,6 +427,7 @@ def parseMessage(config, msg):
 
     foundDuplicate = False
     cur = db.cursor()
+    # TODO: is this valid? we are checking if the branch is equal, same with percent- in this case it already exists?!?
     sql = "select id from alerts where branch='%s' and test='%s' and platform='%s' and percent='%s'" % (branch, test, platform, percent)
     cur.execute(sql)
     for row in cur.fetchall():
@@ -336,6 +449,12 @@ def parseMessage(config, msg):
     print "keyrevision: %s" % keyrevision
     print "bugcount: %s" % bugCount
     print "changesets: %s" % csets
+
+    #TODO: is branch valid?
+    dzdata = getDatazillaData(branch)
+    vals = getRevisionRange(dzdata, keyrevision)
+    link = 'https://tbpl.mozilla.org/?tree=%s&fromchange=%s&tochange=%s&jobname=%s talos %s' % (tbpl_branches[branch], vals[0], vals[1], tbpl_platforms[platform], tbpl_tests[test])
+    print "tbpl links: %s" % link
 
     cur = db.cursor()
     sql = 'insert into alerts (branch, test, platform, percent, graphurl, changeset, keyrevision, bugcount, comment, bug, status, body, date, changesets, mergedfrom) values ('
