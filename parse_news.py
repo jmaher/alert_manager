@@ -12,6 +12,7 @@ import ConfigParser
 from optparse import OptionParser
 import httplib
 import json
+import time
 
 trees = ['Mozilla-Inbound', 
          'Mozilla-Inbound-Non-PGO', 
@@ -35,7 +36,8 @@ platforms = ['XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
              'Android 2.2 (Native)', 'Android 4.0.4']
 
 tbpl_platforms = {'WINNT 5.1 (ix)': 'Windows XP 32-bit',
-                  'WINNT 6.1 (ix)': 'Windows 8 32-bit',
+                  'WINNT 5.2': '',
+                  'WINNT 6.1 (ix)': 'Windows 7 32-bit',
                   'WINNT 6.2 x64': 'WINNT 6.2',
                   'Ubuntu HW 12.04': 'Ubuntu HW 12.04',
                   'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
@@ -160,7 +162,7 @@ tests = ['SVG No Chrome',
 
 
 def getDatazillaData(branchid):
-    fname = "%s-%s.revs" % (branchid, int(time.time()))
+    fname = "%s-%s.revs" % (branchid, int(time.time() / 1000))
     if os.path.exists(fname):
         data = '{}'
         with open(fname, 'r') as fhandle:
@@ -185,7 +187,7 @@ def getRevisionRange(dzdata, revision):
             break
 
     if not revid:
-        print "unable to find revision: %s" % revision
+#        print "unable to find revision: %s" % revision
         return None
     low = '%s' % (int(revid) - 6)
     high = '%s' % (int(revid) + 6)
@@ -250,13 +252,42 @@ def getCSets(config):
 
     return results
 
+def addTbplURL(id, tbplurl):
+    if tbplurl == '':
+        return
+
+    db = MySQLdb.connect(host=config['host'],
+                         user=config['username'],
+                         passwd=config['password'],
+                         db=config['database'])
+
+    sql = "select tbplurl from alerts where id=%s" % id
+    cur = db.cursor()
+    cur.execute(sql)
+
+    results = []
+    exists = False
+    for row in cur.fetchall():
+        if row[0]:
+            if row[0] != '' and row[0] != 'NULL':
+                exists = True
+                break
+    cur.close()
+
+    if not exists:
+        sql = "update alerts set tbplurl='%s' where id=%s" % (tbplurl, id)
+        cur = db.cursor()
+        cur.execute(sql)
+        cur.close()
+
+
 def markMerged(config, id, originalKeyRevision):
     db = MySQLdb.connect(host=config['host'],
                          user=config['username'],
                          passwd=config['password'],
                          db=config['database'])
 
-    sql = "select mergedfrom from alerts where id=%s" % id;
+    sql = "select mergedfrom from alerts where id=%s" % id
     cur = db.cursor()
     cur.execute(sql)
 
@@ -270,7 +301,7 @@ def markMerged(config, id, originalKeyRevision):
     cur.close()
 
     if not setAsMerged:
-        sql = "update alerts set mergedfrom='%s' where id=%s" % (originalKeyRevision, id);
+        sql = "update alerts set mergedfrom='%s' where id=%s" % (originalKeyRevision, id)
         cur = db.cursor()
         cur.execute(sql)
         cur.close()
@@ -431,6 +462,17 @@ def parseMessage(config, msg):
     status = ''
     body = MySQLdb.escape_string(newbody)
 
+    #TODO: is branch valid?
+    dzdata = getDatazillaData(branch)
+    vals = getRevisionRange(dzdata, keyrevision)
+    link = ''
+    if vals:
+        tree = '?tree=%s&' % branch
+        if branch == 'Firefox' or branch == 'Firefox-Non-PGO':
+            tree = '?'
+        link = 'https://tbpl.mozilla.org/%sfromchange=%s&tochange=%s&jobname=%s %s talos %s' % (tree, vals[0], vals[1], tbpl_platforms[platform], tbpl_trees[branch], tbpl_tests[test])
+        link = link.replace(' ', '%20')
+
     foundDuplicate = False
     cur = db.cursor()
     # TODO: is this valid? we are checking if the branch is equal, same with percent- in this case it already exists?!?
@@ -441,9 +483,11 @@ def parseMessage(config, msg):
           foundDuplicate = row[0]
 
     cur.close()
+
     if foundDuplicate:
         if merged:
             markMerged(config, foundDuplicate, merged)
+        #addTbplURL(foundDuplicate, link)
         return
 
     if 1 == 0:
@@ -457,14 +501,8 @@ def parseMessage(config, msg):
         print "bugcount: %s" % bugCount
         print "changesets: %s" % csets
 
-    #TODO: is branch valid?
-    dzdata = getDatazillaData(branch)
-    vals = getRevisionRange(dzdata, keyrevision)
-    link = 'https://tbpl.mozilla.org/?tree=%s&fromchange=%s&tochange=%s&jobname=%s talos %s' % (tbpl_branches[branch], vals[0], vals[1], tbpl_platforms[platform], tbpl_tests[test])
-    print "tbpl links: %s" % link
-
     cur = db.cursor()
-    sql = 'insert into alerts (branch, test, platform, percent, graphurl, changeset, keyrevision, bugcount, comment, bug, status, body, date, changesets, mergedfrom) values ('
+    sql = 'insert into alerts (branch, test, platform, percent, graphurl, changeset, keyrevision, bugcount, comment, bug, status, body, date, changesets, mergedfrom, tbplurl) values ('
     sql += "'%s'" % branch
     sql += ", '%s'" % test
     sql += ", '%s'" % platform
@@ -480,6 +518,7 @@ def parseMessage(config, msg):
     sql += ", '%s'" % datestring
     sql += ", '%s'" % ','.join(csets)
     sql += ", '%s'" % merged
+    sql += ", '%s'" % link
     sql += ')'
 
     cur.execute(sql)
