@@ -12,7 +12,7 @@ function hideMerged(originalkeyrev, showall) {
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
+        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
         var alerts = raw_data.alerts;   
      
         var keyrev = "";
@@ -120,7 +120,7 @@ function updateBug(alertid, bugid, status) {
 
 function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
 //    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
-    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "bug", "status"]
+    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
 
     var cname = "data";
     if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
@@ -143,12 +143,12 @@ function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
         cell.className = cname;
         cell.onclick = editAlert(alert["id"], alert["body"]);
         var value = alert[test];
-        if (fields[i] == "graphurl" || fields[i] == "changeset") {
+        if (fields[i] == "graphurl" || fields[i] == "changeset" || fields[i] == "tbplurl") {
             value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
             cell.onclick = "";
         } else if (fields[i] == "status") {
             value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['mergedfrom'] + "');\">";
-            var options = ["NEW", "Investigating", "Duplicate", "Resolved", "False Alarm"]
+            var options = ["NEW", "Investigating", "Duplicate", "Resolved", "False Alarm", "Ignore"]
             for (var j=0; j < options.length; j++) {
                 value += "<option ";
                 if (alert['status'] == options[j]) {

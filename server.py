@@ -51,7 +51,7 @@ def run_query(where_clause, body=False):
     db = create_db_connnection()
     cursor = db.cursor()
 
-    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate']
+    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
     if body:
         fields.append('body')
     cursor.execute("""select %s from alerts %s;""" % (', '.join(fields), where_clause))
