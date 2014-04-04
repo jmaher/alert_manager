@@ -463,12 +463,13 @@ def parseMessage(config, msg):
     body = MySQLdb.escape_string(newbody)
 
     #TODO: is branch valid?
-    dzdata = getDatazillaData(branch)
+    tbpl_branch = branch.split('-Non-PGO')[0]
+    dzdata = getDatazillaData(tbpl_branch)
     vals = getRevisionRange(dzdata, keyrevision)
     link = ''
     if vals:
-        tree = '?tree=%s&' % branch
-        if branch == 'Firefox' or branch == 'Firefox-Non-PGO':
+        tree = '?tree=%s&' % tbpl_branch
+        if tbpl_branch == 'Firefox':
             tree = '?'
         link = 'https://tbpl.mozilla.org/%sfromchange=%s&tochange=%s&jobname=%s %s talos %s' % (tree, vals[0], vals[1], tbpl_platforms[platform], tbpl_trees[branch], tbpl_tests[test])
         link = link.replace(' ', '%20')
@@ -487,7 +488,7 @@ def parseMessage(config, msg):
     if foundDuplicate:
         if merged:
             markMerged(config, foundDuplicate, merged)
-        #addTbplURL(foundDuplicate, link)
+        addTbplURL(foundDuplicate, link)
         return
 
     if 1 == 0:

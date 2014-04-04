@@ -144,7 +144,11 @@ function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
         cell.onclick = editAlert(alert["id"], alert["body"]);
         var value = alert[test];
         if (fields[i] == "graphurl" || fields[i] == "changeset" || fields[i] == "tbplurl") {
-            value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
+            if (value == '' || value == 'NULL' || value == 'null' || value == null) {
+                value = "N/A tbpl"
+            } else {
+                value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
+            }
             cell.onclick = "";
         } else if (fields[i] == "status") {
             value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['mergedfrom'] + "');\">";
