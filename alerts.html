@@ -118,6 +118,10 @@ function updateBug(alertid, bugid, status) {
     AddBugUI.openBugBox(alertid, bug, status);
 }
 
+function updateTbplURL(alertid, tbplurl) {
+    AddTbplUI.openTbplBox(alertid, tbplurl);
+}
+
 function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
 //    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
     var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
@@ -143,12 +147,8 @@ function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
         cell.className = cname;
         cell.onclick = editAlert(alert["id"], alert["body"]);
         var value = alert[test];
-        if (fields[i] == "graphurl" || fields[i] == "changeset" || fields[i] == "tbplurl") {
-            if (value == '' || value == 'NULL' || value == 'null' || value == null) {
-                value = "N/A tbpl"
-            } else {
-                value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
-            }
+        if (fields[i] == "graphurl" || fields[i] == "changeset") {
+            value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
             cell.onclick = "";
         } else if (fields[i] == "status") {
             value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['mergedfrom'] + "');\">";
@@ -166,6 +166,14 @@ function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
             var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
             if (alert['bug'] != "") {
                 defaultValue = "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + alert['bug'] + "\">" + alert['bug'] + "</a>";
+            }
+
+            value = defaultValue;
+            cell.onclick = "";
+        } else if (fields[i] == "tbplurl") {
+            var defaultValue = "<a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
+            if (alert['tbplurl'] != "") {
+                defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
             }
 
             value = defaultValue;
@@ -213,6 +221,7 @@ function loadAllAlerts(showall) {
         AddCommentUI.init();
         AddDuplicateUI.init();
         AddBugUI.init();
+        AddTbplUI.init();
     }
     req.open('get', '/data/alertsbyrev', true);
     req.send();
@@ -270,6 +279,16 @@ loadAllAlerts(showAll);
     <input required type="text" id="logBugText" value="">
     <input type="hidden" id="logBugStatusText" value="">
     <input type="submit" value="Add Bug">
+  </form>
+</div>
+
+<div id="addTBPLPopup" class="popupForm" style="display: none;">
+  <a class="closePopup" href="">close</a>
+  <form id="addTBPLForm">
+    <h2>Link to TBPL view of jobs</h2>
+    <p>
+    <input required type="text" id="logTbplText" value="">
+    <input type="submit" value="Add Link">
   </form>
 </div>
 

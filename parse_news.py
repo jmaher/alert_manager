@@ -41,7 +41,7 @@ tbpl_platforms = {'WINNT 5.1 (ix)': 'Windows XP 32-bit',
                   'WINNT 6.2 x64': 'WINNT 6.2',
                   'Ubuntu HW 12.04': 'Ubuntu HW 12.04',
                   'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
-                  'MacOSX 10.6 (rev4)': 'Rev 4 MacOSX Snow Leopard 10.6',
+                  'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
                   'MacOSX 10.8': 'Rev 5 MacOSX Mountain Lion 10.8',
                   'Android 2.2 (Native)': 'Android 2.2 Tegra',
                   'Android 4.0.4': 'Android 4.0 Tegra'
@@ -469,6 +469,7 @@ def parseMessage(config, msg):
     link = ''
     if vals:
         tree = '?tree=%s&' % tbpl_branch
+        #TODO: if osx, add pgo to branch!!
         if tbpl_branch == 'Firefox':
             tree = '?'
         link = 'https://tbpl.mozilla.org/%sfromchange=%s&tochange=%s&jobname=%s %s talos %s' % (tree, vals[0], vals[1], tbpl_platforms[platform], tbpl_trees[branch], tbpl_tests[test])

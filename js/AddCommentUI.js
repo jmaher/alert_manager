@@ -174,3 +174,43 @@ var AddBugUI = {
     });
   },
 };
+
+var AddTbplUI = {
+  init: function addTbplUI_init(submitURL) {
+    var self = this;
+    $("#addTbplForm").bind("submit", function addTbplFormSubmit() {
+      self.submit();
+      $("#addTbplPopup").hide();
+      return false;
+    });
+    $("#logTbplText").val('');
+  },
+
+  submit: function addTbplUI_submit() {
+    var self = this;
+    var tbplurl = $("#logTbplText").val();
+    self._postLink(alertID, tbplurl);
+    return false;
+  },
+
+  openTbplBox: function addTbplUI_openTbplBox(id, tbplurl) {
+    $("#addTbplPopup").show();
+    alertID = id;
+
+    var focusTextfield = $("#logTbplText");
+    focusTextfield.val(tbplurl);
+    focusTextfield.focus();
+    focusTextfield.select();
+  },
+
+  _postLink: function addTbplUI__postLink(alertID, tbplurl) {
+    $.ajax({
+      url: "/data/submittbpl",
+      type: "POST",
+      data: {
+        id: alertID,
+        bug: tbplurl
+      }
+    });
+  },
+};

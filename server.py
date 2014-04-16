@@ -166,6 +166,24 @@ def run_submitbug_data(query_dict, body):
     #TODO: verify via return value in alerts
     return retVal
 
+@json_response
+def run_submittbpl_data(query_dict, body):
+    retVal = {}
+    d = parse_qs(body)
+    data = {}
+    for item in d:
+        data[item] = d[item][0]
+
+    sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
+
+    db = create_db_connnection()
+    cursor = db.cursor()
+    cursor.execute(sql)
+    alerts = cursor.fetchall()
+
+    #TODO: verify via return value in alerts
+    return retVal
+
 def handler404(start_response):
     status = "404 NOT FOUND"
     response_body = "Not found"
@@ -202,6 +220,7 @@ def application(environ, start_response):
         ('/data/updatestatus$', run_updatestatus_data),
         ('/data/submitduplicate$', run_submitduplicate_data),
         ('/data/submitbug$', run_submitbug_data),
+        ('/data/submittbpl$', run_submittbpl_data),
         ('/data/alertsbyrev$', run_alertsbyrev_query),
         ('/data/mergedalerts$', run_mergedalerts_query),
         ('/data/mergedids$', run_mergedids_query)
