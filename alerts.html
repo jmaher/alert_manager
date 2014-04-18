@@ -122,7 +122,12 @@ function updateTbplURL(alertid, tbplurl) {
     AddTbplUI.openTbplBox(alertid, tbplurl);
 }
 
-function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
+function addAlertToUI(tbl,alert,showall){
+    addMergedAlertToUI(tbl, alert, showall, "");
+}
+
+
+function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
 //    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
     var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
 
