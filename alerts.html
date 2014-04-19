@@ -190,7 +190,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     return 1
 }
 
-function loadAllAlerts(showall,rev) {
+function loadAllAlerts(showall, rev) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -228,13 +228,7 @@ function loadAllAlerts(showall,rev) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    if (rev!='undefined'){
-        req.open('get', ('/data/alertsbyrev?rev='+rev), true);
-    }
-    else{
-        req.open('get', '/data/alertsbyrev', true);
-    }
-    
+    req.open('get', ('/data/alertsbyrev?rev='+rev), true); 
     req.send();
 }
 
@@ -266,9 +260,9 @@ if (parseInt(results['showAll']) != 1) {
   showAll = 0;
 }
 if(!rev){
-    rev="undefined";
+    rev="";
 }
-loadAllAlerts(showAll,rev);
+loadAllAlerts(showAll, rev);
 
     </script>
 </head>

@@ -75,7 +75,6 @@ def run_alert_query(query_dict, body):
     inputid = query_dict['id']
     return { 'alerts': run_query("where id=%s" % inputid, True) }
 
-
 @json_response
 def run_mergedids_query(query_dict, body):
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
@@ -86,9 +85,9 @@ def run_mergedids_query(query_dict, body):
 
 @json_response
 def run_alertsbyrev_query(query_dict, body):
-    if any(query_dict):
-         keyrevision=query_dict['rev']
-         return { 'alerts': run_query("where keyrevision='%s'" %keyrevision, True) }
+    if 'rev' in query_dict:              #rev will only be present in query_dict if rev!="" since in L204 'parse_qs(request.query)' removes all those keys whose len is 0 
+        keyrevision=query_dict['rev']
+        return { 'alerts': run_query("where keyrevision='%s'" %keyrevision, True) }
     
     where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
