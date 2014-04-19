@@ -190,51 +190,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     return 1
 }
 
-function loadAlertsByRev(showall,rev){   
-
-//This function fethces alerts by revisions
-       var req = new XMLHttpRequest();
-    req.onload = function(e) {
-        var raw_data = JSON.parse(req.response);
-        var alerts = raw_data.alerts;   
- 
-        var keyrev = "";
-        var tbl = "";
-        // insert revisions into lower table
-        for (var alert in alerts) {
-            if (alerts[alert]["keyrevision"] != keyrev) {
-                keyrev = alerts[alert]["keyrevision"];
-                if ($("#" + keyrev + "-hdr").html() == null) {
-                    var newdiv = document.createElement("div");
-                    newdiv.id = keyrev;
-                    $("#revisions").append(newdiv);
-                    $("#" + keyrev).append("<span id=\"" + keyrev + "-hdr\"><h3>" + keyrev + "</h3></span>");
-                }
-                if ($("#" + keyrev + "-tbl").html() == null) {
-                    var kdiv = document.getElementById(keyrev);
-                    var newtbl = document.createElement("table");
-                    newtbl.id = keyrev + '-tbl';
-                    $("#" + keyrev).append(newtbl);
-                }
-                $("#" + keyrev + "-hdr").html("<h3>" + keyrev + "</h3>");
-                tbl = document.getElementById(keyrev + "-tbl");
-            }
-            var r = addAlertToUI(tbl, alerts[alert], showall);
-            if ($("#" + keyrev + '-tbl tr').size() == 0) {
-                $("#" + keyrev + "-hdr").html("");
-            }
-        }
-        addMergedLinks(showall);
-        AddCommentUI.init();
-        AddDuplicateUI.init();
-        AddBugUI.init();
-        AddTbplUI.init();
-    }
-    req.open('get', ('/data/alertsbyrev?rev='+rev), true);
-    req.send();
-}
-
-function loadAllAlerts(showall) {
+function loadAllAlerts(showall,rev) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -272,7 +228,13 @@ function loadAllAlerts(showall) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    req.open('get', '/data/alertsbyrev', true);
+    if (rev!='undefined'){
+        req.open('get', ('/data/alertsbyrev?rev='+rev), true);
+    }
+    else{
+        req.open('get', '/data/alertsbyrev', true);
+    }
+    
     req.send();
 }
 
@@ -299,18 +261,14 @@ document.title = 'Talos Alerts';
 
 var results = getJsonFromUrl();
 var showAll = 1;
+var rev=results['rev'];
 if (parseInt(results['showAll']) != 1) {
   showAll = 0;
 }
-
-var rev=results['rev'];
-if(rev){
-    loadAlertsByRev(showAll,rev);
+if(!rev){
+    rev="undefined";
 }
-else{
-    loadAllAlerts(showAll);
-}
-
+loadAllAlerts(showAll,rev);
 
     </script>
 </head>

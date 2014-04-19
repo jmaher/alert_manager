@@ -87,8 +87,8 @@ def run_mergedids_query(query_dict, body):
 @json_response
 def run_alertsbyrev_query(query_dict, body):
     if any(query_dict):
-        keyrevision=query_dict['rev']
-        return { 'alerts': run_query("where keyrevision='%s'" %keyrevision, True) }
+         keyrevision=query_dict['rev']
+         return { 'alerts': run_query("where keyrevision='%s'" %keyrevision, True) }
     
     where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
