@@ -51,7 +51,7 @@ def run_query(where_clause, body=False):
     db = create_db_connnection()
     cursor = db.cursor()
 
-    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
+    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'body', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
     if body:
         fields.append('body')
     cursor.execute("""select %s from alerts %s;""" % (', '.join(fields), where_clause))
@@ -85,6 +85,10 @@ def run_mergedids_query(query_dict, body):
 
 @json_response
 def run_alertsbyrev_query(query_dict, body):
+    if 'rev' in query_dict:              #rev will only be present in query_dict if rev!="" since in L204 'parse_qs(request.query)' removes all those keys whose len is 0 
+        keyrevision=query_dict['rev']
+        return { 'alerts': run_query("where keyrevision='%s'" %keyrevision, True) }
+    
     where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
@@ -197,10 +201,10 @@ def application(environ, start_response):
     # get request path and request params
     request = urlparse(request_uri(environ))
     query_dict = parse_qs(request.query)
-
     for key, value in query_dict.items():
         if len(value) == 1:
             query_dict[key] = value[0]
+
 
 
     # get post data

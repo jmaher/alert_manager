@@ -190,7 +190,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     return 1
 }
 
-function loadAllAlerts(showall) {
+function loadAllAlerts(showall, rev) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -228,7 +228,7 @@ function loadAllAlerts(showall) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    req.open('get', '/data/alertsbyrev', true);
+    req.open('get', ('/data/alertsbyrev?rev='+rev), true); 
     req.send();
 }
 
@@ -255,10 +255,14 @@ document.title = 'Talos Alerts';
 
 var results = getJsonFromUrl();
 var showAll = 1;
+var rev=results['rev'];
 if (parseInt(results['showAll']) != 1) {
   showAll = 0;
 }
-loadAllAlerts(showAll);
+if(!rev){
+    rev="";
+}
+loadAllAlerts(showAll, rev);
 
     </script>
 </head>
