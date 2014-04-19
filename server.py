@@ -85,6 +85,39 @@ def run_mergedids_query(query_dict, body):
 
 @json_response
 def run_alertsbyrev_query(query_dict, body):
+    if 'rev' in query_dict and 'test' in query_dict and 'platform' in query_dict:              #rev will only be present in query_dict if rev!="" since in L204 'parse_qs(request.query)' removes all those keys whose len is 0
+        keyrevision=query_dict['rev']
+        test=query_dict['test']
+        platform=query_dict['platform']
+        return { 'alerts': run_query("where keyrevision='%s' and test='%s' and platform='%s'" %(keyrevision,test,platform), True) }
+   
+    elif 'rev' in query_dict and 'test' in query_dict:
+        keyrevision=query_dict['rev']
+        test=query_dict['test']
+        return { 'alerts': run_query("where keyrevision='%s' and test='%s' " %(keyrevision,test), True) }
+   
+    elif 'rev' in query_dict and 'platform' in query_dict:
+        keyrevision=query_dict['rev']
+        platform=query_dict['platform']
+        return { 'alerts': run_query("where keyrevision='%s' and platform='%s'" %(keyrevision,platform), True) }
+   
+    elif 'test' in query_dict and 'platform' in query_dict:              #rev will only be present in query_dict if rev!="" since in L204 'parse_qs(request.query)' removes all those keys whose len is 0
+        test=query_dict['test']
+        platform=query_dict['platform']
+        return { 'alerts': run_query("where test='%s' and platform='%s'" %(test,platform), True) }
+   
+    elif 'rev' in query_dict:
+        keyrevision=query_dict['rev']
+        return { 'alerts': run_query("where keyrevision='%s'" %keyrevision, True) }
+   
+    elif 'platform' in query_dict:
+        platform=query_dict['platform']
+        return { 'alerts': run_query("where platform='%s'" %platform, True) }
+   
+    elif 'test' in query_dict:
+        test=query_dict['test']
+        return { 'alerts': run_query("where test='%s'" %test, True) }
+
     where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
