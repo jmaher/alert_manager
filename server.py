@@ -85,41 +85,51 @@ def run_mergedids_query(query_dict, body):
 
 @json_response
 def run_alertsbyrev_query(query_dict, body):
-    if 'rev' in query_dict and 'test' in query_dict and 'platform' in query_dict:              #rev will only be present in query_dict if rev!="" since in L204 'parse_qs(request.query)' removes all those keys whose len is 0
-        keyrevision=query_dict['rev']
-        test=query_dict['test']
-        platform=query_dict['platform']
-        return { 'alerts': run_query("where keyrevision='%s' and test='%s' and platform='%s'" %(keyrevision,test,platform), True) }
-   
-    elif 'rev' in query_dict and 'test' in query_dict:
-        keyrevision=query_dict['rev']
-        test=query_dict['test']
-        return { 'alerts': run_query("where keyrevision='%s' and test='%s' " %(keyrevision,test), True) }
-   
-    elif 'rev' in query_dict and 'platform' in query_dict:
-        keyrevision=query_dict['rev']
-        platform=query_dict['platform']
-        return { 'alerts': run_query("where keyrevision='%s' and platform='%s'" %(keyrevision,platform), True) }
-   
-    elif 'test' in query_dict and 'platform' in query_dict:              #rev will only be present in query_dict if rev!="" since in L204 'parse_qs(request.query)' removes all those keys whose len is 0
-        test=query_dict['test']
-        platform=query_dict['platform']
-        return { 'alerts': run_query("where test='%s' and platform='%s'" %(test,platform), True) }
-   
-    elif 'rev' in query_dict:
-        keyrevision=query_dict['rev']
-        return { 'alerts': run_query("where keyrevision='%s'" %keyrevision, True) }
-   
-    elif 'platform' in query_dict:
-        platform=query_dict['platform']
-        return { 'alerts': run_query("where platform='%s'" %platform, True) }
-   
-    elif 'test' in query_dict:
-        test=query_dict['test']
-        return { 'alerts': run_query("where test='%s'" %test, True) }
-
+    if 'rev' in query_dict:
+        query_dict['keyrevision'] = query_dict.pop('rev')
+    query = "where "
+    flag = 0
+    if any(query_dict):
+        for key,val in query_dict.iteritems():
+            if val:
+                if flag:
+                    query+= "and %s='%s' " %(key,val)
+                else:
+                    query+= "%s='%s' " %(key,val)
+                    flag = 1
+        return { 'alerts': run_query(query, True) }
     where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
+
+@json_response
+def run_values_query(query_dict,body):
+    db = create_db_connnection()
+    cursor = db.cursor()
+    
+    retVal = {}
+    retVal['test'] = []
+    retVal['rev'] = []
+    retVal['platform'] = []
+
+    cursor.execute("select DISTINCT test from alerts;")
+    tests = cursor.fetchall()
+    for test in tests:
+        retVal['test'].append(test)
+        
+    cursor.execute("select DISTINCT platform from alerts;")
+    platforms = cursor.fetchall()
+
+    for platform in platforms:
+        retVal['platform'].append(platform)
+
+    cursor.execute("select DISTINCT keyrevision from alerts;")
+    revs = cursor.fetchall()
+
+    for rev in revs:
+        retVal['rev'].append(rev)
+
+       
+    return retVal
 
 @json_response
 def run_mergedalerts_query(query_dict, body):
@@ -256,7 +266,8 @@ def application(environ, start_response):
         ('/data/submittbpl$', run_submittbpl_data),
         ('/data/alertsbyrev$', run_alertsbyrev_query),
         ('/data/mergedalerts$', run_mergedalerts_query),
-        ('/data/mergedids$', run_mergedids_query)
+        ('/data/mergedids$', run_mergedids_query),
+        ('/data/getvalues$', run_values_query),
         )
 
     # dispatch request to request handler
