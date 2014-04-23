@@ -3,9 +3,52 @@
 <head>
 <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="style.css">
+      <link rel="stylesheet" type="text/css" href="menu.css">
     <script src="js/jquery.js"></script>
     <script src="/js/AddCommentUI.js"></script>
     <script type="text/javascript">
+
+$.getJSON( "/data/getvalues", function( data ) {
+
+    var tests = data['test'];
+    var revs = data['rev'];
+    var platforms = data['platform'];
+
+    for(var i in tests) {
+        var newoption = document.createElement("option");
+         newoption.id = "test";
+         var value = tests[i][0];
+            $("#test").append("<option value=\""+value+"\">"+value+"</option>");
+     }
+
+    for(i in revs) {
+        var newoption = document.createElement("option");
+         newoption.id = "rev";
+         var value = revs[i][0];
+            $("#rev").append("<option value=\""+value+"\">"+value+"</option>");
+    }
+
+    for(i in platforms) {
+        var newoption = document.createElement("option");
+         newoption.id = "platform";
+         var value = platforms[i][0];
+            $("#platform").append("<option value=\""+value+"\">"+value+"</option>");
+    }
+});
+
+ $(document).ready(function() { 
+                    $('#button').click(function() { 
+                            var rev = $('#rev').val();
+                            var test = $('#test').val();
+                            var platform = $('#platform').val();
+                            var showall = 0;
+                            if($('#checkbox').is(":checked")) {
+                                console.log("checked");
+                                showall = 1;
+                            }
+                            location.href = "?rev="+rev+"&test="+test+"&platform="+platform+"&showAll="+showall;
+                    });
+});
 
 function hideMerged(originalkeyrev, showall) {
     var req = new XMLHttpRequest();
@@ -190,7 +233,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     return 1
 }
 
-function loadAllAlerts(showall) {
+function loadAllAlerts(showall, rev, test, platform) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -228,7 +271,7 @@ function loadAllAlerts(showall) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    req.open('get', '/data/alertsbyrev', true);
+    req.open('get', ('/data/alertsbyrev?rev='+rev+'&test='+test+'&platform='+platform), true);
     req.send();
 }
 
@@ -258,11 +301,52 @@ var showAll = 1;
 if (parseInt(results['showAll']) != 1) {
   showAll = 0;
 }
-loadAllAlerts(showAll);
+var rev = results['rev'];
+if(!rev) {
+    rev = "";
+}
+var test = results['test'];
+if(!test) {
+    test = "";
+}
+var platform = results['platform'];
+if(!platform) {
+    platform = "";
+}
+loadAllAlerts(showAll, rev, test, platform);
 
     </script>
 </head>
 <body class="noscript">
+    <div id="menu">
+        <ul class="menu">
+            <li><a href="/alerts.html" class="parent"><span>Talos Alert Manager</span></a></li>
+            <li class="last">
+                <div class="options-box">
+                <label>
+                    <select id="rev">
+                        <option value="">--Select Revision--</option>
+       
+                    </select>
+                </label>
+                <label>
+                    <select id="test">
+                        <option value="">---------------------------------------------------Select Test---------------------------------------------------</option>
+        
+                    </select>
+                </label>
+                <label>
+                    <select id="platform">
+                         <option value="">---Select Platform---</option>
+       
+                    </select>
+                </label>
+                <t>ShowAll</t><input type="checkbox" id="checkbox" Value="Show All"/>
+                <input class="button" id="button" type="button" value="Filter" />
+                </div>
+            </li>
+        </ul>
+    </div>
     <div id="revisions">
     </div>
 
