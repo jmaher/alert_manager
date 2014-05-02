@@ -200,7 +200,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
             cell.onclick = "";
         } else if (fields[i] == "status") {
             value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['mergedfrom'] + "');\">";
-            var options = ["NEW", "Investigating", "Duplicate", "Resolved", "False Alarm", "Ignore"]
+            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Wont Fix", "False Alarm", "Ignore", "Not Tracking"]
             for (var j=0; j < options.length; j++) {
                 value += "<option ";
                 if (alert['status'] == options[j]) {
@@ -213,7 +213,12 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
         } else if (fields[i] == "bug") {
             var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
             if (alert['bug'] != "") {
-                defaultValue = "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + alert['bug'] + "\">" + alert['bug'] + "</a>";
+                var bugz = alert['bug'].split(',');
+                defaultValue = ""
+                for (var b = 0; b < bugz.length; b++) {
+                    var bugid = bugz[b].trim();
+                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a><br />";
+                }
             }
 
             value = defaultValue;
