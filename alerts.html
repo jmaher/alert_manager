@@ -238,13 +238,13 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     return 1
 }
 
-// Function dateAscending sorts the objects in the ascending order of their date.
-function dateAscending(a, b) {
+// Function dateDescending sorts the objects in the descending order of their date.
+function dateDescending(a, b) {
     if ((new Date(a["date"])) < (new Date(b["date"]))) {
-        return -1;
+        return 1;
     }
     else {
-        return 1;
+        return -1;
     }
 }
 
@@ -253,7 +253,7 @@ function loadAllAlerts(showall, rev, test, platform) {
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;   
-        alerts.sort(dateAscending);
+        alerts.sort(dateDescending);
  
         var keyrev = "";
         var tbl = "";
