@@ -5,10 +5,10 @@
     <link rel="stylesheet" type="text/css" href="style.css">
       <link rel="stylesheet" type="text/css" href="menu.css">
     <script src="js/jquery.js"></script>
-    <script src="/js/AddCommentUI.js"></script>
+    <script src="js/AddCommentUI.js"></script>
     <script type="text/javascript">
-
-$.getJSON( "/data/getvalues", function( data ) {
+var root_url = 'http://54.215.155.53:8080';
+$.getJSON( root_url + "/data/getvalues", function( data ) {
 
     var tests = data['test'];
     var revs = data['rev'];
@@ -75,7 +75,7 @@ function hideMerged(originalkeyrev, showall) {
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
         $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
     }
-    req.open('get', '/data/mergedalerts?keyrev=' + originalkeyrev, true);
+    req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
 }
 
@@ -97,7 +97,7 @@ function showMerged(originalkeyrev, showall) {
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
         $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
     }
-    req.open('get', '/data/mergedalerts?keyrev=' + originalkeyrev, true);
+    req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
 }
 
@@ -122,7 +122,7 @@ function addMergedLinks(showall) {
             }
         }
     }
-    req.open('get', '/data/mergedids', true);
+    req.open('get', root_url + '/data/mergedids', true);
     req.send();
 }
 
@@ -238,11 +238,22 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     return 1
 }
 
+// Function dateAscending sorts the objects in the ascending order of their date.
+function dateAscending(a, b) {
+    if ((new Date(a["date"])) < (new Date(b["date"]))) {
+        return -1;
+    }
+    else {
+        return 1;
+    }
+}
+
 function loadAllAlerts(showall, rev, test, platform) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;   
+        alerts.sort(dateAscending);
  
         var keyrev = "";
         var tbl = "";
@@ -276,7 +287,7 @@ function loadAllAlerts(showall, rev, test, platform) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    req.open('get', ('/data/alertsbyrev?rev='+rev+'&test='+test+'&platform='+platform), true);
+    req.open('get', (root_url + '/data/alertsbyrev?rev='+rev+'&test='+test+'&platform='+platform), true);
     req.send();
 }
 
