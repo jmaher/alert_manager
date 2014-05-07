@@ -85,6 +85,7 @@ tbpl_tests = {'SVG No Chrome': 'svgr',
         'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal Network IO Bytes)': 'tp5o',
         'Tp5 No Network Row Major MozAfterPaint (Main Normal File IO Bytes)': 'tp5o',
         'Tp5 No Network Row Major MozAfterPaint (Main Startup File IO Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)': 'tp5o',
         'Tp5 Optimized (Modified Page List Bytes)': 'tp5o',
         'Tp5 Optimized Responsiveness': 'tp5o',
         'Tp5 Optimized MozAfterPaint': 'tp5o',
@@ -109,7 +110,9 @@ tbpl_tests = {'SVG No Chrome': 'svgr',
         'tscroll-ASAP': 'svgr',
         'SVG-ASAP, NoChrome': 'svgr',
         'SVG-ASAP': 'svgr',
-        'tscroll-ASAP MozAfterPaint': 'svgr'
+        'tscroll-ASAP MozAfterPaint': 'svgr',
+        'Session Restore no Auto Restore Test': 'other',
+        'Session Restore Test': 'other'
              }
 
 tests = ['SVG No Chrome',
