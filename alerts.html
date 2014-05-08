@@ -238,9 +238,10 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     return 1
 }
 
-// Function dateDescending sorts the objects in the descending order of their date.
-function dateDescending(a, b) {
-    if ((new Date(a["date"])) < (new Date(b["date"]))) {
+// Function idDescending sorts the objects in the descending order of their id. This way, we can view the most recent alerts at the top.
+// The objects have been sorted based on their id and not on their date as sorting by the date field was not working.
+function idDescending(a, b) {
+    if (a["id"] < b["id"]) {
         return 1;
     }
     else {
@@ -253,7 +254,7 @@ function loadAllAlerts(showall, rev, test, platform) {
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;   
-        alerts.sort(dateDescending);
+        alerts.sort(idDescending);
  
         var keyrev = "";
         var tbl = "";
@@ -336,7 +337,7 @@ loadAllAlerts(showAll, rev, test, platform);
 <body class="noscript">
     <div id="menu">
         <ul class="menu">
-            <li><a href="/alerts.html" class="parent"><span>Talos Alert Manager</span></a></li>
+            <li><a href="alerts.html" class="parent"><span>Talos Alert Manager</span></a></li>
             <li class="last">
                 <div class="options-box">
                 <label>
