@@ -161,8 +161,9 @@ tests = ['SVG No Chrome',
         'tscroll-ASAP',
         'SVG-ASAP, NoChrome',
         'SVG-ASAP',
-        'tscroll-ASAP MozAfterPaint' ]
-
+        'tscroll-ASAP MozAfterPaint',
+        'Session Restore no Auto Restore Test',
+        'Session Restore Test' ]
 
 def getDatazillaData(branchid):
     fname = "%s-%s.revs" % (branchid, int(time.time() / 1000))
@@ -428,13 +429,21 @@ def parseMessage(config, msg):
         print "INVALID BODY: no graphurl or changeset"
         return
 
-    csets = getRevisions(changeset)
-
     date = msg.get('Date')
     parsed = rfc822.parsedate(date)
+    datestring = "%s-%s-%s %s:%s:%s" % (str(parsed[0]).zfill(4), str(parsed[1]).zfill(2), str(parsed[2]).zfill(2), str(parsed[3]).zfill(2), str(parsed[4]).zfill(2), str(parsed[5]).zfill(2))
+
+    csets = []
+    csetdate = time.strptime(datestring, "%Y-%m-%d %H:%M:%S")
+    old = datetime.datetime.fromtimestamp(time.mktime(csetdate))
+    new = datetime.datetime.fromtimestamp(time.mktime(time.localtime()))
+    twoweeks = new - datetime.timedelta(14)
+    if old >= twoweeks:
+        csets = getRevisions(changeset)
 
     merged = ''
-    if bugCount > 5:
+    # TODO: find a better way to determine merged.  possibly search top commit for merge & bugcount > 5 ?
+    if len(csets) > 0 and bugCount > 10:
         # search for csets in existing 
         db_csets = getCSets(config)
         merged = ''
@@ -452,8 +461,6 @@ def parseMessage(config, msg):
             if merged:
                 break
 
-    datestring = "%s-%s-%s %s:%s:%s" % (str(parsed[0]).zfill(4), str(parsed[1]).zfill(2), str(parsed[2]).zfill(2), str(parsed[3]).zfill(2), str(parsed[4]).zfill(2), str(parsed[5]).zfill(2))
-
     db = MySQLdb.connect(host=config['host'],
                          user=config['username'],
                          passwd=config['password'],
@@ -467,6 +474,9 @@ def parseMessage(config, msg):
 
     #TODO: is branch valid?
     tbpl_branch = branch.split('-Non-PGO')[0]
+
+
+    #TODO: make dzdata and vals conditional on 2 weeks
     dzdata = getDatazillaData(tbpl_branch)
     vals = getRevisionRange(dzdata, keyrevision)
     link = ''

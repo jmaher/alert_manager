@@ -126,7 +126,7 @@ function addMergedLinks(showall) {
     req.send();
 }
 
-function updateStatus(alertid, duplicate, mergedfrom) {
+function updateStatus(alertid, duplicate, bugid, mergedfrom) {
     var status = $("#" + alertid + "-status").val();
     if (status == 'Duplicate') {
         // popup window with field for duplicate, seeded with alert['duplicate']
@@ -137,6 +137,12 @@ function updateStatus(alertid, duplicate, mergedfrom) {
         }
 
         AddDuplicateUI.openDuplicateBox(alertid, suggestedDuplicate);
+    } else if (status == 'Backout') {
+        var bug = bugid;
+        if (bug == '') {
+            bug = $("#" + alertid + "-bug").val();
+        }
+        AddBugUI.openBugBox(alertid, bug, 'Backout');
     } else {
         $.ajax({
           url: "data/updatestatus",
@@ -199,8 +205,8 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
             value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
             cell.onclick = "";
         } else if (fields[i] == "status") {
-            value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['mergedfrom'] + "');\">";
-            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Wont Fix", "False Alarm", "Ignore", "Not Tracking"]
+            value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
+            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
             for (var j=0; j < options.length; j++) {
                 value += "<option ";
                 if (alert['status'] == options[j]) {

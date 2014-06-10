@@ -216,3 +216,45 @@ var AddTbplUI = {
     });
   },
 };
+
+var AddBackoutUI = {
+  init: function addBackoutUI_init(submitURL) {
+    var self = this;
+    $("#addBackoutForm").bind("submit", function addBackoutFormSubmit() {
+      self.submit();
+      $("#addBackoutPopup").hide();
+      return false;
+    });
+    $("#logBackoutText").val('');
+  },
+
+  submit: function addBackoutUI_submit() {
+    var self = this;
+    var bugid = $("#logBackoutText").val();
+    self._postBackout(alertID, bugid);
+    return false;
+  },
+
+  openBackoutBox: function addBackoutUI_openBackoutBox(id, bugid) {
+    $("#addBackoutPopup").show();
+    alertID = id;
+    
+    var focusTextfield = $("#logBackoutText");
+    focusTextfield.val(bugid);
+    focusTextfield.focus();
+    focusTextfield.select();
+  },
+
+  _postBackout: function addBugUI__postBug(alertID, bugID) {
+    $.ajax({
+      url: root_url + "/data/submitbug",
+      type: "POST",
+      data: {
+        id: alertID,
+        bug: bugID,
+        status: "Backout",
+      }
+    });
+  },
+};
+
