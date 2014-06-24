@@ -223,7 +223,8 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
                 defaultValue = ""
                 for (var b = 0; b < bugz.length; b++) {
                     var bugid = bugz[b].trim();
-                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a><br />";
+                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a>";
+                    defaultValue += "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\"> + </a><br />";
                 }
             }
 
