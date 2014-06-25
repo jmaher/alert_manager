@@ -8,12 +8,16 @@
     <script src="js/AddCommentUI.js"></script>
     <script type="text/javascript">
 var root_url = 'http://54.215.155.53:8080';
-$.getJSON( root_url + "/data/getvalues", function( data ) {
 
+$.getJSON( root_url + "/data/getvalues", function( data ) {
+    
     var tests = data['test'];
     var revs = data['rev'];
     var platforms = data['platform'];
-
+    if (parseInt(results['showAll']) == 1) {
+    document.getElementById("checkbox").checked = true;
+    }
+    
     for(var i in tests) {
         var newoption = document.createElement("option");
          newoption.id = "test";
@@ -34,19 +38,29 @@ $.getJSON( root_url + "/data/getvalues", function( data ) {
          var value = platforms[i][0];
             $("#platform").append("<option value=\""+value+"\">"+value+"</option>");
     }
+                
+        document.getElementById("rev").value = results['rev'];
+        document.getElementById("test").selectedIndex = results['testIndex'];
+        document.getElementById("platform").selectedIndex = results['platIndex'];
+
 });
 
  $(document).ready(function() { 
+                   
                     $('#button').click(function() { 
                             var rev = $('#rev').val();
                             var test = $('#test').val();
                             var platform = $('#platform').val();
                             var showall = 0;
+                            var testIndex = $("select[id='test'] option:selected").index();
+                            var platIndex = $("select[id='platform'] option:selected").index();
                             if($('#checkbox').is(":checked")) {
                                 console.log("checked");
                                 showall = 1;
                             }
-                            location.href = "?rev="+rev+"&test="+test+"&platform="+platform+"&showAll="+showall;
+                          
+                            location.href = "?rev="+rev+"&showAll="+showall+"&testIndex="+testIndex+"&platIndex="+platIndex;
+                                    
                     });
 });
 
@@ -108,7 +122,7 @@ function addMergedLinks(showall) {
 
         var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
         var alerts = raw_data.alerts;   
-
+        
         var count = 0;
         for (var alert in alerts) {
             if (alerts[alert]['mergedfrom'] != '') {
@@ -262,7 +276,7 @@ function loadAllAlerts(showall, rev, test, platform) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;   
         alerts.sort(idDescending);
- 
+
         var keyrev = "";
         var tbl = "";
         // insert revisions into lower table
