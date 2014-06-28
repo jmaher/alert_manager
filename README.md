@@ -14,6 +14,7 @@ production server, but Ouija will run standalone for testing as well.
 * MySQL
 * Python
 * MySql-python
+* Flask
 
 ## Creating an config.ini file
 

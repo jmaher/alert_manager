@@ -2,20 +2,17 @@
 
 import os
 import json
-import re
 import sys
-from datetime import datetime, timedelta
-from itertools import groupby
-from collections import Counter
-from urlparse import urlparse, parse_qs
-from wsgiref.simple_server import make_server
-from wsgiref.util import request_uri
+from flask import Flask, request
+from functools import wraps
 
 import MySQLdb
 import ConfigParser
 from optparse import OptionParser
 
 global config
+app = Flask(__name__, static_url_path='', static_folder='.')
+application = app
 
 def create_db_connnection():
     global config
@@ -40,6 +37,7 @@ def serialize_to_json(object):
 
 def json_response(func):
     """Decorator: Serialize response to json"""
+    @wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         return json.dumps(result or {'error': 'No data found for your request'},
@@ -70,21 +68,25 @@ def run_query(where_clause, body=False):
         retVal.append(data)
     return retVal
 
+@app.route('/data/alert')
 @json_response
-def run_alert_query(query_dict, body): 
-    inputid = query_dict['id']
+def run_alert_query():
+    inputid = request.args['id']
     return { 'alerts': run_query("where id=%s" % inputid, True) }
 
+@app.route('/data/mergedids')
 @json_response
-def run_mergedids_query(query_dict, body):
+def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
     where_clause = "where mergedfrom != '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
 
+@app.route('/data/alertsbyrev')
 @json_response
-def run_alertsbyrev_query(query_dict, body):
+def run_alertsbyrev_query():
+    query_dict = request.args.to_dict()
     if 'rev' in query_dict:
         query_dict['keyrevision'] = query_dict.pop('rev')
     query = "where "
@@ -101,11 +103,12 @@ def run_alertsbyrev_query(query_dict, body):
     where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
+@app.route("/data/getvalues")
 @json_response
-def run_values_query(query_dict,body):
+def run_values_query():
     db = create_db_connnection()
     cursor = db.cursor()
-    
+
     retVal = {}
     retVal['test'] = []
     retVal['rev'] = []
@@ -131,20 +134,20 @@ def run_values_query(query_dict,body):
        
     return retVal
 
+@app.route("/data/mergedalerts")
 @json_response
-def run_mergedalerts_query(query_dict, body):
-    keyrev = query_dict['keyrev']
+def run_mergedalerts_query():
+    keyrev = request.args['keyrev']
 
     where_clause = "where mergedfrom='%s' and (status='' or status='Investigating') order by date,keyrevision ASC" % keyrev;
     return { 'alerts': run_query(where_clause) }
 
+@app.route("/data/submit", methods=['POST'])
 @json_response
-def run_submit_data(query_dict, body):
+def run_submit_data():
     retVal = {}
-    d = parse_qs(body)
-    data = {}
-    for item in d:
-        data[item] = d[item][0]
+    data = request.form
+
     sql = "update alerts set comment='%s', status='%s', email='%s', bug='%s' where id=%s;" % (data['comment'][0], data['status'], data['email'], data['bug'], data['id'])
 
     db = create_db_connnection()
@@ -155,13 +158,11 @@ def run_submit_data(query_dict, body):
     #TODO: verify via return value in alerts
     return retVal
 
+@app.route("/data/updatestatus", methods=['POST'])
 @json_response
-def run_updatestatus_data(query_dict, body):
+def run_updatestatus_data():
     retVal = {}
-    d = parse_qs(body)
-    data = {}
-    for item in d:
-        data[item] = d[item][0]
+    data = request.form
 
     sql = "update alerts set status='%s' where id=%s;" % (data['status'], data['id'])
 
@@ -173,13 +174,11 @@ def run_updatestatus_data(query_dict, body):
     #TODO: verify via return value in alerts
     return retVal
 
+@app.route("/data/submitduplicate", methods=['POST'])
 @json_response
-def run_submitduplicate_data(query_dict, body):
+def run_submitduplicate_data():
     retVal = {}
-    d = parse_qs(body)
-    data = {}
-    for item in d:
-        data[item] = d[item][0]
+    data = request.form
 
     sql = "update alerts set status='%s', duplicate='%s' where id=%s;" % (data['status'], data['duplicate'], data['id'])
 
@@ -191,13 +190,11 @@ def run_submitduplicate_data(query_dict, body):
     #TODO: verify via return value in alerts
     return retVal
 
+@app.route("/data/submitbug", methods=['POST'])
 @json_response
-def run_submitbug_data(query_dict, body):
+def run_submitbug_data():
     retVal = {}
-    d = parse_qs(body)
-    data = {}
-    for item in d:
-        data[item] = d[item][0]
+    data = request.form
 
     sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
 
@@ -209,13 +206,11 @@ def run_submitbug_data(query_dict, body):
     #TODO: verify via return value in alerts
     return retVal
 
+@app.route("/data/submittbpl", methods=['POST'])
 @json_response
-def run_submittbpl_data(query_dict, body):
+def run_submittbpl_data():
     retVal = {}
-    d = parse_qs(body)
-    data = {}
-    for item in d:
-        data[item] = d[item][0]
+    data = request.form
 
     sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
 
@@ -226,76 +221,6 @@ def run_submittbpl_data(query_dict, body):
 
     #TODO: verify via return value in alerts
     return retVal
-
-def handler404(start_response):
-    status = "404 NOT FOUND"
-    response_body = "Not found"
-    response_headers = [("Content-Type", "text/html"),
-                        ("Content-Length", str(len(response_body)))]
-    start_response(status, response_headers)
-    return response_body
-
-
-def application(environ, start_response):
-    # get request path and request params
-    request = urlparse(request_uri(environ))
-    query_dict = parse_qs(request.query)
-
-    for key, value in query_dict.items():
-        if len(value) == 1:
-            query_dict[key] = value[0]
-
-
-    # get post data
-    body = ''  # b'' for consistency on Python 3.0
-    try:
-        length = int(environ.get('CONTENT_LENGTH', '0'))
-    except ValueError:
-        length = 0
-
-    if length != 0:
-        body = environ['wsgi.input'].read(length)
-
-    # map request handler to request path
-    urlpatterns = (
-        ('/data/alert(/)?$', run_alert_query),
-        ('/data/submit$', run_submit_data),
-        ('/data/updatestatus$', run_updatestatus_data),
-        ('/data/submitduplicate$', run_submitduplicate_data),
-        ('/data/submitbug$', run_submitbug_data),
-        ('/data/submittbpl$', run_submittbpl_data),
-        ('/data/alertsbyrev$', run_alertsbyrev_query),
-        ('/data/mergedalerts$', run_mergedalerts_query),
-        ('/data/mergedids$', run_mergedids_query),
-        ('/data/getvalues$', run_values_query),
-        )
-
-    # dispatch request to request handler
-    for pattern, request_handler in urlpatterns:
-        if re.match(pattern, request.path, re.I):
-            response_body = request_handler(query_dict, body)
-            break
-    else:
-        # When running outside of Apache, we need to handle serving
-        # static files as well. This can be removed when we move to Flask.
-        # need to strip off leading '/' for relative path
-        static_path = request.path[1:]
-        if os.path.exists(static_path):
-            with open(static_path, 'r') as f:
-                response_body = f.read()
-            status = "200 OK"
-            response_headers = [("Content-Type", "html"),
-                                ("Content-Length", str(len(response_body)))]
-            start_response(status, response_headers)
-            return response_body
-        else:
-            return handler404(start_response)
-
-    status = "200 OK"
-    response_headers = [("Content-Type", "application/json"),
-                        ("Content-Length", str(len(response_body)))]
-    start_response(status, response_headers)
-    return response_body
 
 
 def getConfig():
@@ -323,5 +248,4 @@ def getConfig():
 
 if __name__ == '__main__':
     getConfig()
-    httpd = make_server("0.0.0.0", 8159, application)
-    httpd.serve_forever()
+    app.run(host="0.0.0.0", port=8159)
