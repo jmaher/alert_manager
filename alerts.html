@@ -59,7 +59,9 @@ $.getJSON( root_url + "/data/getvalues", function( data ) {
                                 showall = 1;
                             }
                           
-                            location.href = "?rev="+rev+"&showAll="+showall+"&testIndex="+testIndex+"&platIndex="+platIndex;
+                         document.cookie="platform = "+platform;
+                         document.cookie="test = "+test;                           
+                         location.href = "?rev="+rev+"&showAll="+showall+"&testIndex="+testIndex+"&platIndex="+platIndex;
                                     
                     });
 });
@@ -319,6 +321,16 @@ function editAlert(id, body) {
     }
 }
 
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i].trim();
+        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+    }
+    return "";
+}
+ 
 function getJsonFromUrl() {
   var query = location.search.substr(1);
   var data = query.split("&");
@@ -343,14 +355,18 @@ var rev = results['rev'];
 if(!rev) {
     rev = "";
 }
-var test = results['test'];
+var test = getCookie("test");
 if(!test) {
     test = "";
 }
-var platform = results['platform'];
+
+var platform = getCookie("platform");
 if(!platform) {
     platform = "";
 }
+
+document.cookie = "platform =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 loadAllAlerts(showAll, rev, test, platform);
 
     </script>
