@@ -6,6 +6,7 @@ filename = 'config.ini'
 db_host = 'localhost'
 db_name = 'alerts'
 maildir = '/var/spool/news/mozilla/dev/tree-management'
+debug = 'true'
 parser = OptionParser()
 parser.add_option("-u", "--username",
                   type="string", default="root",
@@ -23,6 +24,7 @@ def db_config():
         target.write("username = %s\n" % opts.username)
         target.write("password = %s\n" % opts.password)
         target.write("maildir = %s\n" % maildir)
+        target.write("debug = %s\n" % debug)
 
 if __name__ == '__main__':
     db_config()

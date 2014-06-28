@@ -10,21 +10,19 @@ import MySQLdb
 import ConfigParser
 from optparse import OptionParser
 
-global config
 app = Flask(__name__, static_url_path='', static_folder='.')
 application = app
 
 def create_db_connnection():
-    global config
     try:
-        print config
-    except:
+        app.config['host']
+    except KeyError:
         getConfig()
 
-    return MySQLdb.connect(host=config['host'],
-                           user=config['username'],
-                           passwd=config['password'],
-                           db=config['database'])
+    return MySQLdb.connect(host=app.config['host'],
+                           user=app.config['username'],
+                           passwd=app.config['password'],
+                           db=app.config['database'])
 
 
 def serialize_to_json(object):
@@ -224,7 +222,6 @@ def run_submittbpl_data():
 
 
 def getConfig():
-    global config
     op = OptionParser()
     op.add_option("--config",
                     action = "store", type = "string", dest = "config",
@@ -237,14 +234,17 @@ def getConfig():
         print "ERROR: %s doesn't exist" % (os.path.abspath(options.config))
         sys.exit(1)
 
-    parser = ConfigParser.RawConfigParser()
+    parser = ConfigParser.RawConfigParser(defaults={'debug': 'false'})
     parser.read(options.config)
 
-    config = {'username': parser.get('alerts', 'username'), 
-              'password': parser.get('alerts', 'password'), 
-              'host': parser.get('alerts', 'host'), 
-              'database': parser.get('alerts', 'database'), 
-              'maildir': parser.get('alerts', 'maildir')}
+    app.config.update({
+        'username': parser.get('alerts', 'username'), 
+        'password': parser.get('alerts', 'password'), 
+        'host': parser.get('alerts', 'host'), 
+        'database': parser.get('alerts', 'database'), 
+        'maildir': parser.get('alerts', 'maildir'),
+        'DEBUG': parser.getboolean('alerts', 'debug'),
+    })
 
 if __name__ == '__main__':
     getConfig()
