@@ -45,25 +45,23 @@ $.getJSON( root_url + "/data/getvalues", function( data ) {
 
 });
 
- $(document).ready(function() { 
-                   
-                    $('#button').click(function() { 
-                            var rev = $('#rev').val();
-                            var test = $('#test').val();
-                            var platform = $('#platform').val();
-                            var showall = 0;
-                            var testIndex = $("select[id='test'] option:selected").index();
-                            var platIndex = $("select[id='platform'] option:selected").index();
-                            if($('#checkbox').is(":checked")) {
-                                console.log("checked");
-                                showall = 1;
-                            }
-                          
-                         document.cookie="platform = "+platform;
-                         document.cookie="test = "+test;                           
-                         location.href = "?rev="+rev+"&showAll="+showall+"&testIndex="+testIndex+"&platIndex="+platIndex;
-                                    
-                    });
+$(document).ready(function() {
+    $('#button').click(function() { 
+        var rev = $('#rev').val();
+        var test = $('#test').val();
+        var platform = $('#platform').val();
+        var showall = 0;
+        var testIndex = $("select[id='test'] option:selected").index();
+        var platIndex = $("select[id='platform'] option:selected").index();
+        if ($('#checkbox').is(":checked")) {
+            console.log("checked");
+            showall = 1;
+        }
+
+        document.cookie="platform = "+platform;
+        document.cookie="test = "+test;                           
+        location.href = "?rev="+rev+"&showAll="+showall+"&testIndex="+testIndex+"&platIndex="+platIndex;
+    });
 });
 
 function hideMerged(originalkeyrev, showall) {
