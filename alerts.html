@@ -15,7 +15,7 @@ $.getJSON( root_url + "/data/getvalues", function( data ) {
     var revs = data['rev'];
     var platforms = data['platform'];
     if (parseInt(results['showAll']) == 1) {
-    document.getElementById("checkbox").checked = true;
+        document.getElementById("checkbox").checked = true;
     }
     
     for(var i in tests) {
@@ -39,9 +39,9 @@ $.getJSON( root_url + "/data/getvalues", function( data ) {
             $("#platform").append("<option value=\""+value+"\">"+value+"</option>");
     }
                 
-        document.getElementById("rev").value = results['rev'];
-        document.getElementById("test").selectedIndex = results['testIndex'];
-        document.getElementById("platform").selectedIndex = results['platIndex'];
+    document.getElementById("rev").value = results['rev'];
+    document.getElementById("test").selectedIndex = results['testIndex'];
+    document.getElementById("platform").selectedIndex = results['platIndex'];
 
 });
 
