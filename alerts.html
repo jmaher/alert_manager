@@ -89,7 +89,8 @@ function hideMerged(originalkeyrev, showall) {
             }
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
-        $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
+        //$("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
+          $("#" + originalkeyrev + "-hdr").html("<a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);  
     }
     req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -111,7 +112,8 @@ function showMerged(originalkeyrev, showall) {
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
-        $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
+       // $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
+          $("#" + originalkeyrev + "-hdr").html("<h3><a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
     }
     req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -134,7 +136,8 @@ function addMergedLinks(showall) {
                 }
 
                 var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
-                $("#" + mf + "-hdr").html("<h3>" + mf + "</h3>" + mergedfromhtml);
+                //$("#" + mf + "-hdr").html("<h3>" + mf + "</h3>" + mergedfromhtml);
+                  $("#" + mf + "-hdr").html("<a href=?rev="+mf+"&showall=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
             }
         }
     }
@@ -289,7 +292,9 @@ function loadAllAlerts(showall, rev, test, platform) {
                     var newdiv = document.createElement("div");
                     newdiv.id = keyrev;
                     $("#revisions").append(newdiv);
-                    $("#" + keyrev).append("<span id=\"" + keyrev + "-hdr\"><h3>" + keyrev + "</h3></span>");
+                   // $("#" + keyrev).append("<span id=\"" + keyrev + "-hdr\"><h3>" + keyrev + "</h3></span>");
+                    $("#" + keyrev).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev="+keyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
+                      
                 }
                 if ($("#" + keyrev + "-tbl").html() == null) {
                     var kdiv = document.getElementById(keyrev);
@@ -297,7 +302,8 @@ function loadAllAlerts(showall, rev, test, platform) {
                     newtbl.id = keyrev + '-tbl';
                     $("#" + keyrev).append(newtbl);
                 }
-                $("#" + keyrev + "-hdr").html("<h3>" + keyrev + "</h3>");
+                // $("#" + keyrev + "-hdr").html("<h3>" + keyrev + "</h3>");
+                 $("#" + keyrev + "-hdr").html("<a href=?rev="+keyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
             var r = addAlertToUI(tbl, alerts[alert], showall);
