@@ -256,8 +256,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
                     var url = alert['tbplurl'].split("talos");
                     alert['tbplurl']= url[0]+"%20pgo%20talos"+url[1];
                     defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
-                 }
-             else{
+            }else{
                 defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";    
               }
             }
