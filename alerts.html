@@ -87,8 +87,7 @@ function hideMerged(originalkeyrev, showall) {
             }
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
-        
-          $("#" + originalkeyrev + "-hdr").html("<a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);  
+        $("#" + originalkeyrev + "-hdr").html("<a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);  
     }
     req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -110,8 +109,7 @@ function showMerged(originalkeyrev, showall) {
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
-       
-          $("#" + originalkeyrev + "-hdr").html("<h3><a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
+        $("#" + originalkeyrev + "-hdr").html("<h3><a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
     }
     req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -132,10 +130,8 @@ function addMergedLinks(showall) {
                 if ($("#" + mf + "-hdr").html() == "") {
                     continue;
                 }
-
                 var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
-                
-                  $("#" + mf + "-hdr").html("<a href=?rev="+mf+"&showall=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
+                $("#" + mf + "-hdr").html("<a href=?rev="+mf+"&showall=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
             }
         }
     }
@@ -252,10 +248,10 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
             if (alert['tbplurl'] != "") {
                 if (!(alert['branch'].endsWith("Non-PGO"))) {
                     var url = alert['tbplurl'].split("talos");
-                    alert['tbplurl']= url[0]+"%20pgo%20talos"+url[1];
+                    alert['tbplurl']= url[0]+"pgo%20talos"+url[1];
                     defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                 } else {
-                defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";    
+                    defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";    
                 }
             }
 
@@ -273,8 +269,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
 function idDescending(a, b) {
     if (a["id"] < b["id"]) {
         return 1;
-    }
-    else {
+    } else {
         return -1;
     }
 }
@@ -295,10 +290,8 @@ function loadAllAlerts(showall, rev, test, platform) {
                 if ($("#" + keyrev + "-hdr").html() == null) {
                     var newdiv = document.createElement("div");
                     newdiv.id = keyrev;
-                    $("#revisions").append(newdiv);
-                   
+                    $("#revisions").append(newdiv);                   
                     $("#" + keyrev).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev="+keyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
-                      
                 }
                 if ($("#" + keyrev + "-tbl").html() == null) {
                     var kdiv = document.getElementById(keyrev);
@@ -306,8 +299,7 @@ function loadAllAlerts(showall, rev, test, platform) {
                     newtbl.id = keyrev + '-tbl';
                     $("#" + keyrev).append(newtbl);
                 }
-                
-                 $("#" + keyrev + "-hdr").html("<a href=?rev="+keyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
+                $("#" + keyrev + "-hdr").html("<a href=?rev="+keyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
             var r = addAlertToUI(tbl, alerts[alert], showall);
@@ -327,14 +319,14 @@ function loadAllAlerts(showall, rev, test, platform) {
 
 function editAlert(id, body) {
     return function() {
-      AddCommentUI.openCommentBox(id, body);
+        AddCommentUI.openCommentBox(id, body);
     }
 }
 
 function getCookie(cname) {
     var name = cname + "=";
     var ca = document.cookie.split(';');
-    for(var i=0; i<ca.length; i++) {
+    for (var i=0; i<ca.length; i++) {
         var c = ca[i].trim();
         if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
     }
@@ -345,9 +337,9 @@ function getJsonFromUrl() {
   var query = location.search.substr(1);
   var data = query.split("&");
   var result = {};
-  for(var i=0; i<data.length; i++) {
-    var item = data[i].split("=");
-    result[item[0]] = item[1];
+  for (var i=0; i<data.length; i++) {
+      var item = data[i].split("=");
+      result[item[0]] = item[1];
   }
   return result;
 }
@@ -359,19 +351,19 @@ document.title = 'Talos Alerts';
 var results = getJsonFromUrl();
 var showAll = 1;
 if (parseInt(results['showAll']) != 1) {
-  showAll = 0;
+    showAll = 0;
 }
 var rev = results['rev'];
-if(!rev) {
+if (!rev) {
     rev = "";
 }
 var test = getCookie("test");
-if(!test) {
+if (!test) {
     test = "";
 }
 
 var platform = getCookie("platform");
-if(!platform) {
+if (!platform) {
     platform = "";
 }
 
