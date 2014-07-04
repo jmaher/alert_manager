@@ -72,7 +72,7 @@ function hideMerged(originalkeyrev, showall) {
         var raw_data = JSON.parse(req.response);
 
         var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
-        var alerts = raw_data.alerts;   
+        var alerts = raw_dURLata.alerts;   
      
         var keyrev = "";
         var tbl = "";
@@ -94,10 +94,6 @@ function hideMerged(originalkeyrev, showall) {
     }
     req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
-}
-
-function goBack() {
-    window.history.go(0)
 }
 
 function showMerged(originalkeyrev, showall) {
@@ -229,10 +225,11 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
             cell.onclick = "";
         } else if (fields[i] == "status") {
             value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
-            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
+            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved","Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
             for (var j=0; j < options.length; j++) {
                 value += "<option ";
                 if (alert['status'] == options[j]) {
+                    
                     value += "selected";
                 }
                 value += ">" + options[j] + "</option>";
@@ -337,6 +334,10 @@ function editAlert(id, body) {
     }
 }
 
+function hideDiv(name) {
+    document.getElementById(name).style.display = "none";
+}
+
 function getCookie(cname) {
     var name = cname + "=";
     var ca = document.cookie.split(';');
@@ -421,7 +422,7 @@ loadAllAlerts(showAll, rev, test, platform);
     </div>
 
 <div id="addDuplicatePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
+  <a class="closePopup" href="javascript:hideDiv('addDuplicatePopup');">close</a>
   <form id="addDuplicateForm">
     <h2>Mark as duplicate of original revision</h2>
     <p>
@@ -431,7 +432,7 @@ loadAllAlerts(showAll, rev, test, platform);
 </div>
 
 <div id="addBugPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
+  <a class="closePopup" href="javascript:hideDiv('addBugPopup');">close</a>
   <form id="addBugForm">
     <h2>Bug that tracks this regression</h2>
     <p>
@@ -442,7 +443,7 @@ loadAllAlerts(showAll, rev, test, platform);
 </div>
 
 <div id="addTBPLPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
+  <a class="closePopup" href="javascript:hideDiv('addTBPLPopup');">close</a>
   <form id="addTBPLForm">
     <h2>Link to TBPL view of jobs</h2>
     <p>
@@ -452,7 +453,7 @@ loadAllAlerts(showAll, rev, test, platform);
 </div>
 
 <div id="addNotePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
+  <a class="closePopup" href="javascript:hideDiv('addNotePopup');">close</a>
   <form id="addNoteForm">
     <h2>Add a Comment</h2>
     <table>
