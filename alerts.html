@@ -96,6 +96,10 @@ function hideMerged(originalkeyrev, showall) {
     req.send();
 }
 
+function goBack() {
+    window.history.go(0)
+}
+
 function showMerged(originalkeyrev, showall) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
@@ -417,7 +421,7 @@ loadAllAlerts(showAll, rev, test, platform);
     </div>
 
 <div id="addDuplicatePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="">close</a>
+  <a class="closePopup" href="javascript:goBack();">close</a>
   <form id="addDuplicateForm">
     <h2>Mark as duplicate of original revision</h2>
     <p>
@@ -427,7 +431,7 @@ loadAllAlerts(showAll, rev, test, platform);
 </div>
 
 <div id="addBugPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="">close</a>
+  <a class="closePopup" href="javascript:goBack();">close</a>
   <form id="addBugForm">
     <h2>Bug that tracks this regression</h2>
     <p>
@@ -438,7 +442,7 @@ loadAllAlerts(showAll, rev, test, platform);
 </div>
 
 <div id="addTBPLPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="">close</a>
+  <a class="closePopup" href="javascript:goBack();">close</a>
   <form id="addTBPLForm">
     <h2>Link to TBPL view of jobs</h2>
     <p>
@@ -448,7 +452,7 @@ loadAllAlerts(showAll, rev, test, platform);
 </div>
 
 <div id="addNotePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="">close</a>
+  <a class="closePopup" href="javascript:goBack();">close</a>
   <form id="addNoteForm">
     <h2>Add a Comment</h2>
     <table>
