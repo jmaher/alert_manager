@@ -72,7 +72,7 @@ function hideMerged(originalkeyrev, showall) {
         var raw_data = JSON.parse(req.response);
 
         var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
-        var alerts = raw_data.alerts;   
+        var alerts = raw_dURLata.alerts;   
      
         var keyrev = "";
         var tbl = "";
@@ -225,11 +225,10 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
             cell.onclick = "";
         } else if (fields[i] == "status") {
             value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
-            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved","Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
+            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
             for (var j=0; j < options.length; j++) {
                 value += "<option ";
                 if (alert['status'] == options[j]) {
-                    
                     value += "selected";
                 }
                 value += ">" + options[j] + "</option>";
