@@ -283,3 +283,4 @@ function getJsonFromUrl() {
   }
   return result;
 }
+
