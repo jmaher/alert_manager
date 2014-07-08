@@ -1,10 +1,20 @@
 var root_url = 'http://54.215.155.53:8080';
 
 $.getJSON( root_url + "/data/getvalues", function( data ) {
-    
-    var tests = data['test'];
+
+    function compare(a, b) {
+        a = a.toString().toLowerCase();
+        b = b.toString().toLowerCase();
+        if( a < b )
+            return -1;
+        if( a > b )
+            return 1;
+        return 0;
+    }
+
+    var tests = data['test'].sort( compare );
     var revs = data['rev'];
-    var platforms = data['platform'];
+    var platforms = data['platform'].sort( compare );
     if (parseInt(results['showAll']) == 1) {
         document.getElementById("checkbox").checked = true;
     }
@@ -273,5 +283,4 @@ function getJsonFromUrl() {
   }
   return result;
 }
-
 
