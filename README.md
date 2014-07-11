@@ -38,8 +38,8 @@ alerts. You can use the parse_news.py script to populate the database if
 you wish, but sample data is also included in the sample folder. To use it:
 
     cd sample
-    tar zxf alerts.tgz
-    mysql --user <username> --password --database alerts < alerts.sql
+    bunzip2 july_alerts.sql.bz2
+    mysql --user <username> --password --database alerts < july_alerts.sql
 
 ## Start the app
 Start the application:
