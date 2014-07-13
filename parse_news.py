@@ -1,576 +1,426 @@
-import re
-import sys
-import string
+
+import logging
 import mailbox
-import MySQLdb
-import datetime
-import rfc822
-import urllib
-import base64
 import os
-import ConfigParser
-from optparse import OptionParser
-import httplib
-import json
+import re
+import string
 import time
+from collections import namedtuple
+from datetime import datetime, timedelta
+from email.utils import parsedate
+from itertools import chain
+from urllib import urlencode
+from urlparse import parse_qsl, urlsplit, urlunsplit
 
-trees = ['Mozilla-Inbound', 
-         'Mozilla-Inbound-Non-PGO', 
-         'Fx-Team',
-         'Fx-Team-Non-PGO',
-         'Firefox',
-         'Firefox-Non-PGO', 
-         'Mozilla-Aurora',
-         'Mozilla-Aurora-Non-PGO',
-         'Mozilla-Beta',
-         'Mozilla-Beta-Non-PGO',
-         'B2g-Inbound',
-         'B2g-Inbound-Non-PGO',
-         'mobile']
+import requests
 
-platforms = ['XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
-             'WINNT 5.2', 'WINNT 6.1 (ix)', 'WINNT 6.2 x64', 'WINNT 5.1 (ix)',
-# jmaher: I don't care too much about centOS- that is builders
-#             'CentOS release 5 (Final)', 'CentOS (x86_64) release 5 (Final)',
-             'MacOSX 10.7', 'MacOSX 10.8', 'MacOSX 10.6 (rev4)', 
-             'Android 2.2 (Native)', 'Android 4.0.4']
+import settings
+from lib.decorators import database_conn, memoize
 
-tbpl_platforms = {'WINNT 5.1 (ix)': 'Windows XP 32-bit',
-                  'WINNT 5.2': '',
-                  'WINNT 6.1 (ix)': 'Windows 7 32-bit',
-                  'WINNT 6.2 x64': 'WINNT 6.2',
-                  'Ubuntu HW 12.04': 'Ubuntu HW 12.04',
-                  'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
-                  'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
-                  'MacOSX 10.8': 'Rev5 MacOSX Mountain Lion 10.8',
-                  'Android 2.2 (Native)': 'Android 2.2 Tegra',
-                  'Android 4.0.4': 'Android 4.0 Tegra'
-                  }
 
-# oh the hacks continue, osx runs on the pgo branch without the pgo tag
-tbpl_trees = {'Mozilla-Inbound': 'mozilla-inbound pgo',
-              'Mozilla-Inbound-Non-PGO': 'mozilla-inbound',
-              'Fx-Team': 'fx-team pgo',
-              'Fx-Team-Non-PGO': 'fx-team',
-              'Firefox': 'mozilla-central pgo',
-              'Firefox-Non-PGO': 'mozilla-central',
-              'Mozilla-Aurora': 'mozilla-aurora pgo',
-              'Mozilla-Aurora-Non-PGO': 'mozilla-aurora',
-              'Mozilla-Beta': 'mozilla-beta pgo',
-              'Mozilla-Beta-Non-PGO': 'mozilla-beta',
-              'B2g-Inbound': 'b2g-inbound pgo',
-              'B2g-Inbound-Non-PGO': 'b2g-inbound',
-              'mobile': 'mozilla-central'
-             }
-
-tbpl_tests = {'SVG No Chrome': 'svgr',
-        'SVG Row Major': 'svgr',
-        'SVG, Opacity Row Major': 'svgr',
-        'Dromaeo (DOM)': 'dromaeojs',
-        'Dromaeo (CSS)': 'dromaeojs',
-        'Kraken Benchmark': 'dromaeojs',
-        'V8': 'dromaeojs',
-        'V8 Version 7': 'dromaeojs',
-        'V8 version 7': 'dromaeojs',
-        'Paint': 'other',
-        'tscroll Row Major': 'svgr',
-        'TResize': 'chromez',
-        'Tp5 Optimized': 'tp5o',
-        'Tp5 Optimized (XRes)': 'tp5o',
-        'Tp5 Optimized (Private Bytes)': 'tp5o',
-        'Tp5 Optimized (Main RSS)': 'tp5o',
-        'Tp5 Optimized (Content RSS)': 'tp5o',
-        'Tp5 Optimized (%CPU)': 'tp5o',
-        'Tp5 No Network Row major MozAfterPaint (Main Startup File I/O Bytes)': 'tp5o',
-        'Tp5 No Network Row Major MozAfterPaint (Non-Main Startup File IO Bytes)': 'tp5o',
-        'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal Network IO Bytes)': 'tp5o',
-        'Tp5 No Network Row Major MozAfterPaint (Main Normal File IO Bytes)': 'tp5o',
-        'Tp5 No Network Row Major MozAfterPaint (Main Startup File IO Bytes)': 'tp5o',
-        'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)': 'tp5o',
-        'Tp5 Optimized (Modified Page List Bytes)': 'tp5o',
-        'Tp5 Optimized Responsiveness': 'tp5o',
-        'Tp5 Optimized MozAfterPaint': 'tp5o',
-        'a11y Row Major MozAfterPaint': 'other',
-        'Tp4 Mobile': 'remote-tp4m_nochrome',
-        'LibXUL Memory during link': '',
-        'Ts, Paint': 'other',
-        'Robocop Pan Benchmark': 'remote-trobopan',
-        'Robocop Database Benchmark': 'remote-troboprovider',
-        'Robocop Checkerboarding No Snapshot Benchmark': 'remote-trobocheck2',
-        'Robocop Checkerboarding Real User Benchmark': 'remote-trobocheck2',
-        'Customization Animation Tests': 'svgr',
-        'Latency Performance Tests': '',
-        'WebRTC Media Performance Tests': '',
-        'Tab Animation Test, NoChrome': 'svgr',
-        'Tab Animation Test': 'svgr',
-        'Canvasmark, NoChrome': 'chromez',
-        'Canvasmark': 'chromez',
-        'CanvasMark, NoChrome': 'chromez',
-        'CanvasMark': 'chromez',
-        'Tab Animation Test, NoChrome': 'svgr',
-        'tscroll-ASAP': 'svgr',
-        'SVG-ASAP, NoChrome': 'svgr',
-        'SVG-ASAP': 'svgr',
-        'tscroll-ASAP MozAfterPaint': 'svgr',
-        'Session Restore no Auto Restore Test': 'other',
-        'Session Restore Test': 'other',
-        'TP5 Scroll': 'g1'
-             }
-
-tests = ['SVG No Chrome',
-        'SVG Row Major',
-        'SVG, Opacity Row Major',
-        'Dromaeo (DOM)',
-        'Dromaeo (CSS)',
-        'Kraken Benchmark',
-        'V8',
-        'V8 Version 7',
-        'V8 version 7',
-        'Paint',
-        'tscroll Row Major',
-        'TResize',
-        'Tp5 Optimized',
-        'Tp5 Optimized (Private Bytes)',
-        'Tp5 Optimized (Main RSS)',
-        'Tp5 Optimized (Content RSS)',
-        'Tp5 Optimized (%CPU)',
-        'Tp5 No Network Row major MozAfterPaint (Main Startup File I/O Bytes)',
-        'Tp5 No Network Row Major MozAfterPaint (Non-Main Startup File IO Bytes)',
-        'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal Network IO Bytes)',
-        'Tp5 No Network Row Major MozAfterPaint (Main Normal File IO Bytes)',
-        'Tp5 No Network Row Major MozAfterPaint (Main Startup File IO Bytes)',
-        'Tp5 Optimized (Modified Page List Bytes)',
-        'Tp5 Optimized (XRes)',
-        'Tp5 Optimized Responsiveness',
-        'Tp5 Optimized MozAfterPaint',
-        'a11y Row Major MozAfterPaint',
-        'Tp4 Mobile',
-        'LibXUL Memory during link',
-        'Ts, Paint',
-        'Robocop Pan Benchmark',
-        'Robocop Database Benchmark',
-        'Robocop Checkerboarding No Snapshot Benchmark',
-        'Robocop Checkerboarding Real User Benchmark',
-        'Customization Animation Tests',
-        'Latency Performance Tests',
-        'WebRTC Media Performance Tests',
-        'Tab Animation Test, NoChrome',
-        'Tab Animation Test',
-        'Canvasmark, NoChrome',
-        'Canvasmark',
-        'CanvasMark, NoChrome',
-        'CanvasMark',
-        'Tab Animation Test, NoChrome',
-        'tscroll-ASAP',
-        'SVG-ASAP, NoChrome',
-        'SVG-ASAP',
-        'tscroll-ASAP MozAfterPaint',
-        'Session Restore no Auto Restore Test',
-        'Session Restore Test',
-        'TP5 Scroll' ]
-
-def getDatazillaData(branchid):
-    fname = "%s-%s.revs" % (branchid, int(time.time() / 1000))
-    if os.path.exists(fname):
-        data = '{}'
-        with open(fname, 'r') as fhandle:
-            data = fhandle.read()
-    else:
-    # https://datazilla.mozilla.org/refdata/pushlog/list/?days_ago=7&branches=Mozilla-Inbound
-        conn = httplib.HTTPSConnection('datazilla.mozilla.org')
-        cset = "/refdata/pushlog/list/?days_ago=30&branches=%s" % branchid
-        conn.request("GET", cset)
-        response = conn.getresponse()
-        data = response.read()
-        with open(fname, 'w+') as fhandle:
-            fhandle.write(data)
-    
-    return json.loads(data)
-
-def getRevisionRange(dzdata, revision):
-    revid = None
-    for item in dzdata:
-        if revision in dzdata['%s' % item]['revisions']:
-            revid = item
-            break
-
-    if not revid:
-#        print "unable to find revision: %s" % revision
-        return None
-    low = '%s' % (int(revid) - 6)
-    high = '%s' % (int(revid) + 6)
-    if low not in dzdata:
-        print "unable to get range, missing id: %s" % low
-        return None
-    if high not in dzdata:
-        print "unable to get range, missing id: %s" % high
-        return None
-
-    return dzdata[low]['revisions'][-1], dzdata[high]['revisions'][-1]
-
-#subject = "(Improvement) Firefox-Non-PGO - Customization Animation Tests - WINNT 6.2 x64 - 5.84%"
-subre = re.compile("^(<Regression>|\(Improvement\))(.*)")
+logger = logging.getLogger('news parser')
+logger.setLevel(settings.LOG_LEVEL)
+file_handler = logging.FileHandler('news_parser.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 
 subject_trans_table = string.maketrans("\t", " ")
+two_weeks = datetime.today() - timedelta(days=14)
 
-def getRevisions(changeseturl):
-    cpart = changeseturl.split('?')[-1].replace('&', '_')
 
-    if not os.path.exists(os.path.abspath('tmpcset')):
-        os.mkdir('tmpcset')
+SUBJECT_RE = re.compile('^(<Regression>|\(Improvement\))(.*)')
+GRAPHURL_RE = re.compile('(http://mzl.la/.+)')
+CSET_RE = re.compile('Changeset range: (http://.+)')
 
-    cacheFile = os.path.join(os.path.abspath('tmpcset'), cpart)
-    if not os.path.exists(cacheFile):
-        opener = urllib.FancyURLopener({})
-        f = opener.open(changeseturl)
-        data = f.read()
-        f.close()
-        with open(cacheFile, 'w+') as fHandle:
-            fHandle.write(data)
+# TODO: do we need to support other branches
+REV_RE = re.compile(
+    'href=\"(\/integration)?\/'
+    '(b2g-inbound|mozilla-central|mozilla-inbound|fx-team)'
+    '\/rev\/([0-9a-f]+)\"')
 
-    with open(cacheFile, 'r') as fHandle:
-        data = fHandle.read()
 
-    revisions = []
-    #TODO: do we need to support other branches
-    re_rev = re.compile(".*href=\"(\/integration)?\/(b2g-inbound|mozilla-central|mozilla-inbound|fx-team)\/rev\/([0-9a-f]+)\".*")
-    for line in data.split('\n'):
-        matches = re_rev.match(line)
-        if matches:
-            revisions.append(matches.group(3))
+fields = ('branch', 'test', 'platform', 'percent',
+          'graphurl', 'changeset', 'keyrevision', 'bugcount', 'body', 'date',
+          'comment', 'bug', 'status')
+record = namedtuple('record', fields)
 
-    return revisions
 
-def getCSets(config):
-    db = MySQLdb.connect(host=config['host'],
-                         user=config['username'],
-                         passwd=config['password'],
-                         db=config['database'])
+def parse_mailbox():
+    """Main routine"""
+    mbox = mailbox.MH(settings.MAILDIR)
 
-    #TODO: optimize to last 2 weeks of data
-    sql = "select id, keyrevision, changesets from alerts";
-    cur = db.cursor()
-    cur.execute(sql)
+    read = set(mbox.get_sequences().get('read', ''))
+    unread = set(mbox.keys()) - read
 
-    results = []
-    for row in cur.fetchall():
-        results.append([int(row[0]), row[1], row[2].split(',')])
-    cur.close()
+    logger.info('Parsing mailbox. Got %d unread messages' % len(unread))
 
-    return results
+    csets_in_db = get_csets()
 
-def addTbplURL(id, tbplurl):
-    if tbplurl == '':
+    for msg_id in unread:
+        msg = mbox.get(msg_id)
+        record = parse_message(msg)
+
+        if not record:
+            logger.info('Message can not be parsed')
+            continue
+
+        if record.date >= two_weeks:
+            csets = get_revisions(record.changeset)
+        else:
+            csets = []
+
+        merged = is_merged(record, csets, csets_in_db)
+
+        duplicate = check_for_duplicate(record)
+        link = build_tbpl_link(record)
+
+        if duplicate:
+            if merged:
+                mark_merged(duplicate, merged)
+            add_tbpl_url(duplicate, link)
+
+        update_database(record, merged, link, csets)
+
+    all_read = unread | read
+    mbox.set_sequences({'read': all_read})
+
+
+def parse_message(msg):
+    """Handles parsing of message content.
+
+    Returns result packed in named tuple "record"
+    or None if message can not be parsed.
+
+    Record fields:
+        'branch', 'test', 'platform', 'percent',
+        'graphurl', 'changeset', 'keyrevision', 'bugcount','body', 'date',
+        'comment', 'bug', 'status'
+    To get 'platform' from "record":
+    * record.platform
+    * record[2]
+    """
+    subject = parse_subject(get_subject(msg))
+    if not subject:
         return
 
-    db = MySQLdb.connect(host=config['host'],
-                         user=config['username'],
-                         passwd=config['password'],
-                         db=config['database'])
+    body = parse_body(msg)
+    if not body:
+        return
 
-    sql = "select tbplurl from alerts where id=%s" % id
-    cur = db.cursor()
-    cur.execute(sql)
+    logger.info('Message parsed successfully')
 
-    results = []
-    exists = False
-    for row in cur.fetchall():
-        if row[0]:
-            if row[0] != '' and row[0] != 'NULL':
-                exists = True
-                break
-    cur.close()
-
-    if not exists:
-        sql = "update alerts set tbplurl='%s' where id=%s" % (tbplurl, id)
-        cur = db.cursor()
-        cur.execute(sql)
-        cur.close()
+    return record._make(chain(subject, body))
 
 
-def markMerged(config, id, originalKeyRevision):
-    db = MySQLdb.connect(host=config['host'],
-                         user=config['username'],
-                         passwd=config['password'],
-                         db=config['database'])
+def get_subject(msg):
+    """Retrieves subject of mail message.
 
-    sql = "select mergedfrom from alerts where id=%s" % id
-    cur = db.cursor()
-    cur.execute(sql)
+    Returns empty string if message doesn't have subject.
+    """
+    subject = msg.get('subject', '')
+    return subject.translate(subject_trans_table, '\n')
 
-    results = []
-    setAsMerged = False
-    for row in cur.fetchall():
-        if row[0]:
-            if row[0] != '':
-                setAsMerged = True
-                break
-    cur.close()
 
-    if not setAsMerged:
-        sql = "update alerts set mergedfrom='%s' where id=%s" % (originalKeyRevision, id)
-        cur = db.cursor()
-        cur.execute(sql)
-        cur.close()
+def parse_subject(subject, subject_re=SUBJECT_RE):
+    """Parses message subject.
 
-def subject_of(msg):
-    global subject_trans_table
-    subject = msg.get('Subject')
-    if subject is None:
-        return subject
-    return subject.translate(subject_trans_table, "\n")
-
-def validSubject(subject):
-    global trees, platforms, tests, subre
-    match = subre.match(subject)
+    Returns None if subject can not be parsed.
+    """
+    match = subject_re.match(subject)
     if not match:
-        return [None, None, None, None]
+        return
 
-    if match.group(1) == "(Improvement)":
-        sign = "+"
+    if match.group(1) == '(Improvement)':
+        sign = '+'
     else:
-        sign = "-"
+        sign = '-'
 
     parts = match.group(2).strip().split(' - ')
-    if parts[0] not in trees:
-        print "INVALID TREE: %s" % parts[0]
-        return [None, None, None, None]
+    if parts[0] not in settings.TREES:
+        logger.info('INVALID TREE: %s' % parts[0])
+        return
 
-    if parts[2] not in platforms:
-#        print "INVALID PLATFORM: '%s'" % parts[2]
-        return [None, None, None, None]
+    if parts[1] not in settings.TESTS:
+        logger.info('INVALID TEST NAME: %s' % parts[1])
+        return
 
-    if parts[1] not in tests:
-        print "INVALID TEST NAME: %s" % parts[1]
-        return [None, None, None, None]
+    if parts[2] not in settings.PLATFORMS:
+        logger.info('INVALID PLATFORM: %s' % parts[2])
+        return
 
     parts[3] = "%s%s" % (sign, parts[3])
     return parts
 
 
-def parseMailbox(config):
-    mbox = mailbox.MH(config['maildir'])
-
-    read = set(mbox.get_sequences().get('read', ''))
-    unread = set(mbox.iterkeys()) - read
-
-    for msg_id in unread:
-        msg = mbox[msg_id]
-        parseMessage(config, msg)
-
-    read = unread | read
-    mbox.set_sequences({'read': list(read)})
-
-
-def parseMessage(config, msg):
-    parts = validSubject(subject_of(msg))
-
-    if not parts[0]:
-        return
-
-    branch = parts[0]
-    test = parts[1]
-    platform = parts[2]
-    percent = parts[3]
-
+def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
     body = msg.get_payload()
-
     if not body:
         return
 
-    graphurl = None
-    changeset = None
-    keyrevision = None
-    bugCount = 0
-    bugsection = False
-
-# get these out of the body
-#    Graph   : http://mzl.la/1iU7sbe
-#Changeset range: http://hg.mozilla.org/integration/mozilla-inbound/pushloghtml?fromchange=1bb4238bdde3&tochange=89f9304ff4ba
-    newbody = ""
-    logbody = False
-
-    for line in body.split('\n'):
-        if line.strip().startswith('-----------------------------'):
-            logbody = True
-
-        try:
-            line.strip().index('http://mzl.la/')
-            graphurl = ':'.join(line.strip().split(':')[1:])
-        except:
-            pass
-
-        try:
-            line.strip().index('Changeset range')
-            changeset = ':'.join(line.strip().split(':')[1:])
-            parts = changeset.split('=')
-            rawparts = []
-            for p in parts:
-                raw = p.split('&')
-                for r in raw:
-                   rawparts.append(r)
-            rawparts[-1] = rawparts[-1].zfill(12)
-            rawparts[-3] = rawparts[-3].zfill(12)
-            changeset = "%s=%s&%s=%s" % (rawparts[0], rawparts[1], rawparts[2], rawparts[3])
-        except:
-            pass
-
-        try:
-            line.strip().index('since revision')
-            keyrevision = line.strip().split(' ')[-1].strip()
-            keyrevision = keyrevision.zfill(12)
-        except:
-            pass
-
-        if bugsection:
-            if line.strip().startswith('* http://bugzilla.mozilla.org/show_bug.cgi?id='):
-                bugCount += 1
-            if line.strip() == '':
-                bugsection = None
-
-        if line.strip().startswith('Bugs:'):
-            bugsection = True
-
-        if logbody:
-            newbody += "%s\n" % line
-
-    if not graphurl or not changeset:
-        print "INVALID BODY: no graphurl or changeset"
-        return
-
-    date = msg.get('Date')
-    parsed = rfc822.parsedate(date)
-    datestring = "%s-%s-%s %s:%s:%s" % (str(parsed[0]).zfill(4), str(parsed[1]).zfill(2), str(parsed[2]).zfill(2), str(parsed[3]).zfill(2), str(parsed[4]).zfill(2), str(parsed[5]).zfill(2))
-
-    csets = []
-    csetdate = time.strptime(datestring, "%Y-%m-%d %H:%M:%S")
-    old = datetime.datetime.fromtimestamp(time.mktime(csetdate))
-    new = datetime.datetime.fromtimestamp(time.mktime(time.localtime()))
-    twoweeks = new - datetime.timedelta(14)
-    if old >= twoweeks:
-        csets = getRevisions(changeset)
-
-    merged = ''
-    # TODO: find a better way to determine merged.  possibly search top commit for merge & bugcount > 5 ?
-    if len(csets) > 0 and bugCount > 10:
-        # search for csets in existing 
-        db_csets = getCSets(config)
-        merged = ''
-        for i, k, c in db_csets:
-            if k in csets:
-                merged = k
-                # found the key revision in the merged changeset, see if others are there
-                for originalrev in c:
-                    if originalrev not in csets:
-#                        print "OH NO: found keyrevision %s, but not other cset: %s from original in current set: %s" % (k, originalrev, c)
-#                        print "       platform: %s, branch: %s, test %s, keyrevision %s, csets: %s\n" % (platform, branch, test, keyrevision, csets)
-                        merged = ''
-                        break
-
-            if merged:
-                break
-
-    db = MySQLdb.connect(host=config['host'],
-                         user=config['username'],
-                         passwd=config['password'],
-                         db=config['database'])
+    graph_url = None
+    change_set = None
+    key_revision = None
+    bug_count = 0
+    new_body_parts = []
 
     # TODO: figure out if we should set these fields to a specific value
     comment = ''
     bug = ''
     status = ''
-    body = MySQLdb.escape_string(newbody)
 
-    #TODO: is branch valid?
-    tbpl_branch = branch.split('-Non-PGO')[0]
+    bug_section = False
+    log_body = False
 
+    match = graphurl_re.search(body)
+    if match:
+        graph_url = match.group(1)
 
-    #TODO: make dzdata and vals conditional on 2 weeks
-    dzdata = getDatazillaData(tbpl_branch)
-    vals = getRevisionRange(dzdata, keyrevision)
-    link = ''
-    if vals:
-        tree = '?tree=%s&' % tbpl_branch
-        if 'OSX' in tbpl_platforms[platform]:
-             tbpl_trees[branch] = tbpl_trees[branch].split(' pgo')[0]
-        if tbpl_branch == 'Firefox':
-            tree = '?'
-        link = 'https://tbpl.mozilla.org/%sfromchange=%s&tochange=%s&jobname=%s %s talos %s' % (tree, vals[0], vals[1], tbpl_platforms[platform], tbpl_trees[branch], tbpl_tests[test])
-        link = link.replace(' ', '%20')
+    match = cset_re.search(body)
+    if match:
+        parsed_url = urlsplit(match.group(1))
+        query_parts = parse_qsl(parsed_url.query)
 
-    foundDuplicate = False
-    cur = db.cursor()
-    # TODO: is this valid? we are checking if the branch is equal, same with percent- in this case it already exists?!?
-    sql = "select id from alerts where branch='%s' and test='%s' and platform='%s' and percent='%s'" % (branch, test, platform, percent)
-    cur.execute(sql)
-    for row in cur.fetchall():
-        if row[0]:
-          foundDuplicate = row[0]
+        new_parts = []
+        for param, value in query_parts:
+            new_value = value.zfill(12)
+            if param == 'tochange':
+                key_revision = new_value
 
-    cur.close()
+            new_parts.append((param, new_value))
+        new_query_part = tuple([urlencode(new_parts)])
+        change_set = urlunsplit(parsed_url[:3] + new_query_part + parsed_url[4:])
 
-    if foundDuplicate:
-        if merged:
-            markMerged(config, foundDuplicate, merged)
-        addTbplURL(foundDuplicate, link)
+    if not graph_url or not change_set:
+        logger.error('INVALID BODY: no graphurl or changeset')
         return
 
-    if 1 == 0:
-        print "branch: %s" % branch
-        print "test: %s" % test
-        print "platform: %s" % platform
-        print "percent: %s" % percent
-        print "graphurl: %s" % graphurl
-        print "changeset: %s" % changeset
-        print "keyrevision: %s" % keyrevision
-        print "bugcount: %s" % bugCount
-        print "changesets: %s" % csets
+    for line in body.splitlines():
+        line = line.strip()
 
-    cur = db.cursor()
-    sql = 'insert into alerts (branch, test, platform, percent, graphurl, changeset, keyrevision, bugcount, comment, bug, status, body, date, changesets, mergedfrom, tbplurl) values ('
-    sql += "'%s'" % branch
-    sql += ", '%s'" % test
-    sql += ", '%s'" % platform
-    sql += ", '%s'" % percent
-    sql += ", '%s'" % graphurl
-    sql += ", '%s'" % changeset
-    sql += ", '%s'" % keyrevision
-    sql += ", %s" % bugCount
-    sql += ", '%s'" % comment
-    sql += ", '%s'" % bug
-    sql += ", '%s'" % status
-    sql += ", '%s'" % body
-    sql += ", '%s'" % datestring
-    sql += ", '%s'" % ','.join(csets)
-    sql += ", '%s'" % merged
-    sql += ", '%s'" % link
-    sql += ')'
+        if line.startswith('-' * 29):
+            log_body = True
+            continue
 
-    cur.execute(sql)
-    cur.close()
+        if log_body:
+            new_body_parts.append(line)
+
+        if line.startswith('Bugs:'):
+            bug_section = True
+            continue
+
+        if bug_section:
+            if line.startswith('* http://bugzilla.mozilla.org/show_bug.cgi?id='):
+                bug_count += 1
+            if not line:
+                bug_section = False
+
+    new_body = u'\n'.join(new_body_parts)
+    parsed_date = parsedate(msg['date'])
+    date_ = datetime.fromtimestamp(time.mktime(parsed_date))
+
+    return (graph_url, change_set, key_revision,
+            bug_count, new_body, date_,
+            comment, bug, status)
+
+
+def is_merged(record, csets, stored_csets):
+    # TODO: find a better way to determine merged.
+    # possibly search top commit for merge & bugcount > 5 ?
+
+    merged = ''
+    if csets and record.bugcount > 10:
+        # search for csets in existing
+        for i, k, c in stored_csets:
+            if k in csets:
+                merged = k
+                # found the key revision in the merged changeset,
+                # see if others are there
+                for originalrev in c:
+                    if originalrev not in csets:
+                        merged = ''
+                        break
+            if merged:
+                break
+
+    return merged
+
+
+def build_tbpl_link(record):
+    # TODO: is branch valid?
+    tbpl_branch = record.branch.split('-Non-PGO')[0]
+
+    dzdata = get_datazilla_data(tbpl_branch)
+    vals = get_revision_range(dzdata, record.keyrevision)
+
+    link = ''
+    if vals:
+        params = []
+
+        tbpl_platform = settings.TBPL_PLATFORMS[record.platform]
+        tbpl_test = settings.TBPL_TESTS[record.test]
+        tbpl_tree = settings.TBPL_TREES[record.branch]
+
+        if 'OSX' in tbpl_platform:
+            tbpl_tree = tbpl_tree.split(' pgo')[0]
+
+        if tbpl_branch != 'Firefox':
+            params.append(('tree', tbpl_branch))
+
+        params.append(('fromchange', vals[0]))
+        params.append(('tochange', vals[1]))
+        params.append(('jobname', '%s %s talos %s' % (tbpl_platform, tbpl_tree, tbpl_test)))
+        link = '%s/?%s' % (settings.TBPL_URL, urlencode(params))
+
+    return link
+
+
+@database_conn
+def get_csets(db_cursor):
+    query = """SELECT id, keyrevision, changesets FROM alerts
+               WHERE DATE_SUB(CURDATE(), INTERVAL 14 DAY) < DATE;"""
+    db_cursor.execute(query)
+
+    results = []
+    for row in db_cursor.fetchall():
+        results.append([int(row[0]), row[1], row[2].split(',')])
+    return results
+
+
+@database_conn
+def check_for_duplicate(db_cursor, record):
+    # TODO: is this valid? we are checking if the branch is equal,
+    # same with percent- in this case it already exists?!?s
+    query = """SELECT id FROM alerts WHERE
+               branch=%s AND test=%s AND platform=%s AND percent=%s"""
+    db_cursor.execute(
+        query,
+        (record.branch, record.test, record.platform, record.percent))
+
+    duplicate = None
+    for row in db_cursor.fetchall():
+        if row[0]:
+            duplicate = row[0]
+    return duplicate
+
+
+@database_conn
+def add_tbpl_url(db_cursor, id_, tbpl_url):
+    if tbpl_url:
+        query = "SELECT tbplurl FROM alerts WHERE id=%s"
+        db_cursor.execute(query, (id_,))
+
+        row = db_cursor.fetchone()
+        if not (row and row[0] != 'NULL'):
+            query = "UPDATE alerts SET tbplurl=%s WHERE id=%s"
+            db_cursor.execute(query, (tbpl_url, id_))
+
+
+@database_conn
+def mark_merged(db_cursor, id_, original_key_revision):
+    query = "SELECT mergedfrom FROM alerts WHERE id=%s"
+    db_cursor.execute(query, (id_,))
+
+    row = db_cursor.fetchone()
+    if not row:
+        query = "UPDATE alerts SET mergedfrom=%s WHERE id=%s"
+        db_cursor.execute(query, (original_key_revision, id_))
+
+
+@memoize
+def get_datazilla_data(branch_id):
+    """Returns data retrieved from datazilla.
+
+    Data is cached in memory to avoid redundant
+    requests to datazilla or producing temp files on disk.
+    """
+    url = settings.DATAZILLA_URL_TEMPLATE % {'branch': branch_id, 'days': 21}
+    return requests.get(url).json()
+
+
+def get_revision_range(dzdata, revision):
+    # TODO: switch this to hg instead of datazilla (jmaher)
+    for item in dzdata:
+        if revision in dzdata[item]['revisions']:
+            revid = int(item)
+            break
+    else:
+        logger.info('Unable to find revision: %s' % revision)
+        return
+
+    lower = str(revid - 6)
+    upper = str(revid + 6)
+
+    if lower not in dzdata:
+        logger.info('Unable to get range, missing id: %s' % lower)
+        return
+    if upper not in dzdata:
+        logger.info('Unable to get range, missing id: %s' % upper)
+        return
+
+    return dzdata[lower]['revisions'][-1], dzdata[upper]['revisions'][-1]
+
+
+@memoize
+def get_revisions(changeset_url, rev_re=REV_RE):
+    cpart = changeset_url.split('?')[-1].replace('&', '_')
+    cache_file = os.path.join(settings.TEMP_CSET_DIR, cpart)
+
+    if not os.path.exists(cache_file):
+        data = requests.get(changeset_url).content
+        with open(cache_file, 'w+') as fhandle:
+            fhandle.write(data)
+    else:
+        with open(cache_file, 'r') as fhandle:
+            data = fhandle.read()
+
+    matches = rev_re.finditer(data)
+    revisions = [m.group(3) for m in matches]
+    return revisions
+
+
+@database_conn
+def update_database(db_cursor, record, merged, link, csets):
+    query = """INSERT into alerts
+               (branch, test, platform, percent,
+               graphurl, changeset, keyrevision, bugcount,
+               body, date, comment, bug,
+               status, mergedfrom, tbplurl, changesets)
+               VALUES
+               (%(branch)s, %(test)s, %(platform)s, %(percent)s,
+               %(graphurl)s, %(changeset)s, %(keyrevision)s, %(bugcount)s,
+               %(body)s, %(date)s, %(comment)s, %(bug)s, %(status)s,
+               %(merged)s, %(tbpl_url)s, %(csets)s)"""
+
+    data = record._asdict()
+    data['merged'] = merged
+    data['tbpl_url'] = link
+    data['csets'] = ', '.join(csets)
+    db_cursor.execute(query, data)
+
+
+def create_tmp_directories():
+    """Creates necessary temp directories"""
+    if not os.path.exists(settings.TEMP_CSET_DIR):
+        os.mkdir(settings.TEMP_CSET_DIR)
+
+
+def clean_up():
+    """Removes outdated tmpcset files"""
+    ls = os.listdir(settings.TEMP_CSET_DIR)
+    delta = timedelta(days=1)
+    now = datetime.now()
+
+    for fname in ls:
+        file_path = os.path.join(settings.TEMP_CSET_DIR, fname)
+        mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
+        if now - mtime > delta:
+            logger.info('File %s is obsolete. Removing.' % file_path)
+            os.remove(file_path)
 
 
 if __name__ == "__main__":
-    op = OptionParser()
-    op.add_option("--config",
-                    action = "store", type = "string", dest = "config",
-                    default = 'config.ini',
-                    help = "path to the config file [config.ini]")
-
-    options, args = op.parse_args()
-
-    if not os.path.exists(options.config):
-        print "ERROR: %s doesn't exist" % (options.config)
-        sys.exit(1)
-
-    parser = ConfigParser.RawConfigParser()
-    parser.read(options.config)
-
-    config = {'username': parser.get('alerts', 'username'), 
-              'password': parser.get('alerts', 'password'), 
-              'host': parser.get('alerts', 'host'), 
-              'database': parser.get('alerts', 'database'), 
-              'maildir': parser.get('alerts', 'maildir')}
-    parseMailbox(config)
-
+    create_tmp_directories()
+    parse_mailbox()
+    clean_up()
