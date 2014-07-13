@@ -11,7 +11,7 @@ parser.add_option("-u", "--username",
                   type="string", default="root",
                   help="username for connecting to the sql server")
 parser.add_option("-p", "--password",
-                  type="string", default="",
+                  type="string", default="everGrEeN1209!",
                   help="password for connecting to the sql server")
 
 def db_config():

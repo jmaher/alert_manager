@@ -10,6 +10,7 @@ from collections import Counter
 from urlparse import urlparse, parse_qs
 from wsgiref.simple_server import make_server
 from wsgiref.util import request_uri
+from datetime import date, timedelta
 
 import MySQLdb
 import ConfigParser
@@ -74,6 +75,34 @@ def run_query(where_clause, body=False):
 def run_alert_query(query_dict, body): 
     inputid = query_dict['id']
     return { 'alerts': run_query("where id=%s" % inputid, True) }
+
+@json_response
+def run_graph_flot_query(query_dict, body):
+   
+    d1 = query_dict['d1']
+    d2 = query_dict['d2']
+    db = create_db_connnection()
+    cursor = db.cursor()
+    if d1 != "empty" or d2 != "empty":
+        query = "select date,bug from alerts where date > '%s' and date <= '%s'" %(d1 , d2)
+    else:
+        d=date.today()-timedelta(days=91)
+        print d
+        query = "select date,bug from alerts where date > '%s'" %d
+    cursor.execute(query)
+                   # where id BETWEEN 1 AND 10""")
+    query_results = cursor.fetchall()
+ 
+    data = {}
+    data['date'] = []
+    data['bug'] = []
+    for i in query_results:
+        data['date'].append(str(i[0]))
+        data['bug'].append(i[1])
+    cursor.close()
+    db.close()
+    print(len(data['bug']))
+    return {'alerts': data} 
 
 @json_response
 def run_mergedids_query(query_dict, body):
@@ -235,6 +264,10 @@ def handler404(start_response):
     start_response(status, response_headers)
     return response_body
 
+def get_date_range(dates):
+    if dates:
+        return {'startDate': min(dates).strftime('%Y-%m-%d %H:%M'),
+                'endDate': max(dates).strftime('%Y-%m-%d %H:%M')}
 
 def application(environ, start_response):
     # get request path and request params
@@ -259,6 +292,7 @@ def application(environ, start_response):
     # map request handler to request path
     urlpatterns = (
         ('/data/alert(/)?$', run_alert_query),
+        ('/data/graph/flot$', run_graph_flot_query),
         ('/data/submit$', run_submit_data),
         ('/data/updatestatus$', run_updatestatus_data),
         ('/data/submitduplicate$', run_submitduplicate_data),
