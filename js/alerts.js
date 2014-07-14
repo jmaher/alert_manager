@@ -1,6 +1,6 @@
 var root_url = 'http://54.215.155.53:8080';
 
-$.getJSON( root_url + "/data/getvalues", function( data ) {
+$.getJSON( root_url + "/getvalues", function( data ) {
 
     function compare(a, b) {
         a = a.toString().toLowerCase();
@@ -60,9 +60,25 @@ $(document).ready(function() {
                                 showall = 1;
                             }
                          document.cookie="platform = "+platform;
-                         document.cookie="test = "+test;                           
-                         location.href = "?rev="+rev+"&showAll="+showall+"&testIndex="+testIndex+"&platIndex="+platIndex;
-                                    
+                         document.cookie="test = "+test;
+                         location.href = "";
+                         flag = '?';
+                         if (rev && rev != '') {
+                             location.href += flag + "rev=" + rev;
+                             flag = '&';
+                         }
+                         if (showall && showall != '') {
+                             location.href += flag + "showAll=" + showall;
+                             flag = '&';
+                         }
+                         if (testIndex && testIndex != '') {
+                             location.href += flag + "testIndex=" + testIndex;
+                             flag = '&';
+                         }
+                         if (platIndex && platIndex != '') {
+                             location.href += flag + "platIndex=" + platIndex;
+                             flag = '&';
+                         }
                     });
 });
 
@@ -93,7 +109,7 @@ function hideMerged(originalkeyrev, showall) {
         
           $("#" + originalkeyrev + "-hdr").html("<a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);  
     }
-    req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
+    req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
 }
 
@@ -112,11 +128,10 @@ function showMerged(originalkeyrev, showall) {
             tbl = document.getElementById(originalkeyrev + "-tbl");
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
-        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
-       
-          $("#" + originalkeyrev + "-hdr").html("<h3><a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
+        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";       
+        $("#" + originalkeyrev + "-hdr").html("<h3><a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
     }
-    req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
+    req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
 }
 
@@ -137,12 +152,11 @@ function addMergedLinks(showall) {
                 }
 
                 var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
-                
-                  $("#" + mf + "-hdr").html("<a href=?rev="+mf+"&showall=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
+                $("#" + mf + "-hdr").html("<a href=?rev="+mf+"&showAll=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
             }
         }
     }
-    req.open('get', root_url + '/data/mergedids', true);
+    req.open('get', root_url + '/mergedids', true);
     req.send();
 }
 
@@ -249,7 +263,18 @@ function loadAllAlerts(showall, rev, test, platform) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    req.open('get', (root_url + '/data/alertsbyrev?rev='+rev+'&test='+test+'&platform='+platform), true);
+    url = "/alertsbyrev";
+    flag = '?';
+    if (rev && rev != '') {
+        url += flag + "rev=" + rev;
+    }
+    if (test && test != '') {
+        url += flag + "test=" + test;
+    }
+    if (platform && platform != '') {
+        url += flag + "platform=" + platform;
+    }
+    req.open('get', (root_url + url), true);
     req.send();
 }
 

@@ -66,13 +66,13 @@ def run_query(where_clause, body=False):
         retVal.append(data)
     return retVal
 
-@app.route('/data/alert')
+@app.route('/alert')
 @json_response
 def run_alert_query():
     inputid = request.args['id']
     return { 'alerts': run_query("where id=%s" % inputid, True) }
 
-@app.route('/data/mergedids')
+@app.route('/mergedids')
 @json_response
 def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
@@ -81,7 +81,7 @@ def run_mergedids_query():
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
 
-@app.route('/data/alertsbyrev')
+@app.route('/alertsbyrev')
 @json_response
 def run_alertsbyrev_query():
     query_dict = request.args.to_dict()
@@ -101,7 +101,7 @@ def run_alertsbyrev_query():
     where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
-@app.route("/data/getvalues")
+@app.route("/getvalues")
 @json_response
 def run_values_query():
     db = create_db_connnection()
@@ -132,7 +132,7 @@ def run_values_query():
        
     return retVal
 
-@app.route("/data/mergedalerts")
+@app.route("/mergedalerts")
 @json_response
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
@@ -140,7 +140,7 @@ def run_mergedalerts_query():
     where_clause = "where mergedfrom='%s' and (status='' or status='Investigating') order by date,keyrevision ASC" % keyrev;
     return { 'alerts': run_query(where_clause) }
 
-@app.route("/data/submit", methods=['POST'])
+@app.route("/submit", methods=['POST'])
 @json_response
 def run_submit_data():
     retVal = {}
@@ -156,7 +156,7 @@ def run_submit_data():
     #TODO: verify via return value in alerts
     return retVal
 
-@app.route("/data/updatestatus", methods=['POST'])
+@app.route("/updatestatus", methods=['POST'])
 @json_response
 def run_updatestatus_data():
     retVal = {}
@@ -172,7 +172,7 @@ def run_updatestatus_data():
     #TODO: verify via return value in alerts
     return retVal
 
-@app.route("/data/submitduplicate", methods=['POST'])
+@app.route("/submitduplicate", methods=['POST'])
 @json_response
 def run_submitduplicate_data():
     retVal = {}
@@ -188,7 +188,7 @@ def run_submitduplicate_data():
     #TODO: verify via return value in alerts
     return retVal
 
-@app.route("/data/submitbug", methods=['POST'])
+@app.route("/submitbug", methods=['POST'])
 @json_response
 def run_submitbug_data():
     retVal = {}
@@ -204,7 +204,7 @@ def run_submitbug_data():
     #TODO: verify via return value in alerts
     return retVal
 
-@app.route("/data/submittbpl", methods=['POST'])
+@app.route("/submittbpl", methods=['POST'])
 @json_response
 def run_submittbpl_data():
     retVal = {}
