@@ -33,6 +33,12 @@
         if (date1 == "none" && date2 == "none") {
             document.getElementById("demo").innerHTML = "Showing last 12 week : ";
         }
+        else if (date1 == "none" && date2 != "none") {
+             document.getElementById("demo").innerHTML = "From : 12 weeks ago To : "+date2;       
+        }
+        else if (date1 != "none" && date2 == "none") {
+             document.getElementById("demo").innerHTML = "From : "+date1+" To : Last Full week";       
+        }
         else {
             document.getElementById("demo").innerHTML = "From : "+date1+" To : "+date2; 
         }       
@@ -41,30 +47,29 @@
         req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;  
-        var start = alerts["start"] 
         var x = alerts["date"][0].split(" ");
-        for (var i = 0;i < 100; i++) {
+        for (var i = 0; i < 85; i++) {
                 count[i] = 0;
                 bug_count[i] = 0;
         }
 
-        for (var i = 1 ; i< alerts["date"].length -1 ; i++) {
+        for (var i = 1; i < alerts["date"].length -1; i++) {
            
             x1 = alerts["date"][i].split(" ");
            
            if(x1[0] == x[0]) {
              count[j] = count[j] + 1;
-              if(alerts["bug"][i] != "")
-             bug_count[j] = bug_count[j] + 1;
+              if(alerts["bug"][i] != "") {
+                bug_count[j] = bug_count[j] + 1;
+              }
            }
            else {
                j = j+1;
            }
            x=x1;
         }
-        if (date1 == "none") {
-            var d = new Date()
-            date1 = (d.getFullYear()+"-"+(d.getMonth()-2)+"-"+(d.getDate())).toString();            
+        if (date1 == "none") { 
+              date1 = alerts["begining"];          
         }
         var s = date1.split('-');
         var alphDate = new Date();        
@@ -122,15 +127,10 @@ function getJsonFromUrl() {
     </form>
     </div>
 	<div id="content">
-
 		<div class="demo-container">
 			<div id="placeholder" class="demo-placeholder"></div>
 		</div>
-
 		<p align='center'>Alerts|Bugs Per Week</p>
-
 	</div>
-
-
 </body>
 </html>
