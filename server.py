@@ -79,18 +79,16 @@ def run_alert_query(query_dict, body):
 @json_response
 def run_graph_flot_query(query_dict, body):
    
-    d1 = query_dict['d1']
-    d2 = query_dict['d2']
+    startDate = query_dict['d1']
+    endDate = query_dict['d2']
     db = create_db_connnection()
     cursor = db.cursor()
-    if d1 != "empty" or d2 != "empty":
-        query = "select date,bug from alerts where date > '%s' and date <= '%s'" %(d1 , d2)
+    if startDate != "none" or endDate != "none":
+        query = "select date,bug from alerts where date > '%s' and date < '%s'" %(startDate , endDate)
     else:
         d=date.today()-timedelta(days=91)
-        print d
         query = "select date,bug from alerts where date > '%s'" %d
     cursor.execute(query)
-                   # where id BETWEEN 1 AND 10""")
     query_results = cursor.fetchall()
  
     data = {}

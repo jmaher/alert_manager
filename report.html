@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Reports</title>
 	<link href="graph_style.css" rel="stylesheet" type="text/css">
-	<script language="javascript" type="text/javascript" src="js/flot/jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="js/jquery.js"></script>
 	<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
 	<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.categories.js"></script>
 	<script type="text/javascript">
@@ -25,18 +25,18 @@
         var date1 = sendDates['startDate'];
         var date2 = sendDates['endDate'];
         if(date1 == "" || date1 == null) {
-            date1 = "empty"        
+            date1 = "none"        
         }
         if(date2 == "" || date2 == null) {
-            date2 = "empty"        
+            date2 = "none"        
         }
-        document.getElementById("demo").innerHTML = "From : "+date1+" To : "+date2; 
-       /*var date1 = document.getElementById('to').value;
-        var date2 = document.getElementById('from').value;
-        */
-        /*var date1 = "2014-01-01";
-          var date2 = "2014-07-01";
-        */
+        if (date1 == "none" && date2 == "none") {
+            document.getElementById("demo").innerHTML = "Showing last 12 week : ";
+        }
+        else {
+            document.getElementById("demo").innerHTML = "From : "+date1+" To : "+date2; 
+        }       
+        
         var req = new XMLHttpRequest();
         req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -62,21 +62,18 @@
            }
            x=x1;
         }
-        if (date1 == "empty") {
-            //date1 = "2014-07-13";
+        if (date1 == "none") {
             var d = new Date()
             date1 = (d.getFullYear()+"-"+(d.getMonth()-2)+"-"+(d.getDate())).toString();            
         }
         var s = date1.split('-');
-//        var dateObj1 = new Date(Number(s[0]),Number(s[1]) -1 ,Number(s[2]))
         var alphDate = new Date();        
-        for(var i = 0 ; i <= 84;i = i + 7) {
+        for(var i = 0 ; i <= 84;i= i + 7) {
                 
                 var dateObj1 = new Date(Number(s[0]),Number(s[1]) -1 ,Number(s[2])+i)
                 alphDate.setDate(dateObj1 + 7);
-                d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);           
+                d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);
                 d1.push([(dateObj1).toString().split("00:")[0] , bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6]]);
-                
         }
 		$.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
 			series: {
@@ -93,11 +90,7 @@
 		});
 
         }
-        
-        
-        
-		// Add the Flot version string to the footer
-        req.open('get', 'http://54.215.155.53:8080/data/graph/flot?d1='+date1+'&d2='+date2, true);
+        req.open('get', 'http://localhost:8159/data/graph/flot?d1='+date1+'&d2='+date2, true);
         req.send();
 	});
     
