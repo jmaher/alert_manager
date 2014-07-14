@@ -79,14 +79,14 @@ def run_alert_query(query_dict, body):
 @json_response
 def run_graph_flot_query(query_dict, body):
    
-    startDate = query_dict['d1']
-    endDate = query_dict['d2']
+    startDate = query_dict['startDate']
+    endDate = query_dict['endDate']
     db = create_db_connnection()
     cursor = db.cursor()
     if startDate != "none" or endDate != "none":
-        query = "select date,bug from alerts where date > '%s' and date < '%s'" %(startDate , endDate)
+        query = "select date,bug from alerts where date > '%s' and date < '%s'" % (startDate , endDate)
     else:
-        d=date.today()-timedelta(days=91)
+        d = date.today() - timedelta(days=91)
         query = "select date,bug from alerts where date > '%s'" %d
     cursor.execute(query)
     query_results = cursor.fetchall()
@@ -99,7 +99,6 @@ def run_graph_flot_query(query_dict, body):
         data['bug'].append(i[1])
     cursor.close()
     db.close()
-    print(len(data['bug']))
     return {'alerts': data} 
 
 @json_response
@@ -290,7 +289,7 @@ def application(environ, start_response):
     # map request handler to request path
     urlpatterns = (
         ('/data/alert(/)?$', run_alert_query),
-        ('/data/graph/flot$', run_graph_flot_query),
+        ('/graph/flot$', run_graph_flot_query),
         ('/data/submit$', run_submit_data),
         ('/data/updatestatus$', run_updatestatus_data),
         ('/data/submitduplicate$', run_submitduplicate_data),
