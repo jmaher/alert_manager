@@ -59,8 +59,7 @@
               if (alerts["bug"][i] != "") {
                 bug_count[j] = bug_count[j] + 1;
               }
-           }
-           else {
+           } else {
                j = j+1;
            }
            x=x1;
@@ -70,7 +69,7 @@
         }
         var s = date1.split('-');
         var alphDate = new Date();        
-        for(var i = 0 ; i <= 84;i= i + 7) {
+        for (var i = 0 ; i <= 84;i= i + 7) {
                 
                 var dateObj1 = new Date(Number(s[0]),Number(s[1]) -1 ,Number(s[2])+i)
                 alphDate.setDate(dateObj1 + 7);
@@ -100,7 +99,7 @@ function getJsonFromUrl() {
     var query = location.search.substr(1);
     var data = query.split("&");
     var result = {};
-    for(var i=0; i<data.length; i++) {
+    for (var i=0; i<data.length; i++) {
         var item = data[i].split("=");
         result[item[0]] = item[1];
     }
