@@ -1,6 +1,4 @@
-//var root_url = 'http://54.215.155.53:8080';
-var root_url = 'http://localhost:8159';
-
+var root_url = 'http://54.215.155.53:8080';
 $.getJSON( root_url + "/getvalues", function( data ) {
 
     function compare(a, b) {
