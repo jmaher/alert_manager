@@ -72,6 +72,32 @@ def run_alert_query():
     inputid = request.args['id']
     return { 'alerts': run_query("where id=%s" % inputid, True) }
 
+def run_graph_flot_query(query_dict, body):
+    startDate = query_dict['startDate']
+    endDate = query_dict['endDate']
+    if endDate != "none":
+        endDate = datetime.datetime.strptime(endDate, '%Y-%m-%d').date()
+    db = create_db_connnection()
+    cursor = db.cursor()
+    if endDate == "none":
+        endDate = date.today()
+    if startDate == "none":
+        startDate = endDate - timedelta(days=84)
+
+    query = "select date,bug from alerts where date > '%s' and date < '%s'" % (startDate , endDate)
+    cursor.execute(query)
+    query_results = cursor.fetchall()
+    data = {}
+    data['date'] = []
+    data['bug'] = []
+    data['begining'] = str(startDate)
+    for i in query_results:
+        data['date'].append(str(i[0]))
+        data['bug'].append(i[1])
+    cursor.close()
+    db.close()
+    return {'alerts': data} 
+
 @app.route('/mergedids')
 @json_response
 def run_mergedids_query():
@@ -219,7 +245,6 @@ def run_submittbpl_data():
 
     #TODO: verify via return value in alerts
     return retVal
-
 
 def getConfig():
     op = OptionParser()

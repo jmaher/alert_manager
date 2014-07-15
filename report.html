@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Reports</title>
+    <link href="graph_style.css" rel="stylesheet" type="text/css">
+    <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.categories.js"></script>
+    <script type="text/javascript">
+
+    var count = [];
+    var bug_count = [];
+    
+$(function() {
+        var data;
+        var d2 = [];
+        var d1 = [];
+        var alert_count=0;
+        var date_next = 0;
+        var total;
+        var sendDates = getJsonFromUrl();
+        var date1 = sendDates['startDate'];
+        var date2 = sendDates['endDate'];
+        if (date1 == "" || date1 == null) {
+            date1 = "none"
+        }
+        if (date2 == "" || date2 == null) {
+            date2 = "none"
+        }
+
+        var req = new XMLHttpRequest();
+        req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        var alerts = raw_data.alerts;
+        var date_prev = alerts["date"][0].split(" ");
+        for (var i = 0; i < 85; i++) {
+                count[i] = 0;
+                bug_count[i] = 0;
+        }
+
+        for (var i = 1; i < alerts["date"].length -1; i++) {
+           
+            date_next = alerts["date"][i].split(" ");
+           
+           if (date_next[0] == date_prev[0]) {
+               count[alert_count] = count[alert_count] + 1;
+               if (alerts["bug"][i] != "") {
+                   bug_count[alert_count] = bug_count[alert_count] + 1;
+               }
+           } else {
+               alert_count = alert_count+1;
+           }
+           date_prev=date_next;
+        }
+        if (date1 == "none") {
+            date1 = alerts["begining"];
+        }
+        var date_elements = date1.split('-');
+        for (var i = 0 ; i <= 84;i= i + 7) {
+            var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i)
+            d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);
+            d1.push([(dateObj1).toString().split("00:")[0] , bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6]]);
+        }
+        $.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
+            series: {
+                bars: {
+                    show: true,
+                    barWidth: 0.5,
+                    align: "center"
+                }
+            },
+        xaxis: {
+            mode: "categories",
+            tickLength: 0
+            }
+        });
+
+    }
+    req.open('get', 'http://54.215.155.53:8080/graph/flot?startDate='+date1+'&endDate='+date2, true);
+    req.send();
+});
+    
+function getJsonFromUrl() {
+    var query = location.search.substr(1);
+    var data = query.split("&");
+    var result = {};
+    for (var i=0; i<data.length; i++) {
+        var item = data[i].split("=");
+        result[item[0]] = item[1];
+    }
+    return result;
+}
+</script>
+</head>
+<body>
+
+<div id="header">
+<h2>Reports</h2>
+        <p id="demo"></p>
+</div>
+    <div align = "center">
+    <form>
+        <label for="from">Start date: </label>
+        <input type="text" id="from" size="10" name="startDate"/>
+        <label for="to">End date: </label>
+        <input type="text" id="to" size="10" name="endDate"/>
+        <input type="submit" value="Get data"/>
+    </form>
+    </div>
+<div id="content">
+<div class="demo-container">
+<div id="placeholder" class="demo-placeholder"></div>
+</div>
+<p align='center'>Alerts|Bugs Per Week</p>
+</div>
+</body>
+</html>
