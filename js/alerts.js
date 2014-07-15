@@ -220,7 +220,7 @@ function idDescending(a, b) {
     }
 }
 
-function loadAllAlerts(showall, rev, test, platform) {
+function loadAllAlerts(showall, rev, test, platform , current) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -262,11 +262,11 @@ function loadAllAlerts(showall, rev, test, platform) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    var changer = (document.URL).toString().split(".html");
-    if (changer[0].endsWith("expired")) {
-        url = "/alertsbyexpiredrev";
+    if (current == "true") {
+       url = "/alertsbyrev";
     } else {
-        url = "/alertsbyrev";
+        
+         url = "/alertsbyexpiredrev";
     }    
     flag = '?';
     if (rev && rev != '') {
