@@ -9,7 +9,7 @@
     <script src="js/alerts.js"></script>    
     <script type="text/javascript">
 
-    var showAll = 1;
+    var showall = 1;
     function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     //    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
     var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
@@ -105,7 +105,8 @@ document.title = 'Talos Alerts';
 var results = getJsonFromUrl();
 var showAll = 1;
 if (parseInt(results['showAll']) != 1) {
-  showAll = 0;
+  showAll = 1;
+ 
 }
 var rev = results['rev'];
 if(!rev) {
@@ -151,7 +152,7 @@ loadAllAlerts(showAll, rev, test, platform);
        
                     </select>
                 </label>
-                <t>ShowAll</t><input type="checkbox" id="checkbox" Value="Show All"/>
+                <input type="checkbox" id="checkbox" Value="Show All" checked = "true" hidden = "true"/>
                 <input class="button" id="button" type="button" value="Filter" />
                 </div>
             </li>

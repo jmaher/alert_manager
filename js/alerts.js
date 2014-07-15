@@ -1,4 +1,5 @@
-var root_url = 'http://54.215.155.53:8080';
+//var root_url = 'http://54.215.155.53:8080';
+var root_url = 'http://localhost:8159';
 
 $.getJSON( root_url + "/getvalues", function( data ) {
 
@@ -263,7 +264,12 @@ function loadAllAlerts(showall, rev, test, platform) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    url = "/alertsbyrev";
+    var changer = (document.URL).toString().split(".html");
+    if (changer[0].endsWith("expired")) {
+        url = "/alertsbyexpiredrev";
+    } else {
+        url = "/alertsbyrev";
+    }    
     flag = '?';
     if (rev && rev != '') {
         url += flag + "rev=" + rev;
