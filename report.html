@@ -13,36 +13,34 @@
     var bug_count = [];
     
 $(function() {
-        var data;
-        var d2 = [];
-        var d1 = [];
-        var alert_count=0;
-        var date_next = 0;
-        var total;
-        var sendDates = getJsonFromUrl();
-        var date1 = sendDates['startDate'];
-        var date2 = sendDates['endDate'];
-        if (date1 == "" || date1 == null) {
-            date1 = "none"
-        }
-        if (date2 == "" || date2 == null) {
-            date2 = "none"
-        }
+    var data;
+    var d2 = [];
+    var d1 = [];
+    var alert_count=0;
+    var date_next = 0;
+    var total;
+    var sendDates = getJsonFromUrl();
+    var date1 = sendDates['startDate'];
+    var date2 = sendDates['endDate'];
+    if (date1 == "" || date1 == null) {
+        date1 = "none"
+    }
+    if (date2 == "" || date2 == null) {
+        date2 = "none"
+    }
 
-        var req = new XMLHttpRequest();
-        req.onload = function(e) {
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;
         var date_prev = alerts["date"][0].split(" ");
         for (var i = 0; i < 85; i++) {
-                count[i] = 0;
-                bug_count[i] = 0;
+            count[i] = 0;
+            bug_count[i] = 0;
         }
 
-        for (var i = 1; i < alerts["date"].length -1; i++) {
-           
-            date_next = alerts["date"][i].split(" ");
-           
+        for (var i = 1; i < alerts["date"].length -1; i++) {   
+           date_next = alerts["date"][i].split(" ");
            if (date_next[0] == date_prev[0]) {
                count[alert_count] = count[alert_count] + 1;
                if (alerts["bug"][i] != "") {
@@ -75,7 +73,6 @@ $(function() {
             tickLength: 0
             }
         });
-
     }
     req.open('get', 'http://54.215.155.53:8080/graph/flot?startDate='+date1+'&endDate='+date2, true);
     req.send();
