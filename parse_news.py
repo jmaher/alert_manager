@@ -346,13 +346,18 @@ def validSubject(subject):
 
 
 def parseMailbox(config):
-    mbox = mailbox.MHMailbox(config['maildir'])
-    while 1:
-        msg = mbox.next()
-        if not msg:
-            break
+    mbox = mailbox.MH(config['maildir'])
 
+    read = set(mbox.get_sequences().get('read', ''))
+    unread = set(mbox.iterkeys()) - read
+
+    for msg_id in unread:
+        msg = mbox[msg_id]
         parseMessage(config, msg)
+
+    read = unread | read
+    mbox.set_sequences({'read': list(read)})
+
 
 def parseMessage(config, msg):
     parts = validSubject(subject_of(msg))
@@ -364,7 +369,8 @@ def parseMessage(config, msg):
     test = parts[1]
     platform = parts[2]
     percent = parts[3]
-    body = msg.fp.read()
+
+    body = msg.get_payload()
 
     if not body:
         return
