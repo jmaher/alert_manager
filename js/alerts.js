@@ -263,10 +263,9 @@ function loadAllAlerts(showall, rev, test, platform , current) {
         AddTbplUI.init();
     }
     if (current == "true") {
-       url = "/alertsbyrev";
+        url = "/alertsbyrev";
     } else {
-        
-         url = "/alertsbyexpiredrev";
+        url = "/alertsbyexpiredrev";
     }    
     flag = '?';
     if (rev && rev != '') {
