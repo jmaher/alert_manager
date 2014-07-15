@@ -1,20 +1,19 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Reports</title>
-<link href="graph_style.css" rel="stylesheet" type="text/css">
-<script language="javascript" type="text/javascript" src="js/jquery.js"></script>
-<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
-<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.categories.js"></script>
-<script type="text/javascript">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Reports</title>
+    <link href="graph_style.css" rel="stylesheet" type="text/css">
+    <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.categories.js"></script>
+    <script type="text/javascript">
 
     var count = [];
     var bug_count = [];
     
 $(function() {
-
-var data;// = d1
+        var data;
         var d2 = [];
         var d1 = [];
         var j=0;
@@ -64,18 +63,18 @@ var data;// = d1
             d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);
             d1.push([(dateObj1).toString().split("00:")[0] , bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6]]);
         }
-$.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
-series: {
-bars: {
-show: true,
-barWidth: 0.5,
-align: "center"
-}
-},
-xaxis: {
-mode: "categories",
-tickLength: 0
-}
+    $.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
+        series: {
+            bars: {
+                show: true,
+                barWidth: 0.5,
+                align: "center"
+            }
+    },
+    xaxis: {
+        mode: "categories",
+        tickLength: 0
+    }
 });
 
         }

@@ -83,7 +83,6 @@ def run_graph_flot_query(query_dict, body):
     endDate = query_dict['endDate']
     if endDate != "none":
         endDate = datetime.datetime.strptime(endDate, '%Y-%m-%d').date()
-    print endDate
     db = create_db_connnection()
     cursor = db.cursor()
     if endDate == "none":
@@ -92,7 +91,7 @@ def run_graph_flot_query(query_dict, body):
         startDate = endDate - timedelta(days=84)
     
         
-    query = "select date,bug from alerts where date > '%s' and date <'%s'" % (startDate , endDate)
+    query = "select date,bug from alerts where date > '%s' and date < '%s'" % (startDate , endDate)
     cursor.execute(query)
     query_results = cursor.fetchall()
     data = {}
