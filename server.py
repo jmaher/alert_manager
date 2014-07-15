@@ -4,7 +4,7 @@ import os
 import json
 import re
 import sys
-from datetime import datetime, timedelta
+import datetime
 from itertools import groupby
 from collections import Counter
 from urlparse import urlparse, parse_qs
@@ -81,14 +81,18 @@ def run_graph_flot_query(query_dict, body):
    
     startDate = query_dict['startDate']
     endDate = query_dict['endDate']
+    if endDate != "none":
+        endDate = datetime.datetime.strptime(endDate, '%Y-%m-%d').date()
+    print endDate
     db = create_db_connnection()
     cursor = db.cursor()
-    if startDate == "none":
-        startDate = date.today() - timedelta(days=84)
     if endDate == "none":
         endDate = date.today()
+    if startDate == "none":
+        startDate = endDate - timedelta(days=84)
+    
         
-    query = "select date,bug from alerts where date > '%s' and date < '%s'" % (startDate , endDate)
+    query = "select date,bug from alerts where date > '%s' and date <'%s'" % (startDate , endDate)
     cursor.execute(query)
     query_results = cursor.fetchall()
     data = {}
@@ -261,11 +265,6 @@ def handler404(start_response):
                         ("Content-Length", str(len(response_body)))]
     start_response(status, response_headers)
     return response_body
-
-def get_date_range(dates):
-    if dates:
-        return {'startDate': min(dates).strftime('%Y-%m-%d %H:%M'),
-                'endDate': max(dates).strftime('%Y-%m-%d %H:%M')}
 
 def application(environ, start_response):
     # get request path and request params

@@ -1,49 +1,40 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Reports</title>
-	<link href="graph_style.css" rel="stylesheet" type="text/css">
-	<script language="javascript" type="text/javascript" src="js/jquery.js"></script>
-	<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
-	<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.categories.js"></script>
-	<script type="text/javascript">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Reports</title>
+<link href="graph_style.css" rel="stylesheet" type="text/css">
+<script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.categories.js"></script>
+<script type="text/javascript">
 
     var count = [];
     var bug_count = [];
     
-	$(function() {
+$(function() {
 
-		var data;// = d1
+var data;// = d1
         var d2 = [];
         var d1 = [];
         var j=0;
         var k=0;
         var x1 = 0;
         var total;
-        var sendDates = getJsonFromUrl();   
+        var sendDates = getJsonFromUrl();
         var date1 = sendDates['startDate'];
         var date2 = sendDates['endDate'];
         if (date1 == "" || date1 == null) {
-            date1 = "none"        
+            date1 = "none"
         }
         if (date2 == "" || date2 == null) {
-            date2 = "none"        
+            date2 = "none"
         }
-        if (date1 == "none" && date2 == "none") {
-            document.getElementById("demo").innerHTML = "Showing last 12 week : ";
-        } else if (date1 == "none" && date2 != "none") {
-             document.getElementById("demo").innerHTML = "From : 12 weeks ago To : "+date2;       
-        } else if (date1 != "none" && date2 == "none") {
-             document.getElementById("demo").innerHTML = "From : "+date1+" To : Last Full week";       
-        } else {
-            document.getElementById("demo").innerHTML = "From : "+date1+" To : "+date2; 
-        }       
-        
+
         var req = new XMLHttpRequest();
         req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
-        var alerts = raw_data.alerts;  
+        var alerts = raw_data.alerts;
         var x = alerts["date"][0].split(" ");
         for (var i = 0; i < 85; i++) {
                 count[i] = 0;
@@ -55,45 +46,42 @@
             x1 = alerts["date"][i].split(" ");
            
            if (x1[0] == x[0]) {
-             count[j] = count[j] + 1;
-              if (alerts["bug"][i] != "") {
-                bug_count[j] = bug_count[j] + 1;
-              }
+               count[j] = count[j] + 1;
+               if (alerts["bug"][i] != "") {
+                   bug_count[j] = bug_count[j] + 1;
+               }
            } else {
                j = j+1;
            }
            x=x1;
         }
-        if (date1 == "none") { 
-            date1 = alerts["begining"];          
+        if (date1 == "none") {
+            date1 = alerts["begining"];
         }
         var s = date1.split('-');
-        var alphDate = new Date();        
         for (var i = 0 ; i <= 84;i= i + 7) {
-                
-                var dateObj1 = new Date(Number(s[0]),Number(s[1]) -1 ,Number(s[2])+i)
-                alphDate.setDate(dateObj1 + 7);
-                d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);
-                d1.push([(dateObj1).toString().split("00:")[0] , bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6]]);
+            var dateObj1 = new Date(Number(s[0]),Number(s[1]) -1 ,Number(s[2])+i)
+            d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);
+            d1.push([(dateObj1).toString().split("00:")[0] , bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6]]);
         }
-		$.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
-			series: {
-				bars: {
-					show: true,
-					barWidth: 0.5,
-					align: "center"
-				}
-			},
-			xaxis: {
-				mode: "categories",
-				tickLength: 0
-			}
-		});
+$.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
+series: {
+bars: {
+show: true,
+barWidth: 0.5,
+align: "center"
+}
+},
+xaxis: {
+mode: "categories",
+tickLength: 0
+}
+});
 
         }
         req.open('get', 'http://54.215.155.53:8080/graph/flot?startDate='+date1+'&endDate='+date2, true);
         req.send();
-	});
+});
     
 function getJsonFromUrl() {
     var query = location.search.substr(1);
@@ -103,16 +91,16 @@ function getJsonFromUrl() {
         var item = data[i].split("=");
         result[item[0]] = item[1];
     }
-return result;
+    return result;
 }
-	</script>
+</script>
 </head>
 <body>
 
-	<div id="header">
-		<h2>Reports</h2>
+<div id="header">
+<h2>Reports</h2>
         <p id="demo"></p>
-	</div>
+</div>
     <div align = "center">
     <form>
         <label for="from">Start date: </label>
@@ -122,11 +110,11 @@ return result;
         <input type="submit" value="Get data"/>
     </form>
     </div>
-	<div id="content">
-		<div class="demo-container">
-			<div id="placeholder" class="demo-placeholder"></div>
-		</div>
-		<p align='center'>Alerts|Bugs Per Week</p>
-	</div>
+<div id="content">
+<div class="demo-container">
+<div id="placeholder" class="demo-placeholder"></div>
+</div>
+<p align='center'>Alerts|Bugs Per Week</p>
+</div>
 </body>
 </html>
