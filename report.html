@@ -16,9 +16,8 @@ $(function() {
         var data;
         var d2 = [];
         var d1 = [];
-        var j=0;
-        var k=0;
-        var x1 = 0;
+        var alert_count=0;
+        var date_next = 0;
         var total;
         var sendDates = getJsonFromUrl();
         var date1 = sendDates['startDate'];
@@ -34,7 +33,7 @@ $(function() {
         req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;
-        var x = alerts["date"][0].split(" ");
+        var date_prev = alerts["date"][0].split(" ");
         for (var i = 0; i < 85; i++) {
                 count[i] = 0;
                 bug_count[i] = 0;
@@ -42,44 +41,44 @@ $(function() {
 
         for (var i = 1; i < alerts["date"].length -1; i++) {
            
-            x1 = alerts["date"][i].split(" ");
+            date_next = alerts["date"][i].split(" ");
            
-           if (x1[0] == x[0]) {
-               count[j] = count[j] + 1;
+           if (date_next[0] == date_prev[0]) {
+               count[alert_count] = count[alert_count] + 1;
                if (alerts["bug"][i] != "") {
-                   bug_count[j] = bug_count[j] + 1;
+                   bug_count[alert_count] = bug_count[alert_count] + 1;
                }
            } else {
-               j = j+1;
+               alert_count = alert_count+1;
            }
-           x=x1;
+           date_prev=date_next;
         }
         if (date1 == "none") {
             date1 = alerts["begining"];
         }
-        var s = date1.split('-');
+        var date_elements = date1.split('-');
         for (var i = 0 ; i <= 84;i= i + 7) {
-            var dateObj1 = new Date(Number(s[0]),Number(s[1]) -1 ,Number(s[2])+i)
+            var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i)
             d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);
             d1.push([(dateObj1).toString().split("00:")[0] , bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6]]);
         }
-    $.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
-        series: {
-            bars: {
-                show: true,
-                barWidth: 0.5,
-                align: "center"
+        $.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
+            series: {
+                bars: {
+                    show: true,
+                    barWidth: 0.5,
+                    align: "center"
+                }
+            },
+        xaxis: {
+            mode: "categories",
+            tickLength: 0
             }
-    },
-    xaxis: {
-        mode: "categories",
-        tickLength: 0
-    }
-});
+        });
 
-        }
-        req.open('get', 'http://54.215.155.53:8080/graph/flot?startDate='+date1+'&endDate='+date2, true);
-        req.send();
+    }
+    req.open('get', 'http://54.215.155.53:8080/graph/flot?startDate='+date1+'&endDate='+date2, true);
+    req.send();
 });
     
 function getJsonFromUrl() {
