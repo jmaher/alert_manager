@@ -11,7 +11,7 @@
 
     var count = [];
     var bug_count = [];
-    
+    var root_url = 'http://54.215.155.53:8080';
 $(function() {
     var data;
     var d2 = [];
@@ -74,7 +74,7 @@ $(function() {
             }
         });
     }
-    req.open('get', 'http://54.215.155.53:8080/graph/flot?startDate='+date1+'&endDate='+date2, true);
+    req.open('get', root_url+'/graph/flot?startDate='+date1+'&endDate='+date2, true);
     req.send();
 });
     

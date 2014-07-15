@@ -72,7 +72,10 @@ def run_alert_query():
     inputid = request.args['id']
     return { 'alerts': run_query("where id=%s" % inputid, True) }
 
-def run_graph_flot_query(query_dict, body):
+@app.route('/graph/flot')
+@json_response
+def run_graph_flot_query():
+    query_dict = request.args.to_dict()
     startDate = query_dict['startDate']
     endDate = query_dict['endDate']
     if endDate != "none":
