@@ -5,7 +5,7 @@ import json
 import sys
 from flask import Flask, request
 from functools import wraps
-
+from datetime import date, timedelta
 import MySQLdb
 import ConfigParser
 from optparse import OptionParser
@@ -72,7 +72,10 @@ def run_alert_query():
     inputid = request.args['id']
     return { 'alerts': run_query("where id=%s" % inputid, True) }
 
-def run_graph_flot_query(query_dict, body):
+@app.route('/graph/flot')
+@json_response
+def run_graph_flot_query():
+    query_dict = request.args.to_dict()
     startDate = query_dict['startDate']
     endDate = query_dict['endDate']
     if endDate != "none":
@@ -106,6 +109,27 @@ def run_mergedids_query():
     return { 'alerts': run_query(where_clause) }
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
+@app.route('/alertsbyexpiredrev')
+@json_response
+def run_alertsbyrev_expired_query():
+    query_dict = request.args.to_dict()
+    if 'rev' in query_dict:
+        query_dict['keyrevision'] = query_dict.pop('rev')
+    query = "where "
+    flag = 0
+    d=date.today()-timedelta(days=126)
+    if any(query_dict):
+        for key,val in query_dict.iteritems():
+            if val:
+                if flag:
+                    query+= "and %s='%s' " %(key,val)
+                else:
+                    query+= "%s='%s' " %(key,val)
+                    flag = 1
+        query+= "and date < '%s'" %str(d);
+        return { 'alerts': run_query(query, True) }
+    where_clause = "where mergedfrom = '' and (status='' or status='Investigating') and date < '%s' order by date DESC, keyrevision" %str(d);
+    return { 'alerts': run_query(where_clause) }
 
 @app.route('/alertsbyrev')
 @json_response

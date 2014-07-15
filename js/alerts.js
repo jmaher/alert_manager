@@ -1,5 +1,4 @@
 var root_url = 'http://54.215.155.53:8080';
-
 $.getJSON( root_url + "/getvalues", function( data ) {
 
     function compare(a, b) {
@@ -221,7 +220,7 @@ function idDescending(a, b) {
     }
 }
 
-function loadAllAlerts(showall, rev, test, platform) {
+function loadAllAlerts(showall, rev, test, platform , current) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -263,7 +262,11 @@ function loadAllAlerts(showall, rev, test, platform) {
         AddBugUI.init();
         AddTbplUI.init();
     }
-    url = "/alertsbyrev";
+    if (current == "true") {
+        url = "/alertsbyrev";
+    } else {
+        url = "/alertsbyexpiredrev";
+    }    
     flag = '?';
     if (rev && rev != '') {
         url += flag + "rev=" + rev;
