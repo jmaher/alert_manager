@@ -76,6 +76,7 @@ tbpl_tests = {'SVG No Chrome': 'svgr',
         'tscroll Row Major': 'svgr',
         'TResize': 'chromez',
         'Tp5 Optimized': 'tp5o',
+        'Tp5 Optimized (XRes)': 'tp5o',
         'Tp5 Optimized (Private Bytes)': 'tp5o',
         'Tp5 Optimized (Main RSS)': 'tp5o',
         'Tp5 Optimized (Content RSS)': 'tp5o',
@@ -112,7 +113,8 @@ tbpl_tests = {'SVG No Chrome': 'svgr',
         'SVG-ASAP': 'svgr',
         'tscroll-ASAP MozAfterPaint': 'svgr',
         'Session Restore no Auto Restore Test': 'other',
-        'Session Restore Test': 'other'
+        'Session Restore Test': 'other',
+        'TP5 Scroll': 'g1'
              }
 
 tests = ['SVG No Chrome',
@@ -138,6 +140,7 @@ tests = ['SVG No Chrome',
         'Tp5 No Network Row Major MozAfterPaint (Main Normal File IO Bytes)',
         'Tp5 No Network Row Major MozAfterPaint (Main Startup File IO Bytes)',
         'Tp5 Optimized (Modified Page List Bytes)',
+        'Tp5 Optimized (XRes)',
         'Tp5 Optimized Responsiveness',
         'Tp5 Optimized MozAfterPaint',
         'a11y Row Major MozAfterPaint',
@@ -163,7 +166,8 @@ tests = ['SVG No Chrome',
         'SVG-ASAP',
         'tscroll-ASAP MozAfterPaint',
         'Session Restore no Auto Restore Test',
-        'Session Restore Test' ]
+        'Session Restore Test',
+        'TP5 Scroll' ]
 
 def getDatazillaData(branchid):
     fname = "%s-%s.revs" % (branchid, int(time.time() / 1000))

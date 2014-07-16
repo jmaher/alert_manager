@@ -178,7 +178,7 @@ function updateStatus(alertid, duplicate, bugid, mergedfrom) {
         AddBugUI.openBugBox(alertid, bug, 'Backout');
     } else {
         $.ajax({
-          url: "data/updatestatus",
+          url: "updatestatus",
           type: "POST",
           data: {
             id: alertid,
