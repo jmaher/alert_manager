@@ -9,10 +9,11 @@
     <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.categories.js"></script>
     <script type="text/javascript">
 
-    var count = [];
-    var bug_count = [];
-    var no_of_days = 84;
-    var root_url = 'http://54.215.155.53:8080';
+var count = [];
+var bug_count = [];
+var no_of_days = 84;
+var root_url = 'http://54.215.155.53:8080';
+
 $(function() {
     var data;
     var d2 = [];
@@ -57,19 +58,18 @@ $(function() {
         }
         var weekly_alert , weekly_bug, week;
         var date_elements = date1.split('-');
-        for (var i = 0 ; i <= no_of_days ; i= i + 7) {
+        for (var i = 0; i <= no_of_days; i = i+7) {
             weekly_alert = 0;
             weekly_bug = 0;
-            var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i)
-                for (var j = 0 ; j < 7 ; j++) {
-                    weekly_alert = weekly_alert + count[i+j];
-                    weekly_bug = weekly_bug + bug_count[i+j];
-                }
-                week = (dateObj1).toString().split("00:")[0];
-                d2.push([week , weekly_alert]);
-                d1.push([week , weekly_bug]);
-            
-            
+            var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i);
+
+            for (var j = 0 ; j < 7 ; j++) {
+                weekly_alert = weekly_alert + count[i+j];
+                weekly_bug = weekly_bug + bug_count[i+j];
+            }
+            week = (dateObj1).toString().split("00:")[0];
+            d2.push([week , weekly_alert]);
+            d1.push([week , weekly_bug]);        
         }
         $.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
             series: {

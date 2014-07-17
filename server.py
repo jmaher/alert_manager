@@ -81,7 +81,6 @@ def run_graph_flot_query():
     if endDate != "none" and startDate == "none":
         dateElements = endDate.split('-')
         endDate = date(int(dateElements[0]),int(dateElements[1]),int(dateElements[2]))
-        #endDate = date(2014,06,30)
 
     db = create_db_connnection()
     cursor = db.cursor()
