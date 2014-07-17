@@ -59,10 +59,6 @@ $(function() {
         var date_elements = date1.split('-');
         for (var i = 0 ; i <= no_of_days ; i= i + 7) {
             var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i)
-            /*         
-            d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);
-            d1.push([(dateObj1).toString().split("00:")[0] , bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6]]);
-            */
                 for (var j = 0 ; j < 7 ; j++) {
                     weekly_alert = count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6];
                     weekly_bug = bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6];                  
