@@ -12,7 +12,8 @@
     var count = [];
     var bug_count = [];
     var no_of_days = 84;
-    var root_url = 'http://54.215.155.53:8080';
+    //var root_url = 'http://54.215.155.53:8080';
+    var root_url = 'http://localhost:8159';
 $(function() {
     var data;
     var d2 = [];
@@ -58,10 +59,12 @@ $(function() {
         var weekly_alert , weekly_bug, week;
         var date_elements = date1.split('-');
         for (var i = 0 ; i <= no_of_days ; i= i + 7) {
+            weekly_alert = 0;
+            weekly_bug = 0;
             var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i)
                 for (var j = 0 ; j < 7 ; j++) {
-                    weekly_alert = count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6];
-                    weekly_bug = bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6];                  
+                    weekly_alert = weekly_alert + count[i+j];
+                    weekly_bug = weekly_bug + bug_count[i+j];
                 }
                 week = (dateObj1).toString().split("00:")[0];
                 d2.push([week , weekly_alert]);
