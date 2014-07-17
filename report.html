@@ -11,6 +11,7 @@
 
     var count = [];
     var bug_count = [];
+    var no_of_days = 84;
     var root_url = 'http://54.215.155.53:8080';
 $(function() {
     var data;
@@ -34,10 +35,8 @@ $(function() {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;
         var date_prev = alerts["date"][0].split(" ");
-        for (var i = 0; i < 85; i++) {
-            count[i] = 0;
-            bug_count[i] = 0;
-        }
+        count[0] = 0;
+        bug_count[0] = 0;
 
         for (var i = 1; i < alerts["date"].length -1; i++) {   
            date_next = alerts["date"][i].split(" ");
@@ -48,17 +47,29 @@ $(function() {
                }
            } else {
                alert_count = alert_count+1;
+               bug_count[alert_count] = 0;
+               count[alert_count] = 0;
            }
            date_prev=date_next;
         }
         if (date1 == "none") {
             date1 = alerts["begining"];
         }
+        var weekly_alert , weekly_bug, week;
         var date_elements = date1.split('-');
-        for (var i = 0 ; i <= 84;i= i + 7) {
+        for (var i = 0 ; i <= no_of_days ; i= i + 7) {
+            weekly_alert = 0;
+            weekly_bug = 0;
             var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i)
-            d2.push([(dateObj1).toString().split("00:")[0] , count[i]+count[i+1]+count[i+2]+count[i+3]+count[i+4]+count[i+5]+count[i+6]]);
-            d1.push([(dateObj1).toString().split("00:")[0] , bug_count[i]+bug_count[i+1]+bug_count[i+2]+bug_count[i+3]+bug_count[i+4]+bug_count[i+5]+bug_count[i+6]]);
+                for (var j = 0 ; j < 7 ; j++) {
+                    weekly_alert = weekly_alert + count[i+j];
+                    weekly_bug = weekly_bug + bug_count[i+j];
+                }
+                week = (dateObj1).toString().split("00:")[0];
+                d2.push([week , weekly_alert]);
+                d1.push([week , weekly_bug]);
+            
+            
         }
         $.plot("#placeholder", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
             series: {
