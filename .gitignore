@@ -15,7 +15,6 @@ var
 sdist
 develop-eggs
 .installed.cfg
-lib
 lib64
 __pycache__
 
@@ -36,6 +35,7 @@ nosetests.xml
 .pydevproject
 
 # alert manager temp files
-*.revs
+local_settings/development.py
 tmpcset
 config.ini
+*.log
