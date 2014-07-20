@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Bugzilla Reports</title>
+	<link href="graph_style.css" rel="stylesheet" type="text/css">
+    <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+	<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.pie.js"></script>
+	<script type="text/javascript">
+    var root_url = 'http://54.215.155.53:8080';
+	$(function() {
+
+        var req = new XMLHttpRequest();
+        raw_date = getJsonFromUrl();
+        date = raw_date['date'];
+        if (date == "" || date == null) {
+            date = "none"
+        }
+        req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        var bugs = raw_data.bugs;
+        var data = []
+        var endDate=null, startDate, id, diffDays, count=0;
+        var bug_line = bugs.split("},");
+        for (var i=0; i<bug_line.length; i++) {
+            var bug_attrib = bug_line[i].split(":");
+            for(var j=0; j<bug_attrib.length; j++) {
+                if (bug_attrib[j].endsWith("cf_last_resolved\"") && !(bug_attrib[j+1].startsWith("null"))) {
+                    endDate = bug_attrib[j+1].split("T")[0];
+                }
+                if (bug_attrib[j].endsWith("creation_time\"")) {
+                    startDate = bug_attrib[j+1].split("T")[0];
+                }
+                if (bug_attrib[j].endsWith("id\"")) {
+                    id = bug_attrib[j+1];
+                }
+                
+            }
+            if(endDate != null) {
+                var oneDay = 24*60*60*1000;
+                var startDate_pieces = startDate.split("\"")[1].split("-");
+                var endDate_pieces = endDate.split("\"")[1].split("-");
+                var start = new Date(parseInt(startDate_pieces[0]),parseInt(startDate_pieces[1]),parseInt(startDate_pieces[2]));
+                var end = new Date(parseInt(endDate_pieces[0]),parseInt(endDate_pieces[1]),parseInt(endDate_pieces[2]));
+
+                diffDays = Math.ceil(Math.abs((start.getTime() - end.getTime())/(oneDay)))+1;
+                
+                data[count++] = {
+                    label: id,
+                    data : diffDays
+                   
+                }
+            }
+        }
+
+		var placeholder = $("#placeholder");
+			placeholder.unbind();
+			$.plot(placeholder, data, {
+				series: {
+					pie: { 
+						innerRadius: 0.5,
+						show: true
+					}
+				}
+			});
+
+			setCode([
+				"$.plot('#placeholder', data, {",
+				"    series: {",
+				"        pie: {",
+				"            innerRadius: 0.5,",
+				"            show: true",
+				"        }",
+				"    }",
+				"});"
+			]);
+		}
+       
+        req.open('get', root_url+'/bugzilla_reports?date='+date, 'true');
+        req.send();
+        
+	});
+	
+	function setCode(lines) {
+		$("#code").text(lines.join("\n"));
+	}
+    function getJsonFromUrl() {
+        var query = location.search.substr(1);
+        var data = query.split("&");
+        var result = {};
+        for (var i=0; i<data.length; i++) {
+            var item = data[i].split("=");
+            result[item[0]] = item[1];
+        }
+    return result;
+}
+    
+	</script>
+</head>
+<body>
+
+	<div id="header">
+	    <h2>Reports : Bugzilla</h2>
+	</div>
+
+	<div id="content">
+
+		<h3 id="title"></h3>
+        <div id="menu">
+            <form>
+            Date : 
+            <input type="text" id="date" size="10" name="date"/>
+	        <input type="submit" value="Show Data" />
+            </form>
+		</div>
+		<div class="demo-container">
+			
+            <div id="placeholder" class="demo-placeholder"></div>
+		</div>
+    </div>
+
+</body>
+</html>

@@ -3,6 +3,7 @@
 import os
 import json
 import sys
+import requests
 from flask import Flask, request
 from functools import wraps
 from datetime import date, timedelta
@@ -72,6 +73,19 @@ def run_alert_query():
     inputid = request.args['id']
     return { 'alerts': run_query("where id=%s" % inputid, True) }
 
+@app.route('/bugzilla_reports')
+@json_response
+def run_bugzilla_query():
+    query_dict = request.args.to_dict()
+    date = query_dict['date']
+    url = 'https://bugzilla.mozilla.org/rest/bug'
+    if date == "none":
+        u = url +"?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,creation_time,cf_last_resolved"
+    else:
+        u = url +"?whiteboard=[talos_regression]&status:RESOLVED&creation_time="+date+"&include_fields=id,creation_time,cf_last_resolved"
+    search_results = requests.get(u)
+    return { 'bugs': search_results.text }
+
 @app.route('/graph/flot')
 @json_response
 def run_graph_flot_query():
@@ -81,7 +95,6 @@ def run_graph_flot_query():
     if endDate != "none" and startDate == "none":
         dateElements = endDate.split('-')
         endDate = date(int(dateElements[0]),int(dateElements[1]),int(dateElements[2]))
-        #endDate = date(2014,06,30)
 
     db = create_db_connnection()
     cursor = db.cursor()
