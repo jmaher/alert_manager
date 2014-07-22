@@ -8,7 +8,8 @@
 	<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
 	<script language="javascript" type="text/javascript" src="js/flot/jquery.flot.pie.js"></script>
 	<script type="text/javascript">
-    var root_url = 'http://54.215.155.53:8080';
+    //var root_url = 'http://54.215.155.53:8080';
+    var root_url = 'http://localhost:8159';
     var collection = [0,0,0,0,0,0];
     var sets = ["0-7","8-14","15-30","31-60","61-90","90+"];
 	$(function() {
@@ -21,27 +22,19 @@
         }
         req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
-        var bugs = raw_data.bugs;
+        var raw_bugs = JSON.parse(raw_data.bugs);
+        var bugs = raw_bugs.bugs;
         var data = []
         var endDate=null, startDate, id, diffDays, count=0;
-        var bug_line = bugs.split("},");
-        for (var i=0; i<bug_line.length; i++) {
-            var bug_attrib = bug_line[i].split(":");
-            for(var j=0; j<bug_attrib.length; j++) {
-                if (bug_attrib[j].endsWith("cf_last_resolved\"") && !(bug_attrib[j+1].startsWith("null"))) {
-                    endDate = bug_attrib[j+1].split("T")[0];
-                }
-                if (bug_attrib[j].endsWith("creation_time\"")) {
-                    startDate = bug_attrib[j+1].split("T")[0];
-                }
-                if (bug_attrib[j].endsWith("id\"")) {
-                    id = bug_attrib[j+1];
-                }               
+        for (var i=0; i<bugs.length; i++) {
+            if((endDate = bugs[i]["cf_last_resolved"]) != null) {
+                startDate = bugs[i]["creation_time"].split("T")[0];
+                endDate = endDate.split("T")[0];
             }
             if(endDate != null) {
                 var oneDay = 24*60*60*1000;
-                var startDate_pieces = startDate.split("\"")[1].split("-");
-                var endDate_pieces = endDate.split("\"")[1].split("-");
+                var startDate_pieces = startDate.split("-");
+                var endDate_pieces = endDate.split("-");
                 var start = new Date(parseInt(startDate_pieces[0]),parseInt(startDate_pieces[1]),parseInt(startDate_pieces[2]));
                 var end = new Date(parseInt(endDate_pieces[0]),parseInt(endDate_pieces[1]),parseInt(endDate_pieces[2]));
 
@@ -59,13 +52,9 @@
                     collection[4]++;
                 } else if (diffDays > 90) {
                     collection[5]++;
-                }
-
-               
-            }
-            
+                }               
+            }            
         }
-       
         for (var i=0; i<collection.length; i++) {
              data[i] = {
                     label: sets[i],
@@ -86,15 +75,15 @@
 		    });
 
 		setCode([
-			"$.plot('#placeholder', data, {",
-			"    series: {",
-			"        pie: {",
-			"            innerRadius: 0.5,",
-			"            show: true",
-			"        }",
-			"    }",
-			"});"
-		 ]);
+		    "$.plot('#placeholder', data, {",
+		    "    series: {",
+		    "        pie: {",
+		    "            innerRadius: 0.5,",
+		    "            show: true",
+		    "        }",
+		    "    }",
+		    "});"
+		]);
 	 }
        
        req.open('get', root_url+'/bugzilla_reports?date='+date, 'true');
@@ -102,8 +91,8 @@
         
 	});
 	
-	function setCode(lines) {
-		$("#code").text(lines.join("\n"));
+    function setCode(lines) {
+        $("#code").text(lines.join("\n"));
 	}
     function getJsonFromUrl() {
         var query = location.search.substr(1);
