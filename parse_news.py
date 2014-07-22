@@ -56,8 +56,6 @@ def parse_mailbox():
 
     logger.info('Parsing mailbox. Got %d unread messages' % len(unread))
 
-    csets_in_db = get_csets()
-
     for msg_id in unread:
         msg = mbox.get(msg_id)
         record = parse_message(msg)
@@ -71,8 +69,7 @@ def parse_mailbox():
         else:
             csets = []
 
-        merged = is_merged(record, csets, csets_in_db)
-
+        merged = is_merged(record, csets)
         duplicate = check_for_duplicate(record)
         link = build_tbpl_link(record)
 
@@ -166,9 +163,7 @@ def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
     new_body_parts = []
 
     # TODO: figure out if we should set these fields to a specific value
-    comment = ''
-    bug = ''
-    status = ''
+    comment = bug = status = ''
 
     bug_section = False
     log_body = False
@@ -225,19 +220,19 @@ def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
             comment, bug, status)
 
 
-def is_merged(record, csets, stored_csets):
+def is_merged(record, csets):
     # TODO: find a better way to determine merged.
     # possibly search top commit for merge & bugcount > 5 ?
 
     merged = ''
     if csets and record.bugcount > 10:
         # search for csets in existing
-        for i, k, c in stored_csets:
-            if k in csets:
-                merged = k
+        for keyrev, stored_csets in get_csets():
+            if keyrev in csets:
+                merged = keyrev
                 # found the key revision in the merged changeset,
                 # see if others are there
-                for originalrev in c:
+                for originalrev in stored_csets:
                     if originalrev not in csets:
                         merged = ''
                         break
@@ -278,13 +273,13 @@ def build_tbpl_link(record):
 
 @database_conn
 def get_csets(db_cursor):
-    query = """SELECT id, keyrevision, changesets FROM alerts
+    query = """SELECT keyrevision, changesets FROM alerts
                WHERE DATE_SUB(CURDATE(), INTERVAL 14 DAY) < DATE;"""
     db_cursor.execute(query)
 
     results = []
-    for row in db_cursor.fetchall():
-        results.append([int(row[0]), row[1], row[2].split(',')])
+    for keyrev, csets in db_cursor.fetchall():
+        results.append([keyrev, csets.split(',')])
     return results
 
 
