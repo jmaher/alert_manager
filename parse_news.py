@@ -57,8 +57,7 @@ def parse_mailbox():
     logger.info('Parsing mailbox. Got %d unread messages' % len(unread))
 
     for msg_id in unread:
-        msg = mbox.get(msg_id)
-        record = parse_message(msg)
+        record = parse_message(mbox[msg_id])
 
         if not record:
             logger.info('Message can not be parsed')
@@ -67,7 +66,7 @@ def parse_mailbox():
         if record.date >= two_weeks:
             csets = get_revisions(record.changeset)
         else:
-            csets = []
+            csets = set()
 
         merged = is_merged(record, csets)
         duplicate = check_for_duplicate(record)
@@ -82,6 +81,8 @@ def parse_mailbox():
 
     all_read = unread | read
     mbox.set_sequences({'read': all_read})
+
+    logger.info('DONE')
 
 
 def parse_message(msg):
@@ -226,18 +227,13 @@ def is_merged(record, csets):
 
     merged = ''
     if csets and record.bugcount > 10:
-        # search for csets in existing
-        for keyrev, stored_csets in get_csets():
+        for keyrev, stored_csets in get_csets():  # search for csets in existing
             if keyrev in csets:
-                merged = keyrev
                 # found the key revision in the merged changeset,
                 # see if others are there
-                for originalrev in stored_csets:
-                    if originalrev not in csets:
-                        merged = ''
-                        break
-            if merged:
-                break
+                if all(originalrev in csets for originalrev in stored_csets):
+                    merged = keyrev
+                    break
 
     return merged
 
@@ -371,8 +367,7 @@ def get_revisions(changeset_url, rev_re=REV_RE):
             data = fhandle.read()
 
     matches = rev_re.finditer(data)
-    revisions = [m.group(3) for m in matches]
-    return revisions
+    return {m.group(3) for m in matches}
 
 
 @database_conn
