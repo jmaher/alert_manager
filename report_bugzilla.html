@@ -10,13 +10,13 @@
     <script type="text/javascript">
 var root_url = 'http://54.215.155.53:8080';
 var collection = [0,0,0,0,0,0];
-var date;
+var raw_date = getJsonFromUrl();
+var date = raw_date['date'];
 var sets = ["0-7","8-14","15-30","31-60","61-90","90+"];
 $(function() {
 
     var req = new XMLHttpRequest();
-    raw_date = getJsonFromUrl();
-    date = raw_date['date'];
+    
     if (date == "" || date == null) {
         date = "none"
     }
