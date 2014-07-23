@@ -80,12 +80,12 @@ def run_bugzilla_query():
     date = query_dict['date']
     url = 'https://bugzilla.mozilla.org/rest/bug'
     if date == "none":
-        u = url +"?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,creation_time,cf_last_resolved"
+        u = url +"?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,status,resolution,creation_time,cf_last_resolved"
     else:
-        u = url +"?whiteboard=[talos_regression]&status:RESOLVED&creation_time="+date+"&include_fields=id,creation_time,cf_last_resolved"
+        u = url +"?whiteboard=[talos_regression]&status:RESOLVED&creation_time="+date+"&include_fields=id,status,resolution,creation_time,cf_last_resolved"
     search_results = requests.get(u)
-    return { 'bugs': search_results.text }
-
+    return { 'bugs': search_results.text }  
+    
 @app.route('/graph/flot')
 @json_response
 def run_graph_flot_query():
