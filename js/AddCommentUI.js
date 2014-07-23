@@ -15,6 +15,11 @@ var AddCommentUI = {
   init: function AddCommentUI_init(submitURL) {
     var self = this;
     $("a.addNote").live("click", function addNoteLinkClick() {
+      // set the hidden values for the addNote form
+      var status = $(this).parent().siblings("[field_name=status]").children("select").val();
+      var bugid = $(this).parent().siblings("[field_name=bug]").children("a[bugid]").attr('bugid');
+      $("#logNoteStatus").attr('value', status);
+      $("#logNoteBug").attr('value', bugid);
       self.openCommentBox(-1, "");
       return false;
     });
@@ -46,11 +51,10 @@ var AddCommentUI = {
 
   submit: function AddCommentUI_submit() {
     var self = this;
+
     var email = $("#logNoteEmail").val();
-    var status = $("#logNoteStatus").val();
-    var bug = $("#logNoteBug").val();
     var comment = $("#logNoteText").val();
-    self._postOneTBPLNote(alertID, email, comment, status, bug);
+    self._postOneTBPLNote(alertID, email, comment);
   },
 
   openCommentBox: function AddCommentUI_openCommentBox(id, body) {
@@ -74,7 +78,7 @@ var AddCommentUI = {
     return $("#addNotePopup").is(":visible");
   },
 
-  _postOneTBPLNote: function AddCommentUI__postOneTBPLNote(alertID, email, comment, status, bugid) {
+  _postOneTBPLNote: function AddCommentUI__postOneTBPLNote(alertID, email, comment) {
     $.ajax({
       url: root_url + "/submit",
       type: "POST",
@@ -82,8 +86,8 @@ var AddCommentUI = {
         id: alertID,
         email: email,
         comment: comment,
-        status: status,
-        bug: bugid,
+        // status: status,
+        // bug: bugid,
       }
     });
   },
@@ -110,7 +114,7 @@ var AddDuplicateUI = {
   openDuplicateBox: function addDuplicateUI_openDuplicateBox(id, duplicate) {
     $("#addDuplicatePopup").show();
     alertID = id;
-    
+
     var focusTextfield = $("#logDuplicateText");
     focusTextfield.val(duplicate);
     focusTextfield.focus();
@@ -157,7 +161,7 @@ var AddBugUI = {
         status = "Investigating";
     }
     $("#logBugStatusText").val(status);
-    
+
     var focusTextfield = $("#logBugText");
     focusTextfield.val(bug);
     focusTextfield.focus();
@@ -238,7 +242,7 @@ var AddBackoutUI = {
   openBackoutBox: function addBackoutUI_openBackoutBox(id, bugid) {
     $("#addBackoutPopup").show();
     alertID = id;
-    
+
     var focusTextfield = $("#logBackoutText");
     focusTextfield.val(bugid);
     focusTextfield.focus();
@@ -257,4 +261,3 @@ var AddBackoutUI = {
     });
   },
 };
-
