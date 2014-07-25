@@ -32,6 +32,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
         var test = fields[i];
         cell = row.insertCell(-1);
         cell.className = cname;
+        cell.setAttribute('field_name', fields[i]);
         cell.onclick = editAlert(alert["id"], alert["body"]);
         var value = alert[test];
         if (fields[i] == "graphurl" || fields[i] == "changeset") {
@@ -56,7 +57,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
                 defaultValue = ""
                 for (var b = 0; b < bugz.length; b++) {
                     var bugid = bugz[b].trim();
-                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a>";
+                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\"</a>";
                     defaultValue += "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\"> + </a><br />";
                 }
             }
@@ -71,7 +72,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
                     alert['tbplurl']= url[0]+"pgo%20talos"+url[1];
                     defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                 } else {
-                    defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";    
+                    defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                 }
             }
 
@@ -81,6 +82,12 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
         textNode = value || 0;
         cell.innerHTML = textNode;
     }
+
+    cell = row.insertCell(-1);
+    cell.className = cname;
+    cell.setAttribute('field_name', 'add_comment');
+    cell.onclick = "";
+    cell.innerHTML = "<a class=\"addNote\">Add a Comment</a>";
     return 1
 }
 
@@ -120,19 +127,19 @@ loadAllAlerts(showAll, rev, test, platform, current);
                 <label>
                     <select id="rev">
                         <option value="">--Select Revision--</option>
-       
+
                     </select>
                 </label>
                 <label>
                     <select id="test">
                         <option value="">---------------------------------------------------Select Test---------------------------------------------------</option>
-        
+
                     </select>
                 </label>
                 <label>
                     <select id="platform">
                          <option value="">---Select Platform---</option>
-       
+
                     </select>
                 </label>
                 <t>ShowAll</t><input type="checkbox" id="checkbox" Value="Show All"/>
@@ -185,25 +192,14 @@ loadAllAlerts(showAll, rev, test, platform, current);
         <td><input required type="text" id="logNoteEmail" value=""></td>
       </tr>
       <tr>
-        <th><label for="logNoteStatus">Status:</label></th>
-        <td><input type="text" id="logNoteStatus" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteBug">Bug #:</label></th>
-        <td><input type="text" id="logNoteBug" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteBody">Alert Content:</label></th>
-        <td id="logNoteBody"><span class="lnBody"></span></td>
-      </tr>
-      <tr>
         <th><label for="logNoteText">Comment:</label></th>
-        <td><textarea required cols="40" rows="15" id="logNoteText"></textarea></td>
+        <td><textarea required cols="40" rows="5" id="logNoteText"></textarea></td>
       </tr>
     </table>
     <p><input type="submit" value="Add Comment">
   </form>
 </div>
+
 
 </body>
 </html>

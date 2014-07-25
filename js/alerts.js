@@ -1,4 +1,5 @@
 var root_url = 'http://54.215.155.53:8080';
+
 $.getJSON( root_url + "/getvalues", function( data ) {
 
     function compare(a, b) {
@@ -17,7 +18,7 @@ $.getJSON( root_url + "/getvalues", function( data ) {
     if (parseInt(results['showAll']) == 1) {
         document.getElementById("checkbox").checked = true;
     }
-    
+
     for(var i in tests) {
         var newoption = document.createElement("option");
          newoption.id = "test";
@@ -38,16 +39,16 @@ $.getJSON( root_url + "/getvalues", function( data ) {
          var value = platforms[i][0];
             $("#platform").append("<option value=\""+value+"\">"+value+"</option>");
     }
-                
+
     document.getElementById("rev").value = results['rev'];
     document.getElementById("test").selectedIndex = results['testIndex'];
     document.getElementById("platform").selectedIndex = results['platIndex'];
 
 });
 
-$(document).ready(function() { 
-                   
-                    $('#button').click(function() { 
+$(document).ready(function() {
+
+                    $('#button').click(function() {
                             var rev = $('#rev').val();
                             var test = $('#test').val();
                             var platform = $('#platform').val();
@@ -88,8 +89,8 @@ function hideMerged(originalkeyrev, showall) {
         var raw_data = JSON.parse(req.response);
 
         var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
-        var alerts = raw_data.alerts;   
-     
+        var alerts = raw_data.alerts;
+
         var keyrev = "";
         var tbl = "";
         // insert revisions into lower table
@@ -105,8 +106,8 @@ function hideMerged(originalkeyrev, showall) {
             }
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
-        
-          $("#" + originalkeyrev + "-hdr").html("<a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);  
+
+          $("#" + originalkeyrev + "-hdr").html("<a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -116,8 +117,8 @@ function showMerged(originalkeyrev, showall) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
-        var alerts = raw_data.alerts;   
-     
+        var alerts = raw_data.alerts;
+
         var tbl = "";
         // insert revisions into lower table
         for (var alert in alerts) {
@@ -127,7 +128,7 @@ function showMerged(originalkeyrev, showall) {
             tbl = document.getElementById(originalkeyrev + "-tbl");
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
-        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";       
+        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
         $("#" + originalkeyrev + "-hdr").html("<h3><a href=?rev="+originalkeyrev+"&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
@@ -140,8 +141,8 @@ function addMergedLinks(showall) {
         var raw_data = JSON.parse(req.response);
 
         var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
-        var alerts = raw_data.alerts;   
-        
+        var alerts = raw_data.alerts;
+
         var count = 0;
         for (var alert in alerts) {
             if (alerts[alert]['mergedfrom'] != '') {
@@ -224,7 +225,7 @@ function loadAllAlerts(showall, rev, test, platform , current) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
-        var alerts = raw_data.alerts;   
+        var alerts = raw_data.alerts;
         alerts.sort(idDescending);
 
         var keyrev = "";
@@ -237,9 +238,9 @@ function loadAllAlerts(showall, rev, test, platform , current) {
                     var newdiv = document.createElement("div");
                     newdiv.id = keyrev;
                     $("#revisions").append(newdiv);
-                   
+
                     $("#" + keyrev).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev="+keyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
-                      
+
                 }
                 if ($("#" + keyrev + "-tbl").html() == null) {
                     var kdiv = document.getElementById(keyrev);
@@ -247,7 +248,7 @@ function loadAllAlerts(showall, rev, test, platform , current) {
                     newtbl.id = keyrev + '-tbl';
                     $("#" + keyrev).append(newtbl);
                 }
-                
+
                  $("#" + keyrev + "-hdr").html("<a href=?rev="+keyrev+"&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
@@ -266,7 +267,7 @@ function loadAllAlerts(showall, rev, test, platform , current) {
         url = "/alertsbyrev";
     } else {
         url = "/alertsbyexpiredrev";
-    }    
+    }
     flag = '?';
     if (rev && rev != '') {
         url += flag + "rev=" + rev;
@@ -300,7 +301,7 @@ function getCookie(cname) {
     }
     return "";
 }
- 
+
 function getJsonFromUrl() {
   var query = location.search.substr(1);
   var data = query.split("&");
@@ -311,4 +312,3 @@ function getJsonFromUrl() {
   }
   return result;
 }
-
