@@ -131,7 +131,7 @@ $(function() {
                 cell4.innerHTML = bugs[i]["resolution"];
                 cell5.innerHTML = bugs[i]["creation_time"].split("T")[0];
                 if(bugs[i]["cf_last_resolved"] == null) {
-                    cell6.innerHTML = bugs[i]["cf_last_resolved"];
+                    cell6.innerHTML = "OPEN"
                 } else {
                     cell6.innerHTML = bugs[i]["cf_last_resolved"].split("T")[0];
                 }
@@ -255,11 +255,11 @@ function getJsonFromUrl() {
         <h3>Data : </h3>
         <table class="sortable" id="data" border=1>
             <th>ID</th>
-            <th>No. of days open</th>
+            <th>Days open</th>
             <th>Status</th>
             <th>Resolution</th>
             <th>Opening date</th>
-            <th>Date of resolution</th>
+            <th>Resolved Date</th>
         </table>
     </div>
 
