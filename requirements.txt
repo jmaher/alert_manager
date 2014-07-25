@@ -1,0 +1,7 @@
+# main packages
+MySQL-python==1.2.5
+Flask==0.10.1
+requests==2.3.0
+
+# optional package for pre-commit hook
+flake8==2.2.2
