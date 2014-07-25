@@ -4,12 +4,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Reports : Bugzilla</title>
     <link href="graph_style.css" rel="stylesheet" type="text/css">
+    <script language="javascript" type="text/javascript" src="js/sorttable.js"></script>
     <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
     <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
     <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.pie.js"></script>
     <script type="text/javascript">
 var root_url = 'http://54.215.155.53:8080';
 var collection = [0,0,0,0,0,0];
+var diffDay = [];
 var raw_date = getJsonFromUrl();
 var date = raw_date['date'];
 if (date == "" || date == null) {
@@ -24,7 +26,7 @@ $(function() {
         var raw_bugs = JSON.parse(raw_data.bugs);
         var bugs = raw_bugs.bugs;
         var data = []
-        var endDate=null, startDate, id, diffDays, count=0;
+        var endDate=null, startDate, id, count=0, diffDays;
         for (var i=0; i<bugs.length; i++) {
             if((endDate = bugs[i]["cf_last_resolved"]) != null) {
                 startDate = bugs[i]["creation_time"].split("T")[0];
@@ -36,8 +38,9 @@ $(function() {
                 var endDate_pieces = endDate.split("-");
                 var start = new Date(parseInt(startDate_pieces[0]),parseInt(startDate_pieces[1]),parseInt(startDate_pieces[2]));
                 var end = new Date(parseInt(endDate_pieces[0]),parseInt(endDate_pieces[1]),parseInt(endDate_pieces[2]));
-
                 diffDays = Math.ceil(Math.abs((start.getTime() - end.getTime())/(oneDay)))+1;
+                diffDay[bugs[i]["id"]] = diffDays;
+                
                 
                 if (diffDays < 8) {
                     collection[0]++;
@@ -110,7 +113,28 @@ $(function() {
         }
         for (var i=0; i<bugs.length; i++) {
             status_count[bugs[i]['status']]++;  
-            res_count[bugs[i]['resolution']]++;             
+            res_count[bugs[i]['resolution']]++; 
+            
+            var table = document.getElementById("data");
+                var row = table.insertRow(1);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                var cell4 = row.insertCell(3);
+                var cell5 = row.insertCell(4);
+                var cell6 = row.insertCell(5);
+                
+                cell1.innerHTML = bugs[i]["id"];
+                cell2.innerHTML = diffDay[bugs[i]["id"]];
+                cell3.innerHTML = bugs[i]["status"];
+                cell4.innerHTML = bugs[i]["resolution"];
+                cell5.innerHTML = bugs[i]["creation_time"].split("T")[0];
+                if(bugs[i]["cf_last_resolved"] == null) {
+                    cell6.innerHTML = "OPEN";
+                } else {
+                    cell6.innerHTML = bugs[i]["cf_last_resolved"].split("T")[0];
+                }
+            
         }
         for (var i=0; i<statuses.length; i++) {
             data[i] = {
@@ -175,7 +199,6 @@ $(function() {
             "});"
         ]);
     }
-
     req.open('get', root_url+'/bugzilla_reports?date='+date, 'true');
     req.send();
 });
@@ -217,15 +240,26 @@ function getJsonFromUrl() {
 		<div class="demo-container">
             <div id="placeholder" class="demo-placeholder"></div>
 		</div>
-		<h3>How long the bugs remain open</h3>
+		<h3 align="center">How long the bugs remain open</h3>
 		<div class="demo-container">
             <div id="placeholder1" class="demo-placeholder"></div>
 		</div>
-		<h3>Status</h3>
+		<h3 align="center">Status</h3>
         <div class="demo-container">
             <div id="placeholder2" class="demo-placeholder"></div>
 		</div>
-		<h3>Resolution</h3>
+		<h3 align="center">Resolution</h3>
+    </div>
+    <div align="center"">
+        <h3>Data : </h3>
+        <table class="sortable" id="data" border=1>
+            <th>ID</th>
+            <th>Days open</th>
+            <th>Status</th>
+            <th>Resolution</th>
+            <th>Opening date</th>
+            <th>Resolved Date</th>
+        </table>
     </div>
 
 </body>
