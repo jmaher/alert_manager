@@ -38,7 +38,6 @@ $(function() {
                 var endDate_pieces = endDate.split("-");
                 var start = new Date(parseInt(startDate_pieces[0]),parseInt(startDate_pieces[1]),parseInt(startDate_pieces[2]));
                 var end = new Date(parseInt(endDate_pieces[0]),parseInt(endDate_pieces[1]),parseInt(endDate_pieces[2]));
-
                 diffDays = Math.ceil(Math.abs((start.getTime() - end.getTime())/(oneDay)))+1;
                 diffDay[bugs[i]["id"]] = diffDays;
                 
@@ -131,7 +130,7 @@ $(function() {
                 cell4.innerHTML = bugs[i]["resolution"];
                 cell5.innerHTML = bugs[i]["creation_time"].split("T")[0];
                 if(bugs[i]["cf_last_resolved"] == null) {
-                    cell6.innerHTML = "OPEN"
+                    cell6.innerHTML = "OPEN";
                 } else {
                     cell6.innerHTML = bugs[i]["cf_last_resolved"].split("T")[0];
                 }
