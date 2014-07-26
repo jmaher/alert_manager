@@ -9,7 +9,8 @@
     <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.js"></script>
     <script language="javascript" type="text/javascript" src="js/flot/jquery.flot.pie.js"></script>
     <script type="text/javascript">
-var root_url = 'http://54.215.155.53:8080';
+//var root_url = 'http://54.215.155.53:8080';
+var root_url = 'http://localhost:8159'
 var collection = [0,0,0,0,0,0];
 var diffDay = [];
 var raw_date = getJsonFromUrl();
@@ -115,7 +116,7 @@ $(function() {
             status_count[bugs[i]['status']]++;  
             res_count[bugs[i]['resolution']]++; 
             
-            var table = document.getElementById("data");
+                var table = document.getElementById("data");
                 var row = table.insertRow(1);
                 var cell1 = row.insertCell(0);
                 var cell2 = row.insertCell(1);
@@ -125,16 +126,30 @@ $(function() {
                 var cell6 = row.insertCell(5);
                 
                 cell1.innerHTML = bugs[i]["id"];
-                cell2.innerHTML = diffDay[bugs[i]["id"]];
+                if(diffDay[bugs[i]["id"]] != null){
+                    cell2.innerHTML = diffDay[bugs[i]["id"]];
+                } else {
+                    var oneDay = 24*60*60*1000;
+                    var startDate_pieces = bugs[i]["creation_time"].split("T")[0].split("-");
+                    var endDate = new Date();
+                    var end = new Date(parseInt(endDate.getFullYear()),parseInt(endDate.getMonth()),parseInt(endDate.getDate()));
+                    var start = new Date(parseInt(startDate_pieces[0]),parseInt(startDate_pieces[1]),parseInt(startDate_pieces[2]));
+                    cell2.innerHTML = Math.ceil(Math.abs((start.getTime() - end.getTime())/(oneDay)))+1;
+
+                }
                 cell3.innerHTML = bugs[i]["status"];
-                cell4.innerHTML = bugs[i]["resolution"];
+                if(bugs[i]["resolution"] == "")
+                {
+                    cell4.innerHTML = "OPEN"
+                } else {
+                     cell4.innerHTML = bugs[i]["resolution"];
+                }
                 cell5.innerHTML = bugs[i]["creation_time"].split("T")[0];
                 if(bugs[i]["cf_last_resolved"] == null) {
                     cell6.innerHTML = "OPEN";
                 } else {
                     cell6.innerHTML = bugs[i]["cf_last_resolved"].split("T")[0];
                 }
-            
         }
         for (var i=0; i<statuses.length; i++) {
             data[i] = {
@@ -253,12 +268,14 @@ function getJsonFromUrl() {
     <div align="center"">
         <h3>Data : </h3>
         <table class="sortable" id="data" border=1>
-            <th>ID</th>
-            <th>Days open</th>
-            <th>Status</th>
-            <th>Resolution</th>
-            <th>Opening date</th>
-            <th>Resolved Date</th>
+            <tr>
+                <td>ID</th>
+                <td class="sorttable_numeric">Days open</td>
+                <td>Status</td>
+                <td>Resolution</td>
+                <td>Opening date</td>
+                <td>Resolved Date</td>
+            </tr>
         </table>
     </div>
 
