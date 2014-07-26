@@ -84,8 +84,8 @@ def run_bugzilla_query():
     else:
         u = url +"?whiteboard=[talos_regression]&status:RESOLVED&creation_time="+date+"&include_fields=id,status,resolution,creation_time,cf_last_resolved"
     search_results = requests.get(u)
-    return { 'bugs': search_results.text }  
-    
+    return { 'bugs': search_results.text }
+
 @app.route('/graph/flot')
 @json_response
 def run_graph_flot_query():
@@ -210,8 +210,8 @@ def run_mergedalerts_query():
 def run_submit_data():
     retVal = {}
     data = request.form
-
-    sql = "update alerts set comment='%s', email='%s' where id=%s;" % (data['comment'][0], data['email'], data['id'])
+    comment = "[%s] %s" % (data['email'], data['comment'][0])
+    sql = "update alerts set comment='%s', email='%s' where id=%s;" % (comment, data['email'], data['id'])
 
     db = create_db_connnection()
     cursor = db.cursor()
