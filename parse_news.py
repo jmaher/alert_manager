@@ -375,7 +375,7 @@ def get_revisions(changeset_url, rev_re=REV_RE):
 def check_for_backout(db_cursor, record):
     query = """SELECT id FROM alerts
                WHERE platform=%s AND test=%s AND branch=%s
-               AND ABS(percent) between %s and %s
+               AND ABS(SUBSTRING_INDEX(percent, "%%", 1)) between %s and %s
                AND backout IS NULL
                AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) < date;"""
 
