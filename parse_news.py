@@ -68,6 +68,7 @@ def parse_mailbox():
         else:
             csets = set()
 
+        check_for_backout(record)
         merged = is_merged(record, csets)
         duplicate = check_for_duplicate(record)
         link = build_tbpl_link(record)
@@ -368,6 +369,27 @@ def get_revisions(changeset_url, rev_re=REV_RE):
 
     matches = rev_re.finditer(data)
     return {m.group(3) for m in matches}
+
+
+@database_conn
+def check_for_backout(db_cursor, record):
+    query = """SELECT id FROM alerts
+               WHERE platform=%s AND test=%s AND branch=%s
+               AND ABS(percent) between %s and %s
+               AND backout IS NULL
+               AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) < date;"""
+
+    percent = float(record.percent[1:-1])
+    query_params = (
+        record.platform, record.test, record.branch,
+        percent * 0.9, percent * 1.1)
+
+    db_cursor.execute(query, query_params)
+
+    results = db_cursor.fetchall()
+    if results:
+        query = "UPDATE alerts SET backout=%s WHERE id=%s"
+        db_cursor.execute(query, (record.keyrevision, results[0]))
 
 
 @database_conn
