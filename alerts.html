@@ -57,7 +57,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
                 defaultValue = ""
                 for (var b = 0; b < bugz.length; b++) {
                     var bugid = bugz[b].trim();
-                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\"</a>";
+                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a>";
                     defaultValue += "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\"> + </a><br />";
                 }
             }
@@ -83,11 +83,6 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
         cell.innerHTML = textNode;
     }
 
-    cell = row.insertCell(-1);
-    cell.className = cname;
-    cell.setAttribute('field_name', 'add_comment');
-    cell.onclick = "";
-    cell.innerHTML = "<a class=\"addNote\">Add a Comment</a>";
     return 1
 }
 
