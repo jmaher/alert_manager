@@ -28,11 +28,11 @@ $(function() {
         var data = []
         var endDate=null, startDate, id, count=0, diffDays;
         for (var i=0; i<bugs.length; i++) {
-            if((endDate = bugs[i]["cf_last_resolved"]) != null) {
+            if ((endDate = bugs[i]["cf_last_resolved"]) != null) {
                 startDate = bugs[i]["creation_time"].split("T")[0];
                 endDate = endDate.split("T")[0];
             }
-            if(endDate != null) {
+            if (endDate != null) {
                 var oneDay = 24*60*60*1000;
                 var startDate_pieces = startDate.split("-");
                 var endDate_pieces = endDate.split("-");
@@ -125,7 +125,7 @@ $(function() {
                 var cell6 = row.insertCell(5);
                 
                 cell1.innerHTML = bugs[i]["id"];
-                if(diffDay[bugs[i]["id"]] != null) {
+                if (diffDay[bugs[i]["id"]] != null) {
                     cell2.innerHTML = diffDay[bugs[i]["id"]];
                 } else {
                     var oneDay = 24*60*60*1000;
@@ -136,13 +136,13 @@ $(function() {
                     cell2.innerHTML = Math.ceil(Math.abs((start.getTime() - end.getTime())/(oneDay)))+1;
                 }
                 cell3.innerHTML = bugs[i]["status"];
-                if(bugs[i]["resolution"] == "") {
+                if (bugs[i]["resolution"] == "") {
                     cell4.innerHTML = "OPEN"
                 } else {
                      cell4.innerHTML = bugs[i]["resolution"];
                 }
                 cell5.innerHTML = bugs[i]["creation_time"].split("T")[0];
-                if(bugs[i]["cf_last_resolved"] == null) {
+                if (bugs[i]["cf_last_resolved"] == null) {
                     cell6.innerHTML = "OPEN";
                 } else {
                     cell6.innerHTML = bugs[i]["cf_last_resolved"].split("T")[0];
