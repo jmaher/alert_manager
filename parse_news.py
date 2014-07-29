@@ -262,7 +262,7 @@ def build_tbpl_link(record):
         params.append(('fromchange', vals[0]))
         params.append(('tochange', vals[1]))
         params.append(('jobname', '%s %s talos %s' % (tbpl_platform, tbpl_tree, tbpl_test)))
-        link = '%s/?%s' % (settings.TBPL_URL, urlencode(params))
+        link = '%s/?%s' % (settings.TBPL_URL, params)
 
     return link
 
