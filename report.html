@@ -38,7 +38,9 @@ $(function() {
     if (date2 == "" || date2 == null) {
         date2 = "none"
     }
-
+    if (date == "none") {
+        date = date1;
+    }
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -164,7 +166,7 @@ $(function() {
             "});"
         ]);
     }
-
+    document.getElementById('date_disp').innerHTML = "<h5>Showing Data For : "+date+"</h5>";
     req.open('get', root_url+'/bugzilla_reports?date='+date, 'true');
     req.send();
 });
@@ -339,9 +341,8 @@ function getJsonFromUrl() {
             <input type="text" id="date" size="10" name="date"/>
 	        <input type="submit" value="Show Data" />
             </form>
-            
 		</div>
-
+        <div id = "date_disp" align="center"></div>
 		<div class="demo-container">
             <div id="placeholder" class="demo-placeholder"></div>
 		</div>
