@@ -163,7 +163,7 @@ def run_alertsbyrev_query():
                     query+= "%s='%s' " %(key,val)
                     flag = 1
         return { 'alerts': run_query(query, True) }
-    where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
+    where_clause = "where where date > NOW() - INTERVAL 127 DAY and mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
 @app.route("/getvalues")
