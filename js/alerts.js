@@ -1,4 +1,4 @@
-var root_url = 'http://0.0.0.0:8159';
+var root_url = 'http://localhost:8159';
 
 $.getJSON( root_url + "/getvalues", function( data ) {
 
