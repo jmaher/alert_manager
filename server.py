@@ -10,6 +10,7 @@ from datetime import date, timedelta
 import MySQLdb
 import ConfigParser
 from optparse import OptionParser
+import logging
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 application = app
@@ -163,7 +164,7 @@ def run_alertsbyrev_query():
                     query+= "%s='%s' " %(key,val)
                     flag = 1
         return { 'alerts': run_query(query, True) }
-    where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
+    where_clause = "where date > NOW() - INTERVAL 127 DAY and mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
 @app.route("/getvalues")
@@ -312,4 +313,5 @@ def getConfig():
 
 if __name__ == '__main__':
     getConfig()
+    logging.basicConfig(level=logging.DEBUG)
     app.run(host="0.0.0.0", port=8159)
