@@ -10,6 +10,7 @@ from datetime import date, timedelta
 import MySQLdb
 import ConfigParser
 from optparse import OptionParser
+import logging
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 application = app
@@ -312,4 +313,5 @@ def getConfig():
 
 if __name__ == '__main__':
     getConfig()
+    logging.basicConfig(level=logging.DEBUG)
     app.run(host="0.0.0.0", port=8159)
