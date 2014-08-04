@@ -81,7 +81,7 @@ $(function() {
             d2.push([week , weekly_alert]);
             d1.push([week , weekly_bug]);        
         }
-        $.plot("#placeholder0", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
+        $.plot("#bugs_per_week", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
             series: {
                 bars: {
                     show: true,
@@ -144,7 +144,7 @@ $(function() {
             }
         }
 
-        var placeholder = $("#placeholder");
+        var placeholder = $("#days_open");
         placeholder.unbind();
         $.plot(placeholder, data, {
             series: {
@@ -156,7 +156,7 @@ $(function() {
         });
 
         setCode([
-            "$.plot('#placeholder', data, {",
+            "$.plot('#days_open', data, {",
             "    series: {",
             "        pie: {",
             "            innerRadius: 0.5,",
@@ -166,7 +166,11 @@ $(function() {
             "});"
         ]);
     }
-    document.getElementById('date_disp').innerHTML = "<h5>Showing Data For : "+date+"</h5>";
+    if (date == "none") {
+        document.getElementById('date_disp').innerHTML = "<h5>Showing Data For : ALL</h5>";
+    } else {
+        document.getElementById('date_disp').innerHTML = "<h5>Showing Data For : "+date+"</h5>";
+    }
     req.open('get', root_url+'/bugzilla_reports?date='+date, 'true');
     req.send();
 });
@@ -248,7 +252,7 @@ $(function() {
             }
             
         }
-        var placeholder = $("#placeholder1");
+        var placeholder = $("#status");
         placeholder.unbind();
         $.plot(placeholder, data, {
             series: {
@@ -260,7 +264,7 @@ $(function() {
         });
 
         setCode([
-            "$.plot('#placeholder1', data, {",
+            "$.plot('#status', data, {",
             "    series: {",
             "        pie: {",
             "            innerRadius: 0.5,",
@@ -269,7 +273,7 @@ $(function() {
             "    }",
             "});"
         ]);
-        var placeholder2 = $("#placeholder2");
+        var placeholder2 = $("#resolution");
         placeholder2.unbind();
         $.plot(placeholder2, data1, {
             series: {
@@ -281,7 +285,7 @@ $(function() {
         });
 
         setCode([
-            "$.plot('#placeholder2', data1, {",
+            "$.plot('#resolution', data1, {",
             "    series: {",
             "        pie: {",
             "            innerRadius: 0.5,",
@@ -332,7 +336,7 @@ function getJsonFromUrl() {
             </form>
         </div>
         		<div class="demo-container">
-            <div id="placeholder0" class="demo-placeholder"></div>
+            <div id="bugs_per_week" class="demo-placeholder"></div>
 		</div>
 		<h3 align="center">Alerts|Bugs Per Week</h3>
 		<div id="menu">
@@ -344,15 +348,15 @@ function getJsonFromUrl() {
 		</div>
         <div id = "date_disp" align="center"></div>
 		<div class="demo-container">
-            <div id="placeholder" class="demo-placeholder"></div>
+            <div id="days_open" class="demo-placeholder"></div>
 		</div>
 		<h3 align="center">How long the bugs remain open</h3>
 		<div class="demo-container">
-            <div id="placeholder1" class="demo-placeholder"></div>
+            <div id="status" class="demo-placeholder"></div>
 		</div>
 		<h3 align="center">Status</h3>
         <div class="demo-container">
-            <div id="placeholder2" class="demo-placeholder"></div>
+            <div id="resolution" class="demo-placeholder"></div>
 		</div>
 		<h3 align="center">Resolution</h3>
     </div>
