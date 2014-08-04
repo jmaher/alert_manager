@@ -82,7 +82,7 @@ newsgroup, or make use of the sample data packaged in the sample folder.
 Create the MySQL database using the schema.sql script as follows, where the
 specified username matches the one in config.ini:
 
-    mysql --user <username> --password < schema.sql
+    mysql --user <username> --password < schemes/0000_create_database.sql
 
 This will create a database called alerts, with a single table, also called
 alerts. You can use the parse_news.py script to populate the database if
