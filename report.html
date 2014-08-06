@@ -317,10 +317,23 @@ function getJsonFromUrl() {
     }
     return result;
 }
+document.getElementById("alerts").setAttribute("href",root_url+"/alerts.html");
+document.getElementById("expired").setAttribute("href",root_url+"/expired.html");
+document.getElementById("report").setAttribute("href",root_url+"/report.html");
 </script>
 </head>
 <body>
-
+    <div align="center">
+        <table>
+            <tr>
+                <td><a id="alerts" >Alerts</a></td>
+                <td></td>
+                <td><a id="expired" >Expired alerts</a></td>
+                <td></td>
+                <td><a id="report" >Reports</a></td>
+            </tr>
+        </table>
+    </div>
 	<div id="header">
 	    <h2 align="center">Reports</h2>
 	</div>
