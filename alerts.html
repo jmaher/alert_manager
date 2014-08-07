@@ -82,7 +82,6 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
         textNode = value || 0;
         cell.innerHTML = textNode;
     }
-
     return 1
 }
 
@@ -111,9 +110,21 @@ var current = "true";
 document.cookie = "platform =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 loadAllAlerts(showAll, rev, test, platform, current);
+
     </script>
 </head>
 <body class="noscript">
+    <div align="center">
+        <table>
+            <tr>
+                <td><a href="http://54.215.155.53:8080/alerts.html" >Alerts</a></td>
+                <td></td>
+                <td><a href="http://54.215.155.53:8080/expired.html" >Expired alerts</a></td>
+                <td></td>
+                <td><a href="http://54.215.155.53:8080/report.html" >Reports</a></td>
+            </tr>
+        </table>
+    </div>
     <div id="menu">
         <ul class="menu">
             <li><a href="alerts.html" class="parent"><span>Talos Alert Manager</span></a></li>
@@ -121,20 +132,17 @@ loadAllAlerts(showAll, rev, test, platform, current);
                 <div class="options-box">
                 <label>
                     <select id="rev">
-                        <option value="">--Select Revision--</option>
-
+                        <option value="">--Select Revision--</option>       
                     </select>
                 </label>
                 <label>
                     <select id="test">
-                        <option value="">---------------------------------------------------Select Test---------------------------------------------------</option>
-
+                        <option value="">---------------------------------------------------Select Test---------------------------------------------------</option>                               
                     </select>
                 </label>
                 <label>
                     <select id="platform">
-                         <option value="">---Select Platform---</option>
-
+                         <option value="">---Select Platform---</option>       
                     </select>
                 </label>
                 <t>ShowAll</t><input type="checkbox" id="checkbox" Value="Show All"/>
@@ -194,7 +202,6 @@ loadAllAlerts(showAll, rev, test, platform, current);
     <p><input type="submit" value="Add Comment">
   </form>
 </div>
-
 
 </body>
 </html>
