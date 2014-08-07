@@ -32,7 +32,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
         var test = fields[i];
         cell = row.insertCell(-1);
         cell.className = cname;
-        cell.setAttribute('field_name', fields[i]);`
+        cell.setAttribute('field_name', fields[i]);
         cell.onclick = editAlert(alert["id"], alert["body"]);
         var value = alert[test];
         if (fields[i] == "graphurl" || fields[i] == "changeset") {
@@ -72,7 +72,7 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
                     alert['tbplurl']= url[0]+"pgo%20talos"+url[1];
                     defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                 } else {
-                    defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";   
+                    defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                 }
             }
 
