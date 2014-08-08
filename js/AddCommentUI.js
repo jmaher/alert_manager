@@ -5,7 +5,8 @@
 
 var alertID = '';
 
-var root_url = 'http://54.215.155.53:8080';
+//var root_url = 'http://54.215.155.53:8080/';
+var root_url = '';
 
 var AddCommentUI = {
 
@@ -80,7 +81,7 @@ var AddCommentUI = {
 
   _postOneTBPLNote: function AddCommentUI__postOneTBPLNote(alertID, email, comment) {
     $.ajax({
-      url: root_url + "/submit",
+      url: root_url + "submit",
       type: "POST",
       data: {
         id: alertID,
@@ -123,7 +124,7 @@ var AddDuplicateUI = {
 
   _postDuplicate: function addDuplicateUI__postDuplicate(alertID, duprev) {
     $.ajax({
-      url: root_url + "/submitduplicate",
+      url: root_url + "submitduplicate",
       type: "POST",
       data: {
         id: alertID,
@@ -170,7 +171,7 @@ var AddBugUI = {
 
   _postBug: function addBugUI__postBug(alertID, bugID, status) {
     $.ajax({
-      url: root_url + "/submitbug",
+      url: root_url + "submitbug",
       type: "POST",
       data: {
         id: alertID,
@@ -211,7 +212,7 @@ var AddTbplUI = {
 
   _postLink: function addTbplUI__postLink(alertID, tbplurl) {
     $.ajax({
-      url: root_url + "/submittbpl",
+      url: root_url + "submittbpl",
       type: "POST",
       data: {
         id: alertID,
@@ -251,7 +252,7 @@ var AddBackoutUI = {
 
   _postBackout: function addBugUI__postBug(alertID, bugID) {
     $.ajax({
-      url: root_url + "/submitbug",
+      url: root_url + "submitbug",
       type: "POST",
       data: {
         id: alertID,
