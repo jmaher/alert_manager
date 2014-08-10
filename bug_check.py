@@ -1,6 +1,5 @@
 from server import create_db_connnection
 import MySQLdb
-import json
 import requests
 
 #------------------------------------------------------------------------------
@@ -15,7 +14,8 @@ def getStatus(bugid):
     status = None
     try:
         url = "https://bugzilla.mozilla.org/rest/bug/" + str(bugid)+ "?include_fields=id,status";
-        bzjson = json.loads(requests.get(url).text);
+        #bzjson = json.loads(requests.get(url).text);
+        bzjson = requests.get(url).json()
         bugs = bzjson['bugs'];
         # bugs is an array of bugs, for this query it is a single item in the array
         if (bugs[0]['id'] == bugid):
@@ -45,7 +45,9 @@ def get_investigating_bugs():
     buglist = []
     for bugid in ids:
         buglist.append(bugid[0])
-
+    
+    cursor.close()
+    db.close()
     return buglist
 
 
@@ -66,4 +68,6 @@ def get_conflicting_bugs():
         if (getStatus(bugid) == 'RESOLVED'):
             conflicting.append(bugid)
     return conflicting
+    
+get_conflicting_bugs()
 
