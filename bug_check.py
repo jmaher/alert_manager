@@ -13,16 +13,18 @@ import requests
 def getStatus(bugid):
     status = None
     try:
-        url = "https://bugzilla.mozilla.org/rest/bug/" + str(bugid)+ "?include_fields=id,status";
+        url = "https://bugzilla.mozilla.org/rest/bug/" + str(bugid)+ "?include_fields=id,status,resolution";
         bzjson = requests.get(url).json()
         bugs = bzjson['bugs'];
+        details = [];
         # bugs is an array of bugs, for this query it is a single item in the array
-        if (bugs[0]['id'] == bugid):
-            status = bugs[0]['status'];
-        return status;
+        if (int(bugs[0]['id']) == int(bugid)):
+            status = bugs[0]['status'];  
+            details.append(status);
+            details.append(bugs[0]['resolution'])         
+            return details;
     except:
-        return None
-
+        return "None";
 def get_investigating_bugs():
     """
     Builds a list of bugs for which the status is marked as 'investigating' 
@@ -37,7 +39,7 @@ def get_investigating_bugs():
     cursor = db.cursor()
 
     #Query for the 'investigating' bugs
-    query = "select id from alerts where status = 'Investigating'"
+    query = "select bug from alerts where status = 'Investigating'"
     cursor.execute(query)
     ids = cursor.fetchall()
     #Append the bug id's to the list object to be returned
@@ -64,7 +66,9 @@ def get_conflicting_bugs():
     investigating = get_investigating_bugs()
     #Check to see if any 'investigating' bugs are resolved on bugzilla
     for bugid in investigating:
-        if (getStatus(bugid) == 'RESOLVED'):
+        param = [];
+        param= getStatus(bugid);
+        if (param[0] == 'RESOLVED'):
             conflicting.append(bugid)
+            conflicting.append(param[1])
     return conflicting
-
