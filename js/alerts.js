@@ -1,4 +1,4 @@
-var root_url = 'http://54.215.155.53:8080';
+var root_url = window.location.protocol + '//' + window.location.host;
 
 $.getJSON( root_url + "/getvalues", function( data ) {
 
