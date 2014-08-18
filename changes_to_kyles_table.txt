@@ -1,0 +1,20 @@
+ alter table alerts add changeset varchar(128); <- need to figure out changeset range, useful for auto merge detection
+ alter table alerts add mergedfrom varchar(128); <- need to run this as a process to look for duplicated and flag these automatically
+ alter table alerts add graphurl varchar(128); <- UI quick links to graph url
+ alter table alerts add bug varchar(128); <- UI for tracking which bugs
+ alter table alerts add duplicate varchar(128); <- UI marks this to confirm merged or manual duplicate
+ alter table alerts add tbplurl varchar(256); <- UI to give quick view of results in narrow field on tbpl
+
+update alerts set mergedfrom='';
+alter table alerts modify status varchar(64); <- will ignore new/obsolete and modify alert_manager to use this field
+alter stati modify code varchar(64);
+
+remove:
+* bugcount (use changesets)
+* comment (not used so far)
+* email (not used so far)
+
+remaining:
+* limit on date/alerts
+* test suite bundling
+* json.suite as value, not working in my queries
