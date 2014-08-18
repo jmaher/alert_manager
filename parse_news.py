@@ -10,6 +10,9 @@ import base64
 import os
 import ConfigParser
 from optparse import OptionParser
+import httplib
+import json
+import time
 
 trees = ['Mozilla-Inbound', 
          'Mozilla-Inbound-Non-PGO', 
@@ -32,6 +35,86 @@ platforms = ['XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
              'MacOSX 10.7', 'MacOSX 10.8', 'MacOSX 10.6 (rev4)', 
              'Android 2.2 (Native)', 'Android 4.0.4']
 
+tbpl_platforms = {'WINNT 5.1 (ix)': 'Windows XP 32-bit',
+                  'WINNT 5.2': '',
+                  'WINNT 6.1 (ix)': 'Windows 7 32-bit',
+                  'WINNT 6.2 x64': 'WINNT 6.2',
+                  'Ubuntu HW 12.04': 'Ubuntu HW 12.04',
+                  'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
+                  'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
+                  'MacOSX 10.8': 'Rev5 MacOSX Mountain Lion 10.8',
+                  'Android 2.2 (Native)': 'Android 2.2 Tegra',
+                  'Android 4.0.4': 'Android 4.0 Tegra'
+                  }
+
+# oh the hacks continue, osx runs on the pgo branch without the pgo tag
+tbpl_trees = {'Mozilla-Inbound': 'mozilla-inbound pgo',
+              'Mozilla-Inbound-Non-PGO': 'mozilla-inbound',
+              'Fx-Team': 'fx-team pgo',
+              'Fx-Team-Non-PGO': 'fx-team',
+              'Firefox': 'mozilla-central pgo',
+              'Firefox-Non-PGO': 'mozilla-central',
+              'Mozilla-Aurora': 'mozilla-aurora pgo',
+              'Mozilla-Aurora-Non-PGO': 'mozilla-aurora',
+              'Mozilla-Beta': 'mozilla-beta pgo',
+              'Mozilla-Beta-Non-PGO': 'mozilla-beta',
+              'B2g-Inbound': 'b2g-inbound pgo',
+              'B2g-Inbound-Non-PGO': 'b2g-inbound',
+              'mobile': 'mozilla-central'
+             }
+
+tbpl_tests = {'SVG No Chrome': 'svgr',
+        'SVG Row Major': 'svgr',
+        'SVG, Opacity Row Major': 'svgr',
+        'Dromaeo (DOM)': 'dromaeojs',
+        'Dromaeo (CSS)': 'dromaeojs',
+        'Kraken Benchmark': 'dromaeojs',
+        'V8': 'dromaeojs',
+        'V8 Version 7': 'dromaeojs',
+        'V8 version 7': 'dromaeojs',
+        'Paint': 'other',
+        'tscroll Row Major': 'svgr',
+        'TResize': 'chromez',
+        'Tp5 Optimized': 'tp5o',
+        'Tp5 Optimized (Private Bytes)': 'tp5o',
+        'Tp5 Optimized (Main RSS)': 'tp5o',
+        'Tp5 Optimized (Content RSS)': 'tp5o',
+        'Tp5 Optimized (%CPU)': 'tp5o',
+        'Tp5 No Network Row major MozAfterPaint (Main Startup File I/O Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Non-Main Startup File IO Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal Network IO Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Main Normal File IO Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Main Startup File IO Bytes)': 'tp5o',
+        'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)': 'tp5o',
+        'Tp5 Optimized (Modified Page List Bytes)': 'tp5o',
+        'Tp5 Optimized Responsiveness': 'tp5o',
+        'Tp5 Optimized MozAfterPaint': 'tp5o',
+        'a11y Row Major MozAfterPaint': 'other',
+        'Tp4 Mobile': 'remote-tp4m_nochrome',
+        'LibXUL Memory during link': '',
+        'Ts, Paint': 'other',
+        'Robocop Pan Benchmark': 'remote-trobopan',
+        'Robocop Database Benchmark': 'remote-troboprovider',
+        'Robocop Checkerboarding No Snapshot Benchmark': 'remote-trobocheck2',
+        'Robocop Checkerboarding Real User Benchmark': 'remote-trobocheck2',
+        'Customization Animation Tests': 'svgr',
+        'Latency Performance Tests': '',
+        'WebRTC Media Performance Tests': '',
+        'Tab Animation Test, NoChrome': 'svgr',
+        'Tab Animation Test': 'svgr',
+        'Canvasmark, NoChrome': 'chromez',
+        'Canvasmark': 'chromez',
+        'CanvasMark, NoChrome': 'chromez',
+        'CanvasMark': 'chromez',
+        'Tab Animation Test, NoChrome': 'svgr',
+        'tscroll-ASAP': 'svgr',
+        'SVG-ASAP, NoChrome': 'svgr',
+        'SVG-ASAP': 'svgr',
+        'tscroll-ASAP MozAfterPaint': 'svgr',
+        'Session Restore no Auto Restore Test': 'other',
+        'Session Restore Test': 'other'
+             }
+
 tests = ['SVG No Chrome',
         'SVG Row Major',
         'SVG, Opacity Row Major',
@@ -40,6 +123,7 @@ tests = ['SVG No Chrome',
         'Kraken Benchmark',
         'V8',
         'V8 Version 7',
+        'V8 version 7',
         'Paint',
         'tscroll Row Major',
         'TResize',
@@ -71,14 +155,54 @@ tests = ['SVG No Chrome',
         'Tab Animation Test',
         'Canvasmark, NoChrome',
         'Canvasmark',
-        'Tab Animation Test, NoChrome',
         'CanvasMark, NoChrome',
         'CanvasMark',
+        'Tab Animation Test, NoChrome',
         'tscroll-ASAP',
         'SVG-ASAP, NoChrome',
         'SVG-ASAP',
-        'V8 version 7',
-        'tscroll-ASAP MozAfterPaint' ]
+        'tscroll-ASAP MozAfterPaint',
+        'Session Restore no Auto Restore Test',
+        'Session Restore Test' ]
+
+def getDatazillaData(branchid):
+    fname = "%s-%s.revs" % (branchid, int(time.time() / 1000))
+    if os.path.exists(fname):
+        data = '{}'
+        with open(fname, 'r') as fhandle:
+            data = fhandle.read()
+    else:
+    # https://datazilla.mozilla.org/refdata/pushlog/list/?days_ago=7&branches=Mozilla-Inbound
+        conn = httplib.HTTPSConnection('datazilla.mozilla.org')
+        cset = "/refdata/pushlog/list/?days_ago=30&branches=%s" % branchid
+        conn.request("GET", cset)
+        response = conn.getresponse()
+        data = response.read()
+        with open(fname, 'w+') as fhandle:
+            fhandle.write(data)
+    
+    return json.loads(data)
+
+def getRevisionRange(dzdata, revision):
+    revid = None
+    for item in dzdata:
+        if revision in dzdata['%s' % item]['revisions']:
+            revid = item
+            break
+
+    if not revid:
+#        print "unable to find revision: %s" % revision
+        return None
+    low = '%s' % (int(revid) - 6)
+    high = '%s' % (int(revid) + 6)
+    if low not in dzdata:
+        print "unable to get range, missing id: %s" % low
+        return None
+    if high not in dzdata:
+        print "unable to get range, missing id: %s" % high
+        return None
+
+    return dzdata[low]['revisions'][-1], dzdata[high]['revisions'][-1]
 
 #subject = "(Improvement) Firefox-Non-PGO - Customization Animation Tests - WINNT 6.2 x64 - 5.84%"
 subre = re.compile("^(<Regression>|\(Improvement\))(.*)")
@@ -132,13 +256,42 @@ def getCSets(config):
 
     return results
 
+def addTbplURL(id, tbplurl):
+    if tbplurl == '':
+        return
+
+    db = MySQLdb.connect(host=config['host'],
+                         user=config['username'],
+                         passwd=config['password'],
+                         db=config['database'])
+
+    sql = "select tbplurl from alerts where id=%s" % id
+    cur = db.cursor()
+    cur.execute(sql)
+
+    results = []
+    exists = False
+    for row in cur.fetchall():
+        if row[0]:
+            if row[0] != '' and row[0] != 'NULL':
+                exists = True
+                break
+    cur.close()
+
+    if not exists:
+        sql = "update alerts set tbplurl='%s' where id=%s" % (tbplurl, id)
+        cur = db.cursor()
+        cur.execute(sql)
+        cur.close()
+
+
 def markMerged(config, id, originalKeyRevision):
     db = MySQLdb.connect(host=config['host'],
                          user=config['username'],
                          passwd=config['password'],
                          db=config['database'])
 
-    sql = "select mergedfrom from alerts where id=%s" % id;
+    sql = "select mergedfrom from alerts where id=%s" % id
     cur = db.cursor()
     cur.execute(sql)
 
@@ -152,7 +305,7 @@ def markMerged(config, id, originalKeyRevision):
     cur.close()
 
     if not setAsMerged:
-        sql = "update alerts set mergedfrom='%s' where id=%s" % (originalKeyRevision, id);
+        sql = "update alerts set mergedfrom='%s' where id=%s" % (originalKeyRevision, id)
         cur = db.cursor()
         cur.execute(sql)
         cur.close()
@@ -276,13 +429,21 @@ def parseMessage(config, msg):
         print "INVALID BODY: no graphurl or changeset"
         return
 
-    csets = getRevisions(changeset)
-
     date = msg.get('Date')
     parsed = rfc822.parsedate(date)
+    datestring = "%s-%s-%s %s:%s:%s" % (str(parsed[0]).zfill(4), str(parsed[1]).zfill(2), str(parsed[2]).zfill(2), str(parsed[3]).zfill(2), str(parsed[4]).zfill(2), str(parsed[5]).zfill(2))
+
+    csets = []
+    csetdate = time.strptime(datestring, "%Y-%m-%d %H:%M:%S")
+    old = datetime.datetime.fromtimestamp(time.mktime(csetdate))
+    new = datetime.datetime.fromtimestamp(time.mktime(time.localtime()))
+    twoweeks = new - datetime.timedelta(14)
+    if old >= twoweeks:
+        csets = getRevisions(changeset)
 
     merged = ''
-    if bugCount > 5:
+    # TODO: find a better way to determine merged.  possibly search top commit for merge & bugcount > 5 ?
+    if len(csets) > 0 and bugCount > 10:
         # search for csets in existing 
         db_csets = getCSets(config)
         merged = ''
@@ -292,15 +453,13 @@ def parseMessage(config, msg):
                 # found the key revision in the merged changeset, see if others are there
                 for originalrev in c:
                     if originalrev not in csets:
-                        print "OH NO: found keyrevision %s, but not other cset: %s from original in current set: %s" % (k, originalrev, c)
-                        print "       platform: %s, branch: %s, test %s, keyrevision %s, csets: %s\n" % (platform, branch, test, keyrevision, csets)
+#                        print "OH NO: found keyrevision %s, but not other cset: %s from original in current set: %s" % (k, originalrev, c)
+#                        print "       platform: %s, branch: %s, test %s, keyrevision %s, csets: %s\n" % (platform, branch, test, keyrevision, csets)
                         merged = ''
                         break
 
             if merged:
                 break
-
-    datestring = "%s-%s-%s %s:%s:%s" % (str(parsed[0]).zfill(4), str(parsed[1]).zfill(2), str(parsed[2]).zfill(2), str(parsed[3]).zfill(2), str(parsed[4]).zfill(2), str(parsed[5]).zfill(2))
 
     db = MySQLdb.connect(host=config['host'],
                          user=config['username'],
@@ -313,8 +472,26 @@ def parseMessage(config, msg):
     status = ''
     body = MySQLdb.escape_string(newbody)
 
+    #TODO: is branch valid?
+    tbpl_branch = branch.split('-Non-PGO')[0]
+
+
+    #TODO: make dzdata and vals conditional on 2 weeks
+    dzdata = getDatazillaData(tbpl_branch)
+    vals = getRevisionRange(dzdata, keyrevision)
+    link = ''
+    if vals:
+        tree = '?tree=%s&' % tbpl_branch
+        if 'OSX' in tbpl_platforms[platform]:
+             tbpl_trees[branch] = tbpl_trees[branch].split(' pgo')[0]
+        if tbpl_branch == 'Firefox':
+            tree = '?'
+        link = 'https://tbpl.mozilla.org/%sfromchange=%s&tochange=%s&jobname=%s %s talos %s' % (tree, vals[0], vals[1], tbpl_platforms[platform], tbpl_trees[branch], tbpl_tests[test])
+        link = link.replace(' ', '%20')
+
     foundDuplicate = False
     cur = db.cursor()
+    # TODO: is this valid? we are checking if the branch is equal, same with percent- in this case it already exists?!?
     sql = "select id from alerts where branch='%s' and test='%s' and platform='%s' and percent='%s'" % (branch, test, platform, percent)
     cur.execute(sql)
     for row in cur.fetchall():
@@ -322,23 +499,26 @@ def parseMessage(config, msg):
           foundDuplicate = row[0]
 
     cur.close()
+
     if foundDuplicate:
         if merged:
             markMerged(config, foundDuplicate, merged)
+        addTbplURL(foundDuplicate, link)
         return
 
-    print "branch: %s" % branch
-    print "test: %s" % test
-    print "platform: %s" % platform
-    print "percent: %s" % percent
-    print "graphurl: %s" % graphurl
-    print "changeset: %s" % changeset
-    print "keyrevision: %s" % keyrevision
-    print "bugcount: %s" % bugCount
-    print "changesets: %s" % csets
+    if 1 == 0:
+        print "branch: %s" % branch
+        print "test: %s" % test
+        print "platform: %s" % platform
+        print "percent: %s" % percent
+        print "graphurl: %s" % graphurl
+        print "changeset: %s" % changeset
+        print "keyrevision: %s" % keyrevision
+        print "bugcount: %s" % bugCount
+        print "changesets: %s" % csets
 
     cur = db.cursor()
-    sql = 'insert into alerts (branch, test, platform, percent, graphurl, changeset, keyrevision, bugcount, comment, bug, status, body, date, changesets, mergedfrom) values ('
+    sql = 'insert into alerts (branch, test, platform, percent, graphurl, changeset, keyrevision, bugcount, comment, bug, status, body, date, changesets, mergedfrom, tbplurl) values ('
     sql += "'%s'" % branch
     sql += ", '%s'" % test
     sql += ", '%s'" % platform
@@ -354,6 +534,7 @@ def parseMessage(config, msg):
     sql += ", '%s'" % datestring
     sql += ", '%s'" % ','.join(csets)
     sql += ", '%s'" % merged
+    sql += ", '%s'" % link
     sql += ')'
 
     cur.execute(sql)

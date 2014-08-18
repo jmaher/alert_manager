@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `alerts` (
   `platform` varchar(64) NOT NULL,
   `percent` varchar(32) NOT NULL,
   `graphurl` varchar(64) NOT NULL,
+  `tbplurl` varchar(256) NOT NULL,
   `changeset` varchar(128) NOT NULL,
   `keyrevision` varchar(128) NOT NULL,
   `bugcount` int NOT NULL,

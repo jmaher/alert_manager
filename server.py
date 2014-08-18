@@ -35,6 +35,8 @@ def serialize_to_json(object):
     try:
         return object.__dict__
     except AttributeError:
+        if type(object) is datetime:
+            return str(object)
         raise TypeError(repr(object) + 'is not JSON serializable')
 
 
@@ -51,10 +53,18 @@ def run_query(where_clause, body=False):
     db = create_db_connnection()
     cursor = db.cursor()
 
-    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate']
+#    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
+    fields = ['id', 'json.string(details, "Branch") as branch',
+                    'json.string(json.json(details, "Test"), "name") as test',
+                    'json.string(json.json(details,"OS"), "version") as platform',
+                    'concat(cast(round(json.number(details, "diff_percent")*100, 1) AS CHAR), "%") as percent',
+                    'graphurl', 'changeset', 'revision as keyrevision', 
+                    'bug', 'status', 'create_time as date', 'mergedfrom', 'duplicate', 'tbplurl']
     if body:
         fields.append('body')
-    cursor.execute("""select %s from alerts %s;""" % (', '.join(fields), where_clause))
+    query = """select %s from alerts %s limit 100;""" % (', '.join(fields), where_clause)
+    print "query: %s" % query
+    cursor.execute(query)
 
     alerts = cursor.fetchall()
 
@@ -70,6 +80,32 @@ def run_query(where_clause, body=False):
         retVal.append(data)
     return retVal
 
+
+@json_response
+def run_graph_flot_query(query_dict, body):
+    
+    db = create_db_connnection()
+    
+    cursor = db.cursor()
+    cursor.execute("select id from alerts where date > '2014-04-01' and date < '2014-06-01'")
+                   # where id BETWEEN 1 AND 10""")
+    query_results = cursor.fetchall()
+
+    data = {}
+    data['uid'] = []
+    data['date'] = []
+
+    for i in query_results:
+        data['date'].append(i[1])
+        data['uid'].append(i[0])
+            
+
+    cursor.close()
+        
+    db.close()
+
+    return {'alerts': data}
+
 @json_response
 def run_alert_query(query_dict, body): 
     inputid = query_dict['id']
@@ -78,21 +114,62 @@ def run_alert_query(query_dict, body):
 @json_response
 def run_mergedids_query(query_dict, body):
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
-    where_clause = "where mergedfrom != '' and (status='' or status='Investigating') order by date,keyrevision";
+    where_clause = "where mergedfrom != '' and (status='' or status='Investigating' or status='new') order by create_time DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
-
-#    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
 
 @json_response
 def run_alertsbyrev_query(query_dict, body):
-    where_clause = "where mergedfrom = '' and (status='' or status='Investigating') order by date,keyrevision";
+    if 'rev' in query_dict:
+        query_dict['keyrevision'] = query_dict.pop('rev')
+    query = "where "
+    flag = 0
+    if any(query_dict):
+        for key,val in query_dict.iteritems():
+            if val:
+                if flag:
+                    query+= "and %s='%s' " %(key,val)
+                else:
+                    query+= "%s='%s' " %(key,val)
+                    flag = 1
+        return { 'alerts': run_query(query, True) }
+    where_clause = "where mergedfrom = '' and (status='' or status='Investigating' or status='new') order by create_time DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
+
+@json_response
+def run_values_query(query_dict,body):
+    db = create_db_connnection()
+    cursor = db.cursor()
+    
+    retVal = {}
+    retVal['test'] = []
+    retVal['rev'] = []
+    retVal['platform'] = []
+
+    cursor.execute("select DISTINCT json.string(details, 'test_name') as test from alerts;")
+    tests = cursor.fetchall()
+    for test in tests:
+        retVal['test'].append(test)
+        
+    cursor.execute("select DISTINCT json.string(details,'operating_system_version') as platform from alerts;")
+    platforms = cursor.fetchall()
+
+    for platform in platforms:
+        retVal['platform'].append(platform)
+
+    cursor.execute("select DISTINCT revision as keyrevision from alerts;")
+    revs = cursor.fetchall()
+
+    for rev in revs:
+        retVal['rev'].append(rev)
+
+       
+    return retVal
 
 @json_response
 def run_mergedalerts_query(query_dict, body):
     keyrev = query_dict['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='' or status='Investigating') order by date,keyrevision" % keyrev;
+    where_clause = "where mergedfrom='%s' and (status='' or status='Investigating' or status='new') order by create_time,revision ASC" % keyrev;
     return { 'alerts': run_query(where_clause) }
 
 @json_response
@@ -102,7 +179,7 @@ def run_submit_data(query_dict, body):
     data = {}
     for item in d:
         data[item] = d[item][0]
-    sql = "update alerts set comment='%s', status='%s', email='%s', bug='%s' where id=%s;" % (data['comment'][0], data['status'], data['email'], data['bug'], data['id'])
+    sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
 
     db = create_db_connnection()
     cursor = db.cursor()
@@ -166,6 +243,24 @@ def run_submitbug_data(query_dict, body):
     #TODO: verify via return value in alerts
     return retVal
 
+@json_response
+def run_submittbpl_data(query_dict, body):
+    retVal = {}
+    d = parse_qs(body)
+    data = {}
+    for item in d:
+        data[item] = d[item][0]
+
+    sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
+
+    db = create_db_connnection()
+    cursor = db.cursor()
+    cursor.execute(sql)
+    alerts = cursor.fetchall()
+
+    #TODO: verify via return value in alerts
+    return retVal
+
 def handler404(start_response):
     status = "404 NOT FOUND"
     response_body = "Not found"
@@ -202,9 +297,12 @@ def application(environ, start_response):
         ('/data/updatestatus$', run_updatestatus_data),
         ('/data/submitduplicate$', run_submitduplicate_data),
         ('/data/submitbug$', run_submitbug_data),
+        ('/data/submittbpl$', run_submittbpl_data),
         ('/data/alertsbyrev$', run_alertsbyrev_query),
         ('/data/mergedalerts$', run_mergedalerts_query),
-        ('/data/mergedids$', run_mergedids_query)
+        ('/data/mergedids$', run_mergedids_query),
+        ('/data/getvalues$', run_values_query),
+        ('/data/flot$', run_graph_flot_query)
         )
 
     # dispatch request to request handler

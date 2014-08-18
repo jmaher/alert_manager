@@ -3,16 +3,62 @@
 <head>
 <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="style.css">
+      <link rel="stylesheet" type="text/css" href="menu.css">
     <script src="js/jquery.js"></script>
-    <script src="/js/AddCommentUI.js"></script>
+    <script src="js/AddCommentUI.js"></script>
     <script type="text/javascript">
+var root_url = 'http://54.215.155.53:8080';
+root_url = 'http://localhost:8159';
+/*
+$.getJSON( root_url + "/data/getvalues", function( data ) {
 
+    var tests = data['test'];
+    var revs = data['rev'];
+    var platforms = data['platform'];
+
+    for(var i in tests) {
+        var newoption = document.createElement("option");
+         newoption.id = "test";
+         var value = tests[i][0];
+            $("#test").append("<option value=\""+value+"\">"+value+"</option>");
+     }
+
+    for(i in revs) {
+        var newoption = document.createElement("option");
+         newoption.id = "rev";
+         var value = revs[i][0];
+            $("#rev").append("<option value=\""+value+"\">"+value+"</option>");
+    }
+
+    for(i in platforms) {
+        var newoption = document.createElement("option");
+         newoption.id = "platform";
+         var value = platforms[i][0];
+            $("#platform").append("<option value=\""+value+"\">"+value+"</option>");
+    }
+});
+
+ $(document).ready(function() { 
+                    $('#button').click(function() { 
+                            var rev = $('#rev').val();
+                            var test = $('#test').val();
+                            var platform = $('#platform').val();
+                            var showall = 0;
+                            if($('#checkbox').is(":checked")) {
+                                console.log("checked");
+                                showall = 1;
+                            }
+                            location.href = "?rev="+rev+"&test="+test+"&platform="+platform+"&showAll="+showall;
+                    });
+});
+*/
 function hideMerged(originalkeyrev, showall) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
+//        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
+        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
         var alerts = raw_data.alerts;   
      
         var keyrev = "";
@@ -32,7 +78,7 @@ function hideMerged(originalkeyrev, showall) {
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
         $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
     }
-    req.open('get', '/data/mergedalerts?keyrev=' + originalkeyrev, true);
+    req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
 }
 
@@ -54,7 +100,7 @@ function showMerged(originalkeyrev, showall) {
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
         $("#" + originalkeyrev + "-hdr").html("<h3>" + originalkeyrev + "</h3>" + mergedfromhtml);
     }
-    req.open('get', '/data/mergedalerts?keyrev=' + originalkeyrev, true);
+    req.open('get', root_url + '/data/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
 }
 
@@ -63,7 +109,7 @@ function addMergedLinks(showall) {
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
+        var fields = ["id", "date", "bug", "status", "keyrevision", "mergedfrom"]
         var alerts = raw_data.alerts;   
 
         var count = 0;
@@ -79,11 +125,11 @@ function addMergedLinks(showall) {
             }
         }
     }
-    req.open('get', '/data/mergedids', true);
+    req.open('get', root_url + '/data/mergedids', true);
     req.send();
 }
 
-function updateStatus(alertid, duplicate, mergedfrom) {
+function updateStatus(alertid, duplicate, bugid, mergedfrom) {
     var status = $("#" + alertid + "-status").val();
     if (status == 'Duplicate') {
         // popup window with field for duplicate, seeded with alert['duplicate']
@@ -94,6 +140,12 @@ function updateStatus(alertid, duplicate, mergedfrom) {
         }
 
         AddDuplicateUI.openDuplicateBox(alertid, suggestedDuplicate);
+    } else if (status == 'Backout') {
+        var bug = bugid;
+        if (bug == '') {
+            bug = $("#" + alertid + "-bug").val();
+        }
+        AddBugUI.openBugBox(alertid, bug, 'Backout');
     } else {
         $.ajax({
           url: "data/updatestatus",
@@ -118,9 +170,18 @@ function updateBug(alertid, bugid, status) {
     AddBugUI.openBugBox(alertid, bug, status);
 }
 
-function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
+function updateTbplURL(alertid, tbplurl) {
+    AddTbplUI.openTbplBox(alertid, tbplurl);
+}
+
+function addAlertToUI(tbl,alert,showall){
+    addMergedAlertToUI(tbl, alert, showall, "");
+}
+
+
+function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
 //    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
-    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "bug", "status"]
+    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
 
     var cname = "data";
     if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
@@ -147,8 +208,8 @@ function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
             value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
             cell.onclick = "";
         } else if (fields[i] == "status") {
-            value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['mergedfrom'] + "');\">";
-            var options = ["NEW", "Investigating", "Duplicate", "Resolved", "False Alarm"]
+            value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
+            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
             for (var j=0; j < options.length; j++) {
                 value += "<option ";
                 if (alert['status'] == options[j]) {
@@ -161,7 +222,20 @@ function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
         } else if (fields[i] == "bug") {
             var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
             if (alert['bug'] != "") {
-                defaultValue = "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + alert['bug'] + "\">" + alert['bug'] + "</a>";
+                var bugz = alert['bug'].split(',');
+                defaultValue = ""
+                for (var b = 0; b < bugz.length; b++) {
+                    var bugid = bugz[b].trim();
+                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a><br />";
+                }
+            }
+
+            value = defaultValue;
+            cell.onclick = "";
+        } else if (fields[i] == "tbplurl") {
+            var defaultValue = "<a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
+            if (alert['tbplurl'] != "") {
+                defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
             }
 
             value = defaultValue;
@@ -173,11 +247,23 @@ function addAlertToUI(tbl, alert, showall, originalKeyRevision="") {
     return 1
 }
 
-function loadAllAlerts(showall) {
+// Function idDescending sorts the objects in the descending order of their id. This way, we can view the most recent alerts at the top.
+// The objects have been sorted based on their id and not on their date as sorting by the date field was not working.
+function idDescending(a, b) {
+    if (a["id"] < b["id"]) {
+        return 1;
+    }
+    else {
+        return -1;
+    }
+}
+
+function loadAllAlerts(showall, rev, test, platform) {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;   
+        alerts.sort(idDescending);
  
         var keyrev = "";
         var tbl = "";
@@ -209,8 +295,9 @@ function loadAllAlerts(showall) {
         AddCommentUI.init();
         AddDuplicateUI.init();
         AddBugUI.init();
+        AddTbplUI.init();
     }
-    req.open('get', '/data/alertsbyrev', true);
+    req.open('get', (root_url + '/data/alertsbyrev?rev='+rev+'&test='+test+'&platform='+platform), true);
     req.send();
 }
 
@@ -240,7 +327,19 @@ var showAll = 1;
 if (parseInt(results['showAll']) != 1) {
   showAll = 0;
 }
-loadAllAlerts(showAll);
+var rev = results['rev'];
+if(!rev) {
+    rev = "";
+}
+var test = results['test'];
+if(!test) {
+    test = "";
+}
+var platform = results['platform'];
+if(!platform) {
+    platform = "";
+}
+loadAllAlerts(showAll, rev, test, platform);
 
     </script>
 </head>
@@ -266,6 +365,16 @@ loadAllAlerts(showAll);
     <input required type="text" id="logBugText" value="">
     <input type="hidden" id="logBugStatusText" value="">
     <input type="submit" value="Add Bug">
+  </form>
+</div>
+
+<div id="addTBPLPopup" class="popupForm" style="display: none;">
+  <a class="closePopup" href="">close</a>
+  <form id="addTBPLForm">
+    <h2>Link to TBPL view of jobs</h2>
+    <p>
+    <input required type="text" id="logTbplText" value="">
+    <input type="submit" value="Add Link">
   </form>
 </div>
 
