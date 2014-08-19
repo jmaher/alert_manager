@@ -121,7 +121,7 @@ def run_graph_flot_query():
 @json_response
 def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
-    where_clause = "where mergedfrom != '' and (status='' or status='Investigating') order by date DESC, keyrevision";
+    where_clause = "where mergedfrom != '' and (status='NEW' or status='Investigating') order by date DESC, keyrevision";
     return { 'alerts': run_query(where_clause) }
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
@@ -144,7 +144,7 @@ def run_alertsbyrev_expired_query():
                     flag = 1
         query+= "and date < '%s'" %str(d);
         return { 'alerts': run_query(query, True) }
-    where_clause = "where mergedfrom = '' and (status='' or status='Investigating') and date < '%s' order by date DESC, keyrevision" %str(d);
+    where_clause = "where mergedfrom = '' and (status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" %str(d);
     return { 'alerts': run_query(where_clause) }
 
 @app.route('/alertsbyrev')
@@ -164,8 +164,16 @@ def run_alertsbyrev_query():
                     query+= "%s='%s' " %(key,val)
                     flag = 1
         return { 'alerts': run_query(query, True) }
-    where_clause = "where date > NOW() - INTERVAL 127 DAY and mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
-    return { 'alerts': run_query(where_clause) }
+    where_clause = """
+        where
+            date > NOW() - INTERVAL 127 DAY and
+            left(revision, 1) <> '{' and
+            mergedfrom = '' and
+            (status='NEW' or status='Investigating')
+        order by
+            date DESC, keyrevision
+        """
+    return {'alerts': run_query(where_clause)}
 
 @app.route("/getvalues")
 @json_response
@@ -203,7 +211,7 @@ def run_values_query():
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='' or status='Investigating') order by date,keyrevision ASC" % keyrev;
+    where_clause = "where mergedfrom='%s' and (status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
     return { 'alerts': run_query(where_clause) }
 
 @app.route("/submit", methods=['POST'])

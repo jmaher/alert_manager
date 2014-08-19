@@ -52,9 +52,9 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
             cell.onclick = "";
         } else if (fields[i] == "bug") {
             var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
-            if (alert['bug'] != "") {
+            if (nvl(alert['bug'], "") != "") {
                 var bugz = alert['bug'].split(',');
-                defaultValue = ""
+                defaultValue = "";
                 for (var b = 0; b < bugz.length; b++) {
                     var bugid = bugz[b].trim();
                     defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a>";
@@ -85,31 +85,37 @@ function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
     return 1
 }
 
-// parse get parameters
-document.title = 'Talos Alerts';
 
-var results = getJsonFromUrl();
-var showAll = 1;
-if (parseInt(results['showAll']) != 1) {
-    showAll = 0;
-}
-var rev = results['rev'];
-if (!rev) {
-    rev = "";
-}
-var test = getCookie("test");
-if (!test) {
-    test = "";
-}
+var results;
+$(document).ready(function(){
+	// parse get parameters
+	document.title = 'Talos Alerts';
 
-var platform = getCookie("platform");
-if (!platform) {
-    platform = "";
-}
-var current = "true";
-document.cookie = "platform =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-loadAllAlerts(showAll, rev, test, platform, current);
+	results = getJsonFromUrl();
+	var showAll = 1;
+	if (parseInt(results['showAll']) != 1) {
+	    showAll = 0;
+	}
+	var rev = results['rev'];
+	if (!rev) {
+	    rev = "";
+	}
+	var test = getCookie("test");
+	if (!test) {
+	    test = "";
+	}
+
+	var platform = getCookie("platform");
+	if (!platform) {
+	    platform = "";
+	}
+	var current = "true";
+	document.cookie = "platform =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+	document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+	loadSelectors();
+	loadAllAlerts(showAll, rev, test, platform, current);
+});
 
     </script>
 </head>
@@ -132,17 +138,17 @@ loadAllAlerts(showAll, rev, test, platform, current);
                 <div class="options-box">
                 <label>
                     <select id="rev">
-                        <option value="">--Select Revision--</option>       
+                        <option value="">--Select Revision--</option>
                     </select>
                 </label>
                 <label>
                     <select id="test">
-                        <option value="">---------------------------------------------------Select Test---------------------------------------------------</option>                               
+                        <option value="">---------------------------------------------------Select Test---------------------------------------------------</option>
                     </select>
                 </label>
                 <label>
                     <select id="platform">
-                         <option value="">---Select Platform---</option>       
+                         <option value="">---Select Platform---</option>
                     </select>
                 </label>
                 <t>ShowAll</t><input type="checkbox" id="checkbox" Value="Show All"/>
