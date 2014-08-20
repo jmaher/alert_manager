@@ -1,6 +1,6 @@
 var root_url = window.location.protocol + '//' + window.location.host;
 
-function loadSelectors(){
+function loadSelectors() {
     $.getJSON(root_url + "/getvalues", function (data) {
 
         function compare(a, b) {
@@ -41,11 +41,11 @@ function loadSelectors(){
             $("#platform").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
-        try{
+        try {
             document.getElementById("rev").value = results['rev'];
             document.getElementById("test").selectedIndex = results['testIndex'];
             document.getElementById("platform").selectedIndex = results['platIndex'];
-        }catch(e){
+        } catch (e) {
             throw e;
         }
 
@@ -259,7 +259,7 @@ function loadAllAlerts(showall, rev, test, platform, current) {
                 tbl = document.getElementById(keyrev + "-tbl");
             }
             var r = addAlertToUI(tbl, alerts[alert], showall);
-            if ($("#" + String2Selector(keyrev + '-tbl')+' tr').size() == 0) {
+            if ($("#" + String2Selector(keyrev + '-tbl') + ' tr').size() == 0) {
                 $("#" + String2Selector(keyrev + "-hdr")).html("");
             }
         }
@@ -314,26 +314,26 @@ function getJsonFromUrl() {
     var result = {};
     for (var i = 0; i < data.length; i++) {
         var item = data[i].split("=");
-        if (item[0].trim().length>0) result[item[0]] = item[1];
+        if (item[0].trim().length > 0) result[item[0]] = item[1];
     }
     return result;
 }
 
 
 //CONVERT FROM STRING TO SOMETHING THAT CAN BE USED BY $()
-function String2Selector(str){
+function String2Selector(str) {
     return str.replace(/([ ;&,\.\+\*\~':"\!\^#$%@\[\]\(\)\{\}\/=>\|])/g, '\\$1');
 }//method
 
 //RETURN FIRST NOT NULL, AND DEFINED VALUE
-function nvl(){
-	var args = arguments.length == 1 ? arguments[0] : arguments;
-	var a;
-	for(var i=0;i<args.length;i++){
-		a=args[i];
-		if (a!==undefined && a!=null) return a;
-	}//for
-	return null;
+function nvl() {
+    var args = arguments.length == 1 ? arguments[0] : arguments;
+    var a;
+    for (var i = 0; i < args.length; i++) {
+        a = args[i];
+        if (a !== undefined && a != null) return a;
+    }//for
+    return null;
 }//method
 
-coalesce=nvl;
+coalesce = nvl;
