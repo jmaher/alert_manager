@@ -1,4 +1,4 @@
-from server import create_db_connnection
+from server import *
 import MySQLdb
 import requests
 
