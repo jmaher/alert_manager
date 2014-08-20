@@ -5,8 +5,7 @@
     <title>Conflicting Bugs</title>   
     <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript">
-var root_url = 'http://54.215.155.53:8080';
-
+var root_url = window.location.protocol+'//'+window.location.host;
 $(function() {
     
     var req = new XMLHttpRequest();
@@ -14,13 +13,12 @@ $(function() {
         var raw_data = JSON.parse(req.response);
         var bugs = raw_data.bugs;
         
-       for(var i=0;i<bugs.length;i++)
-        {
-        
+       for(var i=0;i<bugs.length;i++) {        
             var table = document.getElementById("bugList");
             var row = table.insertRow(1);
             var cell1 = row.insertCell(0);
-            cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i]+">"+bugs[i]+"</a></p>"
+            if(i!=0 && bugs[i]!=bugs[i-1])
+                cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i]+">"+bugs[i]+"</a></p>"
             
         } 
     }
