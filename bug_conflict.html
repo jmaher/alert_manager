@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Conflicting Bugs</title>   
+    <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript">
+var root_url = 'http://54.215.155.53:8080';
+
+$(function() {
+    
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        var bugs = raw_data.bugs;
+        
+       for(var i=0;i<bugs.length;i++)
+        {
+        
+            var table = document.getElementById("bugList");
+            var row = table.insertRow(1);
+            var cell1 = row.insertCell(0);
+            cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i]+">"+bugs[i]+"</a></p>"
+            
+        } 
+    }
+    req.open('get', root_url+'/conflicted_bugs', true);
+    req.send();
+});
+</script>
+</head>
+<body>
+    <h3 align="center">Conflicting bugs</h3>
+    <div>
+         <table id="bugList">
+            <tr>
+                <th>Bugs</th>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

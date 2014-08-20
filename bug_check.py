@@ -61,7 +61,6 @@ def get_conflicting_bugs():
     OUTPUT: List of bugids which are 'conflicting' as per the above definition
     """
     conflicting = []
-
     #Get the local db bugs marked as 'investigating'
     investigating = get_investigating_bugs()
     #Check to see if any 'investigating' bugs are resolved on bugzilla
