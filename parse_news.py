@@ -263,7 +263,13 @@ def build_tbpl_link(record):
         params.append(('fromchange', vals[0]))
         params.append(('tochange', vals[1]))
         params.append(('jobname', '%s %s talos %s' % (tbpl_platform, tbpl_tree, tbpl_test)))
-        link = '%s/?%s' % (settings.TBPL_URL, params)
+        link = '%s/' % settings.TBPL_URL
+        delim = '?'
+        for key, value in params:
+            link = "%s%s%s=%s" % (link, delim, key, value)
+            if delim == '?':
+                delim = '&'
+        link = link.replace(' ', '%20')
 
     return link
 
