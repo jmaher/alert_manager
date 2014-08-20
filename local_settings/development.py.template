@@ -1,0 +1,10 @@
+
+DATABASE = {
+    'host': 'localhost',
+    'database': 'alerts',
+    'username': 'root',
+    'password': '',
+}
+
+LOG_LEVEL = 10  # DEBUG
+DEBUG = True
