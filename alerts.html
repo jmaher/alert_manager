@@ -1,206 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+    <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="style.css">
-      <link rel="stylesheet" type="text/css" href="menu.css">
+    <link rel="stylesheet" type="text/css" href="menu.css">
     <script src="js/jquery.js"></script>
     <script src="js/AddCommentUI.js"></script>
     <script src="js/alerts.js"></script>
     <script type="text/javascript">
 
-function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
-//    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
-    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
+        function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
+            //var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
+            var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
 
-    var cname = "data";
-    if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
-        cname = "mergeddata";
-    }
-    if (parseInt(alert["percent"]) > 0) {
-        if (showall != 1) {
-            return 0;
+            var cname = "data";
+            if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
+                cname = "mergeddata";
+            }
+            if (parseInt(alert["percent"]) > 0) {
+                if (showall != 1) {
+                    return 0;
+                }
+                cname = "improvement";
+            }
+
+            var row = tbl.insertRow(-1);
+            row.id = alert["id"] + "-" + originalKeyRevision;
+            var rev = row.insertCell(0);
+
+            for (var i = 0; i < fields.length; i++) {
+                var test = fields[i];
+                cell = row.insertCell(-1);
+                cell.className = cname;
+                cell.setAttribute('field_name', fields[i]);
+                cell.onclick = editAlert(alert["id"], alert["body"]);
+                var value = alert[test];
+                if (fields[i] == "graphurl" || fields[i] == "changeset") {
+                    value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
+                    cell.onclick = "";
+                } else if (fields[i] == "status") {
+                    value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
+                    var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
+                    for (var j = 0; j < options.length; j++) {
+                        value += "<option ";
+                        if (alert['status'] == options[j]) {
+                            value += "selected";
+                        }
+                        value += ">" + options[j] + "</option>";
+                    }
+                    value += "</select>";
+                    cell.onclick = "";
+                } else if (fields[i] == "bug") {
+                    var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
+                    if (nvl(alert['bug'], "") != "") {
+                        var bugz = alert['bug'].split(',');
+                        defaultValue = "";
+                        for (var b = 0; b < bugz.length; b++) {
+                            var bugid = bugz[b].trim();
+                            defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a>";
+                            defaultValue += "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\"> + </a><br />";
+                        }
+                    }
+
+                    value = defaultValue;
+                    cell.onclick = "";
+                } else if (fields[i] == "tbplurl") {
+                    var defaultValue = "<a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
+                    if (alert['tbplurl'] != "") {
+                        if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
+                            var url = alert['tbplurl'].split("talos");
+                            alert['tbplurl'] = url[0] + "pgo%20talos" + url[1];
+                            defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
+                        } else {
+                            defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
+                        }
+                    }
+
+                    value = defaultValue;
+                    cell.onclick = "";
+                }
+                textNode = value || 0;
+                cell.innerHTML = textNode;
+            }
+            return 1
         }
-        cname = "improvement";
-    }
 
-    var row = tbl.insertRow(-1);
-    row.id = alert["id"] + "-" + originalKeyRevision;
-    var rev = row.insertCell(0);
 
-    for (var i=0; i < fields.length; i++) {
-        var test = fields[i];
-        cell = row.insertCell(-1);
-        cell.className = cname;
-        cell.setAttribute('field_name', fields[i]);
-        cell.onclick = editAlert(alert["id"], alert["body"]);
-        var value = alert[test];
-        if (fields[i] == "graphurl" || fields[i] == "changeset") {
-            value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
-            cell.onclick = "";
-        } else if (fields[i] == "status") {
-            value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
-            var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
-            for (var j=0; j < options.length; j++) {
-                value += "<option ";
-                if (alert['status'] == options[j]) {
-                    value += "selected";
-                }
-                value += ">" + options[j] + "</option>";
+        var results;
+        $(document).ready(function () {
+            // parse get parameters
+            document.title = 'Talos Alerts';
+
+            results = getJsonFromUrl();
+            var showAll = 1;
+            if (parseInt(results['showAll']) != 1) {
+                showAll = 0;
             }
-            value += "</select>";
-            cell.onclick = "";
-        } else if (fields[i] == "bug") {
-            var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
-            if (alert['bug'] != "") {
-                var bugz = alert['bug'].split(',');
-                defaultValue = ""
-                for (var b = 0; b < bugz.length; b++) {
-                    var bugid = bugz[b].trim();
-                    defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a>";
-                    defaultValue += "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\"> + </a><br />";
-                }
+            var rev = results['rev'];
+            if (!rev) {
+                rev = "";
+            }
+            var test = getCookie("test");
+            if (!test) {
+                test = "";
             }
 
-            value = defaultValue;
-            cell.onclick = "";
-        } else if (fields[i] == "tbplurl") {
-            var defaultValue = "<a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
-            if (alert['tbplurl'] != "") {
-                if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
-                    var url = alert['tbplurl'].split("talos");
-                    alert['tbplurl']= url[0]+"pgo%20talos"+url[1];
-                    defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
-                } else {
-                    defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
-                }
+            var platform = getCookie("platform");
+            if (!platform) {
+                platform = "";
             }
+            var current = "true";
+            document.cookie = "platform =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
-            value = defaultValue;
-            cell.onclick = "";
-        }
-        textNode = value || 0;
-        cell.innerHTML = textNode;
-    }
-    return 1
-}
-
-// parse get parameters
-document.title = 'Talos Alerts';
-
-var results = getJsonFromUrl();
-var showAll = 1;
-if (parseInt(results['showAll']) != 1) {
-    showAll = 0;
-}
-var rev = results['rev'];
-if (!rev) {
-    rev = "";
-}
-var test = getCookie("test");
-if (!test) {
-    test = "";
-}
-
-var platform = getCookie("platform");
-if (!platform) {
-    platform = "";
-}
-var current = "true";
-document.cookie = "platform =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-loadAllAlerts(showAll, rev, test, platform, current);
+            loadSelectors();
+            loadAllAlerts(showAll, rev, test, platform, current);
+        });
 
     </script>
 </head>
 <body class="noscript">
-    <div align="center">
-        <table>
-            <tr>
-                <td><a href="http://54.215.155.53:8080/alerts.html" >Alerts</a></td>
-                <td></td>
-                <td><a href="http://54.215.155.53:8080/expired.html" >Expired alerts</a></td>
-                <td></td>
-                <td><a href="http://54.215.155.53:8080/report.html" >Reports</a></td>
-            </tr>
-        </table>
-    </div>
-    <div id="menu">
-        <ul class="menu">
-            <li><a href="alerts.html" class="parent"><span>Talos Alert Manager</span></a></li>
-            <li class="last">
-                <div class="options-box">
+<div align="center">
+    <table>
+        <tr>
+            <td><a href="http://54.215.155.53:8080/alerts.html">Alerts</a></td>
+            <td></td>
+            <td><a href="http://54.215.155.53:8080/expired.html">Expired alerts</a></td>
+            <td></td>
+            <td><a href="http://54.215.155.53:8080/report.html">Reports</a></td>
+        </tr>
+    </table>
+</div>
+<div id="menu">
+    <ul class="menu">
+        <li><a href="alerts.html" class="parent"><span>Talos Alert Manager</span></a></li>
+        <li class="last">
+            <div class="options-box">
                 <label>
                     <select id="rev">
-                        <option value="">--Select Revision--</option>       
+                        <option value="">--Select Revision--</option>
                     </select>
                 </label>
                 <label>
                     <select id="test">
-                        <option value="">---------------------------------------------------Select Test---------------------------------------------------</option>                               
+                        <option value="">---------------------------------------------------Select Test---------------------------------------------------</option>
                     </select>
                 </label>
                 <label>
                     <select id="platform">
-                         <option value="">---Select Platform---</option>       
+                        <option value="">---Select Platform---</option>
                     </select>
                 </label>
-                <t>ShowAll</t><input type="checkbox" id="checkbox" Value="Show All"/>
-                <input class="button" id="button" type="button" value="Filter" />
-                </div>
-            </li>
-        </ul>
-    </div>
-    <div id="revisions">
-    </div>
+                <t>ShowAll</t>
+                <input type="checkbox" id="checkbox" Value="Show All"/>
+                <input class="button" id="button" type="button" value="Filter"/>
+            </div>
+        </li>
+    </ul>
+</div>
+<div id="revisions">
+</div>
 
 <div id="addDuplicatePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:hideDiv('addDuplicatePopup');">close</a>
-  <form id="addDuplicateForm">
-    <h2>Mark as duplicate of original revision</h2>
-    <p>
-    <input required type="text" id="logDuplicateText" value="">
-    <input type="submit" value="Mark as Duplicate">
-  </form>
+    <a class="closePopup" href="javascript:hideDiv('addDuplicatePopup');">close</a>
+
+    <form id="addDuplicateForm">
+        <h2>Mark as duplicate of original revision</h2>
+
+        <p>
+            <input required type="text" id="logDuplicateText" value="">
+            <input type="submit" value="Mark as Duplicate">
+    </form>
 </div>
 
 <div id="addBugPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:hideDiv('addBugPopup');">close</a>
-  <form id="addBugForm">
-    <h2>Bug that tracks this regression</h2>
-    <p>
-    <input required type="text" id="logBugText" value="">
-    <input type="hidden" id="logBugStatusText" value="">
-    <input type="submit" value="Add Bug">
-  </form>
+    <a class="closePopup" href="javascript:hideDiv('addBugPopup');">close</a>
+
+    <form id="addBugForm">
+        <h2>Bug that tracks this regression</h2>
+
+        <p>
+            <input required type="text" id="logBugText" value="">
+            <input type="hidden" id="logBugStatusText" value="">
+            <input type="submit" value="Add Bug">
+    </form>
 </div>
 
 <div id="addTBPLPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:hideDiv('addTBPLPopup');">close</a>
-  <form id="addTBPLForm">
-    <h2>Link to TBPL view of jobs</h2>
-    <p>
-    <input required type="text" id="logTbplText" value="">
-    <input type="submit" value="Add Link">
-  </form>
+    <a class="closePopup" href="javascript:hideDiv('addTBPLPopup');">close</a>
+
+    <form id="addTBPLForm">
+        <h2>Link to TBPL view of jobs</h2>
+
+        <p>
+            <input required type="text" id="logTbplText" value="">
+            <input type="submit" value="Add Link">
+    </form>
 </div>
 
 <div id="addNotePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:hideDiv('addNotePopup');">close</a>
-  <form id="addNoteForm">
-    <h2>Add a Comment</h2>
-    <table>
-      <tr>
-        <th><label for="logNoteEmail">Name/nick:</label></th>
-        <td><input required type="text" id="logNoteEmail" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteText">Comment:</label></th>
-        <td><textarea required cols="40" rows="5" id="logNoteText"></textarea></td>
-      </tr>
-    </table>
-    <p><input type="submit" value="Add Comment">
-  </form>
+    <a class="closePopup" href="javascript:hideDiv('addNotePopup');">close</a>
+
+    <form id="addNoteForm">
+        <h2>Add a Comment</h2>
+        <table>
+            <tr>
+                <th><label for="logNoteEmail">Name/nick:</label></th>
+                <td><input required type="text" id="logNoteEmail" value=""></td>
+            </tr>
+            <tr>
+                <th><label for="logNoteText">Comment:</label></th>
+                <td><textarea required cols="40" rows="5" id="logNoteText"></textarea></td>
+            </tr>
+        </table>
+        <p><input type="submit" value="Add Comment">
+    </form>
 </div>
 
 </body>

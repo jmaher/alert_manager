@@ -16,6 +16,7 @@ from bug_check import *
 app = Flask(__name__, static_url_path='', static_folder='.')
 application = app
 
+
 def create_db_connnection():
     try:
         app.config['host']
@@ -23,9 +24,9 @@ def create_db_connnection():
         getConfig()
 
     return MySQLdb.connect(host=app.config['host'],
-                           user=app.config['username'],
-                           passwd=app.config['password'],
-                           db=app.config['database'])
+        user=app.config['username'],
+        passwd=app.config['password'],
+        db=app.config['database'])
 
 
 def serialize_to_json(object):
@@ -38,11 +39,13 @@ def serialize_to_json(object):
 
 def json_response(func):
     """Decorator: Serialize response to json"""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         return json.dumps(result or {'error': 'No data found for your request'},
-                          default=serialize_to_json)
+            default=serialize_to_json)
+
     return wrapper
 
 
@@ -69,18 +72,20 @@ def run_query(where_clause, body=False):
         retVal.append(data)
     return retVal
 
+
 @app.route('/conflicted_bugs')
 @json_response
 def get_conflicting_alerts():
     bugs = get_conflicting_bugs()
     return { 'bugs' : bugs}
-    
+
 
 @app.route('/alert')
 @json_response
 def run_alert_query():
     inputid = request.args['id']
-    return { 'alerts': run_query("where id=%s" % inputid, True) }
+    return {'alerts': run_query("where id=%s" % inputid, True)}
+
 
 @app.route('/bugzilla_reports')
 @json_response
@@ -89,11 +94,12 @@ def run_bugzilla_query():
     date = query_dict['date']
     url = 'https://bugzilla.mozilla.org/rest/bug'
     if date == "none":
-        u = url +"?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,status,resolution,creation_time,cf_last_resolved"
+        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,status,resolution,creation_time,cf_last_resolved"
     else:
-        u = url +"?whiteboard=[talos_regression]&status:RESOLVED&creation_time="+date+"&include_fields=id,status,resolution,creation_time,cf_last_resolved"
+        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&creation_time=" + date + "&include_fields=id,status,resolution,creation_time,cf_last_resolved"
     search_results = requests.get(u)
-    return { 'bugs': search_results.text }
+    return {'bugs': search_results.text}
+
 
 @app.route('/graph/flot')
 @json_response
@@ -103,7 +109,7 @@ def run_graph_flot_query():
     endDate = query_dict['endDate']
     if endDate != "none" and startDate == "none":
         dateElements = endDate.split('-')
-        endDate = date(int(dateElements[0]),int(dateElements[1]),int(dateElements[2]))
+        endDate = date(int(dateElements[0]), int(dateElements[1]), int(dateElements[2]))
 
     db = create_db_connnection()
     cursor = db.cursor()
@@ -111,7 +117,7 @@ def run_graph_flot_query():
         endDate = date.today()
     if startDate == "none":
         startDate = endDate - timedelta(days=84)
-    query = "select date,bug from alerts where date > '%s' and date < '%s'" % (startDate , endDate)
+    query = "select date,bug from alerts where date > '%s' and date < '%s'" % (startDate, endDate)
     cursor.execute(query)
     query_results = cursor.fetchall()
     data = {}
@@ -125,12 +131,13 @@ def run_graph_flot_query():
     db.close()
     return {'alerts': data}
 
+
 @app.route('/mergedids')
 @json_response
 def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
-    where_clause = "where mergedfrom != '' and (status='' or status='Investigating') order by date DESC, keyrevision";
-    return { 'alerts': run_query(where_clause) }
+    where_clause = "where mergedfrom != '' and (status='NEW' or status='Investigating') order by date DESC, keyrevision";
+    return {'alerts': run_query(where_clause)}
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
 @app.route('/alertsbyexpiredrev')
@@ -141,19 +148,20 @@ def run_alertsbyrev_expired_query():
         query_dict['keyrevision'] = query_dict.pop('rev')
     query = "where "
     flag = 0
-    d=date.today()-timedelta(days=126)
+    d = date.today() - timedelta(days=126)
     if any(query_dict):
-        for key,val in query_dict.iteritems():
+        for key, val in query_dict.iteritems():
             if val:
                 if flag:
-                    query+= "and %s='%s' " %(key,val)
+                    query += "and %s='%s' " % (key, val)
                 else:
-                    query+= "%s='%s' " %(key,val)
+                    query += "%s='%s' " % (key, val)
                     flag = 1
-        query+= "and date < '%s'" %str(d);
-        return { 'alerts': run_query(query, True) }
-    where_clause = "where mergedfrom = '' and (status='' or status='Investigating') and date < '%s' order by date DESC, keyrevision" %str(d);
-    return { 'alerts': run_query(where_clause) }
+        query += "and date < '%s'" % str(d);
+        return {'alerts': run_query(query, True)}
+    where_clause = "where mergedfrom = '' and (status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
+    return {'alerts': run_query(where_clause)}
+
 
 @app.route('/alertsbyrev')
 @json_response
@@ -164,16 +172,25 @@ def run_alertsbyrev_query():
     query = "where "
     flag = 0
     if any(query_dict):
-        for key,val in query_dict.iteritems():
+        for key, val in query_dict.iteritems():
             if val:
                 if flag:
-                    query+= "and %s='%s' " %(key,val)
+                    query += "and %s='%s' " % (key, val)
                 else:
-                    query+= "%s='%s' " %(key,val)
+                    query += "%s='%s' " % (key, val)
                     flag = 1
-        return { 'alerts': run_query(query, True) }
-    where_clause = "where date > NOW() - INTERVAL 127 DAY and mergedfrom = '' and (status='' or status='Investigating') order by date DESC, keyrevision";
-    return { 'alerts': run_query(where_clause) }
+        return {'alerts': run_query(query, True)}
+    where_clause = """
+        where
+            date > NOW() - INTERVAL 127 DAY and
+            left(revision, 1) <> '{' and
+            mergedfrom = '' and
+            (status='NEW' or status='Investigating')
+        order by
+            date DESC, keyrevision
+        """
+    return {'alerts': run_query(where_clause)}
+
 
 @app.route("/getvalues")
 @json_response
@@ -203,16 +220,17 @@ def run_values_query():
     for rev in revs:
         retVal['rev'].append(rev)
 
-
     return retVal
+
 
 @app.route("/mergedalerts")
 @json_response
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='' or status='Investigating') order by date,keyrevision ASC" % keyrev;
-    return { 'alerts': run_query(where_clause) }
+    where_clause = "where mergedfrom='%s' and (status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
+    return {'alerts': run_query(where_clause)}
+
 
 @app.route("/submit", methods=['POST'])
 @json_response
@@ -230,6 +248,7 @@ def run_submit_data():
     #TODO: verify via return value in alerts
     return retVal
 
+
 @app.route("/updatestatus", methods=['POST'])
 @json_response
 def run_updatestatus_data():
@@ -245,6 +264,7 @@ def run_updatestatus_data():
 
     #TODO: verify via return value in alerts
     return retVal
+
 
 @app.route("/submitduplicate", methods=['POST'])
 @json_response
@@ -262,6 +282,7 @@ def run_submitduplicate_data():
     #TODO: verify via return value in alerts
     return retVal
 
+
 @app.route("/submitbug", methods=['POST'])
 @json_response
 def run_submitbug_data():
@@ -277,6 +298,7 @@ def run_submitbug_data():
 
     #TODO: verify via return value in alerts
     return retVal
+
 
 @app.route("/submittbpl", methods=['POST'])
 @json_response
@@ -294,12 +316,13 @@ def run_submittbpl_data():
     #TODO: verify via return value in alerts
     return retVal
 
+
 def getConfig():
     op = OptionParser()
     op.add_option("--config",
-                    action = "store", type = "string", dest = "config",
-                    default = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.ini'),
-                    help = "path to the config file [config.ini]")
+        action="store", type="string", dest="config",
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.ini'),
+        help="path to the config file [config.ini]")
 
     options, args = op.parse_args()
 
@@ -318,6 +341,7 @@ def getConfig():
         'maildir': parser.get('alerts', 'maildir'),
         'DEBUG': parser.getboolean('alerts', 'debug'),
     })
+
 
 if __name__ == '__main__':
     getConfig()

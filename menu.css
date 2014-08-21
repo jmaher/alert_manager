@@ -15,17 +15,17 @@
 }
  .small.button, .small.button:visited{ font-size: 11px}
 .button, .button:visited,
-.medium.button, .medium.button:visited{ 
+.medium.button, .medium.button:visited{
     font-size: 13px;
     font-weight: bold;
     line-height: 1;
     text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
                                               }
- 
+
 .large.button, .large.button:visited{
  font-size: 14px;
 padding: 8px 14px 9px; }
- 
+
 .super.button, .super.button:visited { font-size: 34px;
     padding: 8px 14px 9px; }
 
@@ -54,6 +54,23 @@ padding: 8px 14px 9px; }
     /*position:absolute;*/
     margin-top:3px;
 }
+
+#rev {
+    width:300px;
+}
+
+#rev option {
+    width:275px;
+}
+
+#test {
+ width:400px;
+}
+
+#test option {
+ width:375px;
+}
+
 
 /* Targetting Webkit browsers only. FF will show the dropdown arrow with so much padding. */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
