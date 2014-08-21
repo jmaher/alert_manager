@@ -11,6 +11,7 @@ import MySQLdb
 import ConfigParser
 from optparse import OptionParser
 import logging
+from bug_check import *
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 application = app
@@ -70,6 +71,13 @@ def run_query(where_clause, body=False):
             i += 1
         retVal.append(data)
     return retVal
+
+
+@app.route('/conflicted_bugs')
+@json_response
+def get_conflicting_alerts():
+    bugs = get_conflicting_bugs()
+    return { 'bugs' : bugs}
 
 
 @app.route('/alert')
