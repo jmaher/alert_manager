@@ -106,14 +106,14 @@ function hideMerged(originalkeyrev, showall) {
             } else {
                 continue;
             }
-            var row = $("#" + String2Selector(alerts[alert]["id"] + "-" + originalkeyrev));
+            var row = $(document.getElementById(alerts[alert]["id"] + "-" + originalkeyrev));
             if (row) {
                 row.remove();
             }
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
 
-        $("#" + String2Selector(originalkeyrev + "-hdr")).html("<a href=?rev=" + originalkeyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);
+        $(document.getElementById(originalkeyrev + "-hdr")).html("<a href=?rev=" + originalkeyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -135,7 +135,7 @@ function showMerged(originalkeyrev, showall) {
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
-        $("#" + String2Selector(originalkeyrev + "-hdr")).html("<h3><a href=?rev=" + originalkeyrev + "&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
+        $(document.getElementById(originalkeyrev + "-hdr")).html("<h3><a href=?rev=" + originalkeyrev + "&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -153,12 +153,12 @@ function addMergedLinks(showall) {
         for (var alert in alerts) {
             if (alerts[alert]['mergedfrom'] != '') {
                 var mf = alerts[alert]['mergedfrom'];
-                if ($("#" + String2Selector(mf + "-hdr")).html() == "") {
+                if ($(document.getElementById(mf + "-hdr")).html() == "") {
                     continue;
                 }
 
                 var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
-                $("#" + String2Selector(mf + "-hdr")).html("<a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
+                $(document.getElementById(mf + "-hdr")).html("<a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
             }
         }
     }
@@ -167,7 +167,7 @@ function addMergedLinks(showall) {
 }
 
 function updateStatus(alertid, duplicate, bugid, mergedfrom) {
-    var status = $("#" + String2Selector(alertid + "-status")).val();
+    var status = $(document.getElementById(alertid + "-status")).val();
     if (status == 'Duplicate') {
         // popup window with field for duplicate, seeded with alert['duplicate']
         // consider merged rev if needed
@@ -180,7 +180,7 @@ function updateStatus(alertid, duplicate, bugid, mergedfrom) {
     } else if (status == 'Backout') {
         var bug = bugid;
         if (bug == '') {
-            bug = $("#" + String2Selector(alertid + "-bug")).val();
+            bug = $(document.getElementById(alertid + "-bug")).val();
         }
         AddBugUI.openBugBox(alertid, bug, 'Backout');
     } else {
@@ -198,7 +198,7 @@ function updateStatus(alertid, duplicate, bugid, mergedfrom) {
 function updateBug(alertid, bugid, status) {
     var bug = bugid;
     if (bug == '') {
-        bug = $("#" + String2Selector(alertid + "-bug")).val();
+        bug = $(document.getElementById(alertid + "-bug")).val();
     }
     if (status == '') {
         status = 'NEW';
@@ -240,27 +240,27 @@ function loadAllAlerts(showall, rev, test, platform, current) {
         for (var alert = 0; alert < alerts.length; alert++) {
             if (alerts[alert]["keyrevision"] != keyrev) {
                 keyrev = alerts[alert]["keyrevision"];
-                if ($("#" + String2Selector(keyrev + "-hdr")).html() == null) {
+                if ($(document.getElementById(keyrev + "-hdr")).html() == null) {
                     var newdiv = document.createElement("div");
                     newdiv.id = keyrev;
                     $("#revisions").append(newdiv);
 
-                    $("#" + String2Selector(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
+                    $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
 
                 }
-                if ($("#" + String2Selector(keyrev + "-tbl")).html() == null) {
+                if ($(document.getElementById(keyrev + "-tbl")).html() == null) {
                     var kdiv = document.getElementById(keyrev);
                     var newtbl = document.createElement("table");
                     newtbl.id = keyrev + '-tbl';
-                    $("#" + String2Selector(keyrev)).append(newtbl);
+                    $(document.getElementById(keyrev)).append(newtbl);
                 }
 
-                $("#" + String2Selector(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
+                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
             var r = addAlertToUI(tbl, alerts[alert], showall);
-            if ($("#" + String2Selector(keyrev + '-tbl') + ' tr').size() == 0) {
-                $("#" + String2Selector(keyrev + "-hdr")).html("");
+            if ($(document.getElementById(keyrev + '-tbl')).find('tr').size() == 0) {
+                $(document.getElementById(keyrev + "-hdr")).html("");
             }
         }
         addMergedLinks(showall);
@@ -319,11 +319,6 @@ function getJsonFromUrl() {
     return result;
 }
 
-
-//CONVERT FROM STRING TO SOMETHING THAT CAN BE USED BY $()
-function String2Selector(str) {
-    return str.replace(/([ ;&,\.\+\*\~':"\!\^#$%@\[\]\(\)\{\}\/=>\|])/g, '\\$1');
-}//method
 
 //RETURN FIRST NOT NULL, AND DEFINED VALUE
 function nvl() {
