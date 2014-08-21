@@ -5,7 +5,8 @@
     <title>Conflicting Bugs</title>   
     <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript">
-var root_url = window.location.protocol+'//'+window.location.host;
+//var root_url = window.location.protocol+'//'+window.location.host;
+var root_url = 'http://localhost:8159';
 
 $(function() {
     
@@ -13,17 +14,19 @@ $(function() {
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var bugs = raw_data.bugs;
-        var bug_list = "";
+        /*var bug_list = "";
         for(var i=0;i<bugs.length;i++) {
             bug_list+=bugs[i]+",";
         }
        var bug=bug_list.split(",");
-       for(var i=0;i<bug.length;i++) {        
+       */
+       bugs.sort();
+       for(var i=0;i<bugs.length;i++) {        
             var table = document.getElementById("bugList");
             var row = table.insertRow(1);
             var cell1 = row.insertCell(0);
-            if(i!=0 && bug[i]!=bug[i-1])
-                cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bug[i]+">"+bug[i]+"</a></p>"
+            if(i!=0 && bugs[i]!=bugs[i-1])
+                cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i]+">"+bugs[i]+"</a></p>"
             
         } 
     }

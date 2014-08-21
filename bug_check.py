@@ -37,7 +37,6 @@ def get_investigating_bugs():
     #Get database connection
     db = create_db_connnection()
     cursor = db.cursor()
-
     #Query for the 'investigating' bugs
     query = "select bug from alerts where status = 'Investigating'"
     cursor.execute(query)
@@ -68,5 +67,5 @@ def get_conflicting_bugs():
         param = [];
         param= getStatus(bugid);
         if (param[0] == 'RESOLVED'):
-            conflicting.append(bugid)
+            conflicting.append(bugid)    
     return conflicting
