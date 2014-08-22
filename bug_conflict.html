@@ -5,15 +5,16 @@
     <title>Conflicting Bugs</title>   
     <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript">
-var root_url = window.location.protocol+'//'+window.location.host;
+    var root_url = window.location.protocol+'//'+window.location.host;
+
 $(function() {
     
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var bugs = raw_data.bugs;
-        
-       for(var i=0;i<bugs.length;i++) {        
+        bugs.sort();
+        for(var i=0;i<bugs.length;i++) {        
             var table = document.getElementById("bugList");
             var row = table.insertRow(1);
             var cell1 = row.insertCell(0);
