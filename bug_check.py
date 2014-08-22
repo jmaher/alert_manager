@@ -1,4 +1,4 @@
-from server import *
+from db import *
 import MySQLdb
 import requests
 
@@ -48,7 +48,17 @@ def get_investigating_bugs():
     
     cursor.close()
     db.close()
-    return buglist
+    bugslist = []
+    for bugid in buglist:
+        bugs = [x.strip() for x in bugid.split(',')]
+        bugslist.extend(bugs)
+    bugslist.sort()
+    allbugs = []
+    allbugs.append(int(bugslist[0]))
+    for i in range(1,len(bugslist)):
+        if (int(bugslist[i]) != int(bugslist[i-1])):
+            allbugs.append(bugslist[i])
+    return allbugs
 
 
 def get_conflicting_bugs():

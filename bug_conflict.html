@@ -16,10 +16,11 @@ $(function() {
         bugs.sort();
         for(var i=0;i<bugs.length;i++) {        
             var table = document.getElementById("bugList");
-            var row = table.insertRow(1);
-            var cell1 = row.insertCell(0);
-            if(i!=0 && bugs[i]!=bugs[i-1])
+            if(i!=0 && bugs[i]!=bugs[i-1]) {
+                var row = table.insertRow(1);
+                var cell1 = row.insertCell(0);
                 cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i]+">"+bugs[i]+"</a></p>"
+            }
             
         } 
     }
