@@ -169,7 +169,7 @@ def run_alertsbyrev_query():
     where_clause = """
         where
             date > NOW() - INTERVAL 127 DAY and
-            left(revision, 1) <> '{' and
+            left(keyrevision, 1) <> '{' and
             mergedfrom = '' and
             (status='NEW' or status='Investigating')
         order by

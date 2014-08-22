@@ -56,10 +56,13 @@ def get_investigating_bugs():
     allbugs = []
     allbugs.append(int(bugslist[0]))
     for i in range(1,len(bugslist)):
-        if (int(bugslist[i]) != int(bugslist[i-1])):
-            allbugs.append(bugslist[i])
+        try:
+            if (int(bugslist[i]) != int(bugslist[i-1])):
+                allbugs.append(bugslist[i])
+        except:
+            print "ERROR: bugslist has an invalid type: %s or %s" % (bugslist[i], bugslist[i-1])
+            pass
     return allbugs
-
 
 def get_conflicting_bugs():
     """
@@ -79,3 +82,6 @@ def get_conflicting_bugs():
         if (param[0] == 'RESOLVED'):
             conflicting.append(bugid)
     return conflicting
+
+if __name__ == "__main__":
+    print get_conflicting_bugs()
