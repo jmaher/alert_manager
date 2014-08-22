@@ -13,7 +13,6 @@ $(function() {
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var bugs = raw_data.bugs;
-        bugs.sort();
         for(var i=0;i<bugs.length;i++) {        
             var table = document.getElementById("bugList");
                 var row = table.insertRow(1);
