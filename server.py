@@ -63,12 +63,6 @@ def run_query(where_clause, body=False):
 @json_response
 def get_conflicting_alerts():
     bugs = get_conflicting_bugs()
-    #buglist = []
-    #for bugid in bugs:
-    #    bugs = [x.strip() for x in bugid.split(',')]
-    #    buglist.extend(bugs)
-
-    #return { 'bugs' : buglist}
     return { 'bugs' : bugs}
 
 
