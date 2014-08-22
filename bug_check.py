@@ -37,7 +37,6 @@ def get_investigating_bugs():
     #Get database connection
     db = create_db_connnection()
     cursor = db.cursor()
-
     #Query for the 'investigating' bugs
     query = "select bug from alerts where status = 'Investigating'"
     cursor.execute(query)
