@@ -13,20 +13,20 @@ import requests
 def getStatus(bugid):
     status = None
     try:
-        url = "https://bugzilla.mozilla.org/rest/bug/" + str(bugid)+ "?include_fields=id,status,resolution,creation_time,cf_last_resolved";
+        url = "https://bugzilla.mozilla.org/rest/bug/" + str(bugid)+ "?include_fields=id,status,resolution,creation_time,cf_last_resolved"
         bzjson = requests.get(url).json()
-        bugs = bzjson['bugs'];
-        details = [];
+        bugs = bzjson['bugs']
+        details = []
         # bugs is an array of bugs, for this query it is a single item in the array
         if (int(bugs[0]['id']) == int(bugid)):
-            status = bugs[0]['status'];  
-            details.append(status);
+            status = bugs[0]['status']
+            details.append(status)
             details.append(bugs[0]['resolution'])
             details.append(bugs[0]['creation_time'])
             details.append(bugs[0]['cf_last_resolved'])
-            return details;
+            return details
     except:
-        return "None";
+        return "None"
 def get_investigating_bugs():
     """
     Builds a list of bugs for which the status is marked as 'investigating' 
@@ -79,8 +79,8 @@ def get_conflicting_bugs():
     investigating = get_investigating_bugs()
     #Check to see if any 'investigating' bugs are resolved on bugzilla
     for bugid in investigating:
-        param = [];
-        param= getStatus(bugid);
+        param = []
+        param= getStatus(bugid)
         if (param[0] == 'RESOLVED'):
             conflicting.append(bugid)
     return conflicting
@@ -92,14 +92,13 @@ def write_bug_report():
     db = create_db_connnection()
     cursor = db.cursor()
     for bugid in investigating:
-        param = [];
-        param= getStatus(bugid);
-        if (param[0] == 'RESOLVED'):
-            #write details to database here
-            query = '''INSERT into details (bug, status, resolution, date_opened, date_resolved)
-                  values (%s, %s, %s, %s, %s)''',
-                  (param[0], param[1], param[2], param[3], param[4])
-            cursor.execute(query)
+        param = []
+        param= getStatus(bugid)
+        #write details to database here
+        query = '''INSERT into details (bug, status, resolution, date_opened, date_resolved)
+              values (%s, %s, %s, %s, %s)''',
+              (param[0], param[1], param[2], param[3], param[4])
+        cursor.execute(query)
     curson.close()
     db.close()
     
