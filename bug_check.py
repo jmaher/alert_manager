@@ -20,6 +20,7 @@ def getStatus(bugid):
         # bugs is an array of bugs, for this query it is a single item in the array
         if (int(bugs[0]['id']) == int(bugid)):
             status = bugs[0]['status']
+            details.append(bugs[0]['id'])
             details.append(status)
             details.append(bugs[0]['resolution'])
             details.append(bugs[0]['creation_time'])
@@ -92,14 +93,16 @@ def write_bug_report():
     db = create_db_connnection()
     cursor = db.cursor()
     for bugid in investigating:
-        param = []
-        param= getStatus(bugid)
+        params = []
+        params = getStatus(bugid)
+        if len(params) != 5:
+            continue
         #write details to database here
         query = '''INSERT into details (bug, status, resolution, date_opened, date_resolved)
-              values (%s, %s, %s, %s, %s)''',
-              (param[0], param[1], param[2], param[3], param[4])
+              values (%s, %s, %s, %s, %s)''' % \
+              (params[0], params[1], params[2], params[3], params[4])
         cursor.execute(query)
-    curson.close()
+    cursor.close()
     db.close()
     
 
