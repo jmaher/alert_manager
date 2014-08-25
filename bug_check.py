@@ -82,6 +82,25 @@ def get_conflicting_bugs():
         if (param[0] == 'RESOLVED'):
             conflicting.append(bugid)
     return conflicting
+    
+def write_bug_report():
+    
+    conflicting = []
+    investigating = get_investigating_bugs()
+    db = create_db_connnection()
+    cursor = db.cursor()
+    for bugid in investigating:
+        param = [];
+        param= getStatus(bugid);
+        if (param[0] == 'RESOLVED'):
+            #write details to database here
+            query = '''INSERT into details (bug, status, resolution)
+                  values (%s, %s, %s)''',
+                  (param[0], param[1], param[2])
+            cursor.execute(query)
+    curson.close()
+    db.close()
+    
 
 if __name__ == "__main__":
-    print get_conflicting_bugs()
+    write_bug_report()
