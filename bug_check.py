@@ -99,7 +99,7 @@ def write_bug_report():
             continue
         #write details to database here
         query = '''INSERT into details (bug, status, resolution, date_opened, date_resolved)
-              values (%s, %s, %s, %s, %s)''' % \
+              values ('%s', '%s', '%s', '%s', '%s')''' % \
               (params[0], params[1], params[2], params[3], params[4])
         cursor.execute(query)
     cursor.close()
