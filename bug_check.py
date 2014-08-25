@@ -20,6 +20,7 @@ def getStatus(bugid):
         # bugs is an array of bugs, for this query it is a single item in the array
         if (int(bugs[0]['id']) == int(bugid)):
             status = bugs[0]['status']
+            details.append(bugs[0]['id'])
             details.append(status)
             details.append(bugs[0]['resolution'])
             details.append(bugs[0]['creation_time'])
