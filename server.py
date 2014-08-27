@@ -14,7 +14,6 @@ import logging
 from bug_check import *
 from db import *
 
-
 def serialize_to_json(object):
     """Serialize class objects to json"""
     try:
@@ -42,7 +41,8 @@ def run_query(where_clause, body=False):
     fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
     if body:
         fields.append('body')
-    cursor.execute("""select %s from alerts %s;""" % (', '.join(fields), where_clause))
+    sql = "select %s from alerts%s;" %(','.join(fields), where_clause)
+    cursor.execute(sql)
 
     alerts = cursor.fetchall()
 
@@ -171,7 +171,7 @@ def run_alertsbyrev_query():
             date > NOW() - INTERVAL 127 DAY and
             left(keyrevision, 1) <> '{' and
             mergedfrom = '' and
-            (status='NEW' or status='Investigating')
+            (status='' or status='NEW' or status='Investigating')
         order by
             date DESC, keyrevision
         """
