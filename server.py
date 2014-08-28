@@ -73,18 +73,38 @@ def run_alert_query():
     return {'alerts': run_query("where id=%s" % inputid, True)}
 
 
+#@app.route('/bugzilla_reports')
+#@json_response
+#def run_bugzilla_query():
+#    query_dict = request.args.to_dict()
+#    date = query_dict['date']
+#    url = 'https://bugzilla.mozilla.org/rest/bug'
+#    if date == "none":
+#        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,status,resolution,creation_time,cf_last_resolved"
+#    else:
+#        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&creation_time=" + date + "&include_fields=id,status,resolution,creation_time,cf_last_resolved"
+#    search_results = requests.get(u)
+#    return {'bugs': search_results.text}
+
 @app.route('/bugzilla_reports')
 @json_response
 def run_bugzilla_query():
+
     query_dict = request.args.to_dict()
     date = query_dict['date']
-    url = 'https://bugzilla.mozilla.org/rest/bug'
+    db = create_db_connnection()
+    cursor = db.cursor()
     if date == "none":
-        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,status,resolution,creation_time,cf_last_resolved"
+        query = "select bug,status,resolution,date_opened,date_resolved from details"
     else:
-        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&creation_time=" + date + "&include_fields=id,status,resolution,creation_time,cf_last_resolved"
-    search_results = requests.get(u)
-    return {'bugs': search_results.text}
+        query = "select bug,status,resolution,date_opened,date_resolved from details  where date_opened > '%s'" % (date)    
+    
+    cursor.execute(query)
+    search_results = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return {'bugs': search_results}
+
 
 @app.route('/bug_data')
 @json_response
