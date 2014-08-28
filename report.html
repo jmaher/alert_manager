@@ -209,7 +209,7 @@ $(function() {
             var cell5 = row.insertCell(4);
             var cell6 = row.insertCell(5);
             
-            cell1.innerHTML = bugs[i]["id"];
+            cell1.innerHTML = "<a href = https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i]["id"]+">"+bugs[i]["id"]+"</a>";
             if (diffDay[bugs[i]["id"]] != null) {
                 cell2.innerHTML = diffDay[bugs[i]["id"]];
             } else {

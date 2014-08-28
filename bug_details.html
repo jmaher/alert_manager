@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Bug Details</title>   
+    <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript">
+    var root_url = window.location.protocol+'//'+window.location.host;
+
+$(function() {
+    
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        var bugs = raw_data.details;
+        for(var i=0;i<bugs['bug'].length;i++) {        
+            var table = document.getElementById("bugList");
+                var row = table.insertRow(1);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                var cell4 = row.insertCell(3);
+                var cell5 = row.insertCell(4);
+                cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs['bug'][i]+">"+bugs['bug'][i]+"</a></p>"           
+                cell2.innerHTML=bugs['status'][i];
+                if (bugs['resolution'][i]=="")
+                    cell3.innerHTML="OPEN";
+                else
+                    cell3.innerHTML=bugs['resolution'][i];
+                cell4.innerHTML=bugs['date_opened'][i];
+                cell5.innerHTML=bugs['date_resolved'][i];
+        } 
+    }
+    req.open('get', root_url+'/bug_data', true);
+    req.send();
+});
+</script>
+</head>
+<body>
+    <h3 align="center">Bug Details</h3>
+    <div>
+         <table id="bugList" border='1' align="center">
+            <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Resolution</th>
+                <th>Opening date</th>
+                <th>Resolved Date</th>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
