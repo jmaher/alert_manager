@@ -72,20 +72,6 @@ def run_alert_query():
     inputid = request.args['id']
     return {'alerts': run_query("where id=%s" % inputid, True)}
 
-
-#@app.route('/bugzilla_reports')
-#@json_response
-#def run_bugzilla_query():
-#    query_dict = request.args.to_dict()
-#    date = query_dict['date']
-#    url = 'https://bugzilla.mozilla.org/rest/bug'
-#    if date == "none":
-#        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,status,resolution,creation_time,cf_last_resolved"
-#    else:
-#        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&creation_time=" + date + "&include_fields=id,status,resolution,creation_time,cf_last_resolved"
-#    search_results = requests.get(u)
-#    return {'bugs': search_results.text}
-
 @app.route('/bugzilla_reports')
 @json_response
 def run_bugzilla_query():
@@ -104,31 +90,6 @@ def run_bugzilla_query():
     cursor.close()
     db.close()
     return {'bugs': search_results}
-
-
-@app.route('/bug_data')
-@json_response
-def get_details():
-    db = create_db_connnection()
-    cursor = db.cursor()
-    query = "select bug,status,resolution,date_opened,date_resolved from details"
-    cursor.execute(query)
-    query_results = cursor.fetchall()
-    data = {}
-    data['bug'] = []
-    data['status'] = []
-    data['resolution'] = []
-    data['date_opened'] = []
-    data['date_resolved'] = []
-    for i in query_results:
-        data['bug'].append(i[0])
-        data['status'].append(i[1])
-        data['resolution'].append(i[2])
-        data['date_opened'].append(i[3])
-        data['date_resolved'].append(i[4])
-    cursor.close()
-    db.close()
-    return {'details': data}
 
 @app.route('/graph/flot')
 @json_response
