@@ -28,16 +28,48 @@
             row.id = alert["id"] + "-" + originalKeyRevision;
             var rev = row.insertCell(0);
 
+             c = 0;
+             d = 0;
+             v = "";
+             u = "";
+
             for (var i = 0; i < fields.length; i++) {
                 var test = fields[i];
-                cell = row.insertCell(-1);
-                cell.className = cname;
-                cell.setAttribute('field_name', fields[i]);
+
+                if (fields[i] == "graphurl" || fields[i] == "changeset"){
+
+                    if (fields[i] == "changeset"){
+
+                        cell = row.insertCell(-1);
+                        cell.className = cname;
+                        cell.setAttribute('field_name', "reference");
+                    }
+                }
+
+                else if (fields[i] == "bug" || fields[i] == "tbplurl"){
+
+                    if (fields[i] == "bug"){
+
+                        cell = row.insertCell(-1);
+                        cell.className = cname;
+                        cell.setAttribute('field_name', "investigate");
+                    }
+
+                }
+
+                else{
+                    cell = row.insertCell(-1);
+                    cell.className = cname;
+                    cell.setAttribute('field_name', fields[i]);
+                }
+
                 cell.onclick = editAlert(alert["id"], alert["body"]);
                 var value = alert[test];
                 if (fields[i] == "graphurl" || fields[i] == "changeset") {
                     value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
                     cell.onclick = "";
+                    c++;
+
                 } else if (fields[i] == "status") {
                     value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
                     var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
@@ -51,6 +83,8 @@
                     value += "</select>";
                     cell.onclick = "";
                 } else if (fields[i] == "bug") {
+                    d++;
+
                     var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
                     if (nvl(alert['bug'], "") != "") {
                         var bugz = alert['bug'].split(',');
@@ -65,6 +99,8 @@
                     value = defaultValue;
                     cell.onclick = "";
                 } else if (fields[i] == "tbplurl") {
+
+                    d++;
                     var defaultValue = "<a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
                     if (alert['tbplurl'] != "") {
                         if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
@@ -77,15 +113,38 @@
                     }
 
                     value = defaultValue;
-                    cell.onclick = "";
+                    cell.onclick = "";                
                 }
+
+                if (fields[i] == "graphurl" || fields[i] == "changeset"){
+                     
+                    u = u+"<p>"+value+"</p>";
+                    
+                    if (c == 2){
+                        console.log(c);
+                        
+                        textNode = u || 0;
+                        cell.innerHTML = textNode;}                   
+                }
+
+                else if (fields[i] == "bug" || fields[i] == "tbplurl"){
+                     
+                    v = v+"<p>"+value+"</p>";                  
+
+                    if (d == 2){
+                        console.log(c);
+                        
+                        textNode = v || 0;
+                        cell.innerHTML = textNode;}                   
+                }
+
+                else{
                 textNode = value || 0;
-                cell.innerHTML = textNode;
+                cell.innerHTML = textNode; }
             }
             return 1
         }
-
-
+      
         var results;
         $(document).ready(function () {
             // parse get parameters
