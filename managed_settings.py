@@ -22,8 +22,7 @@ TREES = ('Mozilla-Inbound',
 
 PLATFORMS = ('XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
              'WINNT 5.2', 'WINNT 6.1 (ix)', 'WINNT 6.2 x64', 'WINNT 5.1 (ix)',
-             'MacOSX 10.7', 'MacOSX 10.8', 'MacOSX 10.6 (rev4)',
-             'Android 2.2 (Native)', 'Android 4.0.4')
+             'MacOSX 10.7', 'MacOSX 10.8', 'MacOSX 10.6 (rev4)', 'Android 4.0.4')
 
 
 TBPL_PLATFORMS = {
@@ -35,7 +34,6 @@ TBPL_PLATFORMS = {
     'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
     'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
     'MacOSX 10.8': 'Rev5 MacOSX Mountain Lion 10.8',
-    'Android 2.2 (Native)': 'Android 2.2 Tegra',
     'Android 4.0.4': 'Android 4.0 Tegra'
 }
 
@@ -76,12 +74,12 @@ TBPL_TESTS = {
     'Tp5 Optimized (Main RSS)': 'tp5o',
     'Tp5 Optimized (Content RSS)': 'tp5o',
     'Tp5 Optimized (%CPU)': 'tp5o',
-    'Tp5 No Network Row major MozAfterPaint (Main Startup File I/O Bytes)': 'tp5o',
-    'Tp5 No Network Row Major MozAfterPaint (Non-Main Startup File IO Bytes)': 'tp5o',
-    'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal Network IO Bytes)': 'tp5o',
-    'Tp5 No Network Row Major MozAfterPaint (Main Normal File IO Bytes)': 'tp5o',
-    'Tp5 No Network Row Major MozAfterPaint (Main Startup File IO Bytes)': 'tp5o',
-    'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)': 'tp5o',
+    'Tp5 No Network Row major MozAfterPaint (Main Startup File I/O Bytes)': 'xperf',
+    'Tp5 No Network Row Major MozAfterPaint (Non-Main Startup File IO Bytes)': 'xperf',
+    'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal Network IO Bytes)': 'xperf',
+    'Tp5 No Network Row Major MozAfterPaint (Main Normal File IO Bytes)': 'xperf',
+    'Tp5 No Network Row Major MozAfterPaint (Main Startup File IO Bytes)': 'xperf',
+    'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)': 'xperf',
     'Tp5 Optimized (Modified Page List Bytes)': 'tp5o',
     'Tp5 Optimized Responsiveness': 'tp5o',
     'Tp5 Optimized MozAfterPaint': 'tp5o',
@@ -108,7 +106,10 @@ TBPL_TESTS = {
     'SVG-ASAP': 'svgr',
     'tscroll-ASAP MozAfterPaint': 'svgr',
     'Session Restore no Auto Restore Test': 'other',
-    'Session Restore Test': 'other'
+    'Session Restore Test': 'other',
+    'WebRTC Media Performance Tests': 'other_l64',
+    'TP5 Scroll': 'g1',
+    'WEBGL Terrain': 'g1'
 }
 
 
@@ -161,4 +162,7 @@ TESTS = (
     'SVG-ASAP',
     'tscroll-ASAP MozAfterPaint',
     'Session Restore no Auto Restore Test',
-    'Session Restore Test')
+    'Session Restore Test',
+    'TP5 Scroll',
+    'WEBGL Terrain',
+    'WebRTC Media Performance Tests')

@@ -67,13 +67,7 @@
                 } else if (fields[i] == "tbplurl") {
                     var defaultValue = "<a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
                     if (alert['tbplurl'] != "") {
-                        if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
-                            var url = alert['tbplurl'].split("talos");
-                            alert['tbplurl'] = url[0] + "pgo%20talos" + url[1];
-                            defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
-                        } else {
-                            defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
-                        }
+                        defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                     }
 
                     value = defaultValue;
