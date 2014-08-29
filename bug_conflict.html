@@ -16,8 +16,27 @@ $(function() {
         for(var i=0;i<bugs.length;i++) {        
             var table = document.getElementById("bugList");
                 var row = table.insertRow(1);
-                var cell1 = row.insertCell(0);
-                cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i]+">"+bugs[i]+"</a></p>"           
+                var cell = row.insertCell(0);
+                cell.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i][0][0]+">"+bugs[i][0][0]+"</a></p>";
+               
+                for(var j=0;j<bugs[i].length;j++)
+                {
+                    var row1 = table.insertRow(2);
+                    var cell1 = row1.insertCell(0);
+                    var cell2 = row1.insertCell(1);
+                    var cell3 = row1.insertCell(2);
+                    var cell4 = row1.insertCell(3);
+                    var cell5 = row1.insertCell(4);
+                    var cell6 = row1.insertCell(5);
+                    
+                    cell1.innerHTML = bugs[i][j][1];
+                    cell2.innerHTML = bugs[i][j][2];
+                    cell3.innerHTML = bugs[i][j][3];
+                    cell4.innerHTML = bugs[i][j][4];
+                    cell5.innerHTML = bugs[i][j][5];
+                    cell6.innerHTML = bugs[i][j][6];
+                   
+                }      
         } 
     }
     req.open('get', root_url+'/conflicted_bugs', true);
@@ -28,9 +47,9 @@ $(function() {
 <body>
     <h3 align="center">Conflicting bugs</h3>
     <div>
-         <table id="bugList">
+         <table id="bugList" border=1>
             <tr>
-                <th>Bugs</th>
+               
             </tr>
         </table>
     </div>
