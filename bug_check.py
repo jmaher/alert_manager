@@ -82,7 +82,7 @@ def get_conflicting_bugs():
     for bugid in investigating:
         param = []
         param= getStatus(bugid)
-        if (param[0] == 'RESOLVED'):
+        if (param[1] == 'RESOLVED'):
             conflicting.append(bugid)
     return conflicting
     
