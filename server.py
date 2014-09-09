@@ -67,7 +67,7 @@ def get_conflicting_alerts():
     db = create_db_connnection()
     cursor = db.cursor()
     for bugid in bugs:
-        query = "select bug,branch,test,platform,percent,keyrevision,status from alerts  where bug = '%s'" % (bugid)     
+        query = "select bug,branch,test,platform,percent,graphurl,tbplurl,changeset,status,id,duplicate,mergedfrom from alerts  where bug = '%s'" % (bugid)     
         cursor.execute(query)
         search_results = cursor.fetchall()
         alerts.append(search_results)
