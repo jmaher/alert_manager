@@ -78,12 +78,18 @@ def get_conflicting_bugs():
     conflicting = []
     #Get the local db bugs marked as 'investigating'
     investigating = get_investigating_bugs()
+    db = create_db_connnection()
+    cursor = db.cursor()
+    #Query for the 'investigating' bugs
     #Check to see if any 'investigating' bugs are resolved on bugzilla
     for bugid in investigating:
-        param = []
-        param= getStatus(bugid)
-        if (param[1] == 'RESOLVED'):
+        query = "select status from alerts where bug = '%s'" % (bugid)
+        cursor.execute(query)
+        param = cursor.fetchall()
+        if (param[0][0] == 'Resolved'):
             conflicting.append(bugid)
+    cursor.close()
+    db.close()
     return conflicting
     
 def write_bug_report():
