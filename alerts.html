@@ -10,8 +10,7 @@
     <script type="text/javascript">
 
         function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
-            //var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
-            var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
+            var fields = ["date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
 
             var cname = "data";
             if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
@@ -28,47 +27,18 @@
             row.id = alert["id"] + "-" + originalKeyRevision;
             var rev = row.insertCell(0);
 
-             c = 0;
-             d = 0;
-             v = "";
-             u = "";
-
             for (var i = 0; i < fields.length; i++) {
                 var test = fields[i];
 
-                if (fields[i] == "graphurl" || fields[i] == "changeset"){
-
-                    if (fields[i] == "changeset"){
-
-                        cell = row.insertCell(-1);
-                        cell.className = cname;
-                        cell.setAttribute('field_name', "reference");
-                    }
-                }
-
-                else if (fields[i] == "bug" || fields[i] == "tbplurl"){
-
-                    if (fields[i] == "bug"){
-
-                        cell = row.insertCell(-1);
-                        cell.className = cname;
-                        cell.setAttribute('field_name', "investigate");
-                    }
-
-                }
-
-                else{
-                    cell = row.insertCell(-1);
-                    cell.className = cname;
-                    cell.setAttribute('field_name', fields[i]);
-                }
-
+                cell = row.insertCell(-1);
+                cell.className = cname;
+                cell.setAttribute('field_name', fields[i]);
+              
                 cell.onclick = editAlert(alert["id"], alert["body"]);
                 var value = alert[test];
-                if (fields[i] == "graphurl" || fields[i] == "changeset") {
-                    value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
+                if (fields[i] == "reference") {
+                    value = "<p><a href=\"" + alert['graphurl'] + "\">" + 'graphurl' + "</a></p>"+ "<p><a href=\"" + alert['changeset'] + "\">" + 'changeset' + "</a></p>";
                     cell.onclick = "";
-                    c++;
 
                 } else if (fields[i] == "status") {
                     value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
@@ -82,10 +52,11 @@
                     }
                     value += "</select>";
                     cell.onclick = "";
-                } else if (fields[i] == "bug") {
-                    d++;
+                } else if (fields[i] == "investigate") {
 
-                    var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
+                    var investigate = ''
+
+                    var defaultValue = "<p><a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a></p>";
                     if (nvl(alert['bug'], "") != "") {
                         var bugz = alert['bug'].split(',');
                         defaultValue = "";
@@ -96,51 +67,28 @@
                         }
                     }
 
-                    value = defaultValue;
-                    cell.onclick = "";
-                } else if (fields[i] == "tbplurl") {
+                    investigate += defaultValue;
 
-                    d++;
-                    var defaultValue = "<a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
+                    defaultValue = "<p><a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a></p>";
                     if (alert['tbplurl'] != "") {
                         if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
                             var url = alert['tbplurl'].split("talos");
                             alert['tbplurl'] = url[0] + "pgo%20talos" + url[1];
-                            defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
+                            defaultValue = "<p><a href=\"" + alert['tbplurl'] + "\">tbplurl</a><p>";
                         } else {
-                            defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
+                            defaultValue = "<p><a href=\"" + alert['tbplurl'] + "\">tbplurl</a></p>";
                         }
                     }
 
-                    value = defaultValue;
+                    investigate += defaultValue;
+                    
+                    value = investigate;
                     cell.onclick = "";                
                 }
 
-                if (fields[i] == "graphurl" || fields[i] == "changeset"){
-                     
-                    u = u+"<p>"+value+"</p>";
-                    
-                    if (c == 2){
-                        console.log(c);
-                        
-                        textNode = u || 0;
-                        cell.innerHTML = textNode;}                   
-                }
-
-                else if (fields[i] == "bug" || fields[i] == "tbplurl"){
-                     
-                    v = v+"<p>"+value+"</p>";                  
-
-                    if (d == 2){
-                        console.log(c);
-                        
-                        textNode = v || 0;
-                        cell.innerHTML = textNode;}                   
-                }
-
-                else{
                 textNode = value || 0;
-                cell.innerHTML = textNode; }
+                cell.innerHTML = textNode; 
+             
             }
             return 1
         }
