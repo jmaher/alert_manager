@@ -41,7 +41,7 @@ def run_query(where_clause, body=False):
     fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
     if body:
         fields.append('body')
-    sql = "select %s from alerts%s;" %(','.join(fields), where_clause)
+    sql = "select %s from alerts %s;" %(','.join(fields), where_clause)
     cursor.execute(sql)
 
     alerts = cursor.fetchall()
@@ -62,8 +62,18 @@ def run_query(where_clause, body=False):
 @app.route('/conflicted_bugs')
 @json_response
 def get_conflicting_alerts():
+    alerts=[]
     bugs = get_conflicting_bugs()
-    return { 'bugs' : bugs}
+    db = create_db_connnection()
+    cursor = db.cursor()
+    for bugid in bugs:
+        query = "select bug,branch,test,platform,percent,graphurl,tbplurl,changeset,status,id,duplicate,mergedfrom from alerts  where bug = '%s'" % (bugid)     
+        cursor.execute(query)
+        search_results = cursor.fetchall()
+        alerts.append(search_results)
+    cursor.close()
+    db.close()        
+    return { 'bugs' : alerts}
 
 
 @app.route('/alert')
@@ -72,20 +82,24 @@ def run_alert_query():
     inputid = request.args['id']
     return {'alerts': run_query("where id=%s" % inputid, True)}
 
-
 @app.route('/bugzilla_reports')
 @json_response
 def run_bugzilla_query():
+
     query_dict = request.args.to_dict()
     date = query_dict['date']
-    url = 'https://bugzilla.mozilla.org/rest/bug'
+    db = create_db_connnection()
+    cursor = db.cursor()
     if date == "none":
-        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&include_fields=id,status,resolution,creation_time,cf_last_resolved"
+        query = "select bug,status,resolution,date_opened,date_resolved from details"
     else:
-        u = url + "?whiteboard=[talos_regression]&status:RESOLVED&creation_time=" + date + "&include_fields=id,status,resolution,creation_time,cf_last_resolved"
-    search_results = requests.get(u)
-    return {'bugs': search_results.text}
-
+        query = "select bug,status,resolution,date_opened,date_resolved from details  where date_opened > '%s'" % (date)    
+    
+    cursor.execute(query)
+    search_results = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return {'bugs': search_results}
 
 @app.route('/graph/flot')
 @json_response
@@ -122,7 +136,7 @@ def run_graph_flot_query():
 @json_response
 def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
-    where_clause = "where mergedfrom != '' and (status='NEW' or status='Investigating') order by date DESC, keyrevision";
+    where_clause = "where mergedfrom!='' and (status='' or status='NEW' or status='Investigating') order by date DESC, keyrevision";
     return {'alerts': run_query(where_clause)}
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
@@ -145,7 +159,7 @@ def run_alertsbyrev_expired_query():
                     flag = 1
         query += "and date < '%s'" % str(d);
         return {'alerts': run_query(query, True)}
-    where_clause = "where mergedfrom = '' and (status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
+    where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
     return {'alerts': run_query(where_clause)}
 
 
@@ -214,7 +228,7 @@ def run_values_query():
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
+    where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
     return {'alerts': run_query(where_clause)}
 
 

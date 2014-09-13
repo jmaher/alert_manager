@@ -1,10 +1,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
+    <title>Conflicting Bugs</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Conflicting Bugs</title>   
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="menu.css">
+    <script src="js/AddCommentUI.js"></script>
+    <script src="js/alerts.js"></script> 
     <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript">
+          
     var root_url = window.location.protocol+'//'+window.location.host;
 
 $(function() {
@@ -16,8 +21,47 @@ $(function() {
         for(var i=0;i<bugs.length;i++) {        
             var table = document.getElementById("bugList");
                 var row = table.insertRow(1);
-                var cell1 = row.insertCell(0);
-                cell1.innerHTML = "<p><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i]+">"+bugs[i]+"</a></p>"           
+                var cell = row.insertCell(0);
+                cell.innerHTML = "<p><h3><a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i][0][0]+">"+bugs[i][0][0]+"</a></h3></p>";
+               
+                for(var j=0;j<bugs[i].length;j++)
+                {
+                    var id = bugs[i][j][9];
+                    var duplicate = bugs[i][j][10];
+                    var bug = bugs[i][j][0];
+                    var mergedfrom = bugs[i][j][11];
+                    
+                    var row1 = table.insertRow(2);
+                    var cell1 = row1.insertCell(0);
+                    var cell2 = row1.insertCell(1);
+                    var cell3 = row1.insertCell(2);
+                    var cell4 = row1.insertCell(3);
+                    var cell5 = row1.insertCell(4);
+                    var cell6 = row1.insertCell(5);
+                    var cell7 = row1.insertCell(6);
+                    var cell8 = row1.insertCell(7);
+                    
+                    value = "<select id=\"" + id + "-status\" onChange=\"updateStatus(" + id + ", '" + duplicate + "', '" + bug + "', '" + mergedfrom + "');\">";
+                    var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
+                    for (var x = 0; x < options.length; x++) {
+                        value += "<option ";
+                        if (bugs[i][j][8] == options[x]) {
+                            value += "selected";
+                        }
+                        value += ">" + options[x] + "</option>";
+                    }
+                    value += "</select>";
+                    
+                    cell1.innerHTML = bugs[i][j][1];
+                    cell2.innerHTML = bugs[i][j][2];
+                    cell3.innerHTML = bugs[i][j][3];
+                    cell4.innerHTML = bugs[i][j][4];
+                    cell5.innerHTML = "<a href="+bugs[i][j][5]+">graphurl</a>";
+                    cell6.innerHTML = "<a href="+bugs[i][j][6]+">tbplurl</a>";
+                    cell7.innerHTML = "<a href="+bugs[i][j][7]+">changeset</a>";
+                    cell8.innerHTML = value;
+                   
+                }      
         } 
     }
     req.open('get', root_url+'/conflicted_bugs', true);
@@ -28,9 +72,8 @@ $(function() {
 <body>
     <h3 align="center">Conflicting bugs</h3>
     <div>
-         <table id="bugList">
-            <tr>
-                <th>Bugs</th>
+         <table id="bugList" width="100%">
+            <tr>               
             </tr>
         </table>
     </div>

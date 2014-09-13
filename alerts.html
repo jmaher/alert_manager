@@ -69,6 +69,7 @@
 
                     defaultValue = "<p><a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a></p>";
                     if (alert['tbplurl'] != "") {
+<<<<<<< HEAD
                         if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
                             var url = alert['tbplurl'].split("talos");
                             alert['tbplurl'] = url[0] + "pgo%20talos" + url[1];
@@ -76,6 +77,9 @@
                         } else {
                             defaultValue = "<p><a href=\"" + alert['tbplurl'] + "\">tbplurl</a></p>";
                         }
+=======
+                        defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
+>>>>>>> upstream/master
                     }
                     investigate += defaultValue;
                     
