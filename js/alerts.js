@@ -88,6 +88,81 @@ function loadSelectors() {
     });
 }
 
+        function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
+            //var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
+            var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
+
+            var cname = "data";
+            if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
+                cname = "mergeddata";
+            }
+            if (parseInt(alert["percent"]) > 0) {
+                if (showall != 1) {
+                    return 0;
+                }
+                cname = "improvement";
+            }
+
+            var row = tbl.insertRow(-1);
+            row.id = alert["id"] + "-" + originalKeyRevision;
+            var rev = row.insertCell(0);
+
+            for (var i = 0; i < fields.length; i++) {
+                var test = fields[i];
+                cell = row.insertCell(-1);
+                cell.className = cname;
+                cell.setAttribute('field_name', fields[i]);
+                cell.onclick = editAlert(alert["id"], alert["body"]);
+                var value = alert[test];
+                if (fields[i] == "graphurl" || fields[i] == "changeset") {
+                    value = "<a href=\"" + value + "\">" + fields[i] + "</a>";
+                    cell.onclick = "";
+                } else if (fields[i] == "status") {
+                    value = "<select id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
+                    var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
+                    for (var j = 0; j < options.length; j++) {
+                        value += "<option ";
+                        if (alert['status'] == options[j]) {
+                            value += "selected";
+                        }
+                        value += ">" + options[j] + "</option>";
+                    }
+                    value += "</select>";
+                    cell.onclick = "";
+                } else if (fields[i] == "bug") {
+                    var defaultValue = "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
+                    if (nvl(alert['bug'], "") != "") {
+                        var bugz = alert['bug'].split(',');
+                        defaultValue = "";
+                        for (var b = 0; b < bugz.length; b++) {
+                            var bugid = bugz[b].trim();
+                            defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a>";
+                            defaultValue += "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\"> + </a><br />";
+                        }
+                    }
+
+                    value = defaultValue;
+                    cell.onclick = "";
+                } else if (fields[i] == "tbplurl") {
+                    var defaultValue = "<a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
+                    if (alert['tbplurl'] != "") {
+                        if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
+                            var url = alert['tbplurl'].split("talos");
+                            alert['tbplurl'] = url[0] + "pgo%20talos" + url[1];
+                            defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
+                        } else {
+                            defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
+                        }
+                    }
+
+                    value = defaultValue;
+                    cell.onclick = "";
+                }
+                textNode = value || 0;
+                cell.innerHTML = textNode;
+            }
+            return 1
+        }
 
 function hideMerged(originalkeyrev, showall) {
     var req = new XMLHttpRequest();
