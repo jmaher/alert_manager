@@ -49,7 +49,10 @@ def get_investigating_bugs():
     for bugid in ids:
         bugseq=bugid[0].split(",");
         for item in bugseq:
-            buglist.append(item);
+            try:
+                buglist.append(int(item));
+            except:
+                pass
     
     cursor.close()
     db.close()
