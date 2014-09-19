@@ -38,7 +38,7 @@ def run_query(where_clause, body=False):
     db = create_db_connnection()
     cursor = db.cursor()
 
-    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
+    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'push_date', 'mergedfrom', 'duplicate', 'tbplurl']
     if body:
         fields.append('body')
     sql = "select %s from alerts %s;" %(','.join(fields), where_clause)
@@ -52,7 +52,7 @@ def run_query(where_clause, body=False):
         i = 0
         while i < len(fields):
             data[fields[i]] = alert[i]
-            if fields[i] == 'date':
+            if fields[i] == 'push_date':
                 data[fields[i]] = str(alert[i])
             i += 1
         retVal.append(data)
@@ -67,12 +67,12 @@ def get_conflicting_alerts():
     db = create_db_connnection()
     cursor = db.cursor()
     for bugid in bugs:
-        query = "select bug,branch,test,platform,percent,graphurl,tbplurl,changeset,status,id,duplicate,mergedfrom from alerts  where bug = '%s'" % (bugid)     
+        query = "select bug,branch,test,platform,percent,graphurl,tbplurl,changeset,status,id,duplicate,mergedfrom from alerts  where bug = '%s'" % (bugid)
         cursor.execute(query)
         search_results = cursor.fetchall()
         alerts.append(search_results)
     cursor.close()
-    db.close()        
+    db.close()
     return { 'bugs' : alerts}
 
 
@@ -87,14 +87,14 @@ def run_alert_query():
 def run_bugzilla_query():
 
     query_dict = request.args.to_dict()
-    date = query_dict['date']
+    push_date = query_dict['push_date']
     db = create_db_connnection()
     cursor = db.cursor()
-    if date == "none":
+    if push_date == "none":
         query = "select bug,status,resolution,date_opened,date_resolved from details"
     else:
-        query = "select bug,status,resolution,date_opened,date_resolved from details  where date_opened > '%s'" % (date)    
-    
+        query = "select bug,status,resolution,date_opened,date_resolved from details  where date_opened > '%s'" % (push_date)
+
     cursor.execute(query)
     search_results = cursor.fetchall()
     cursor.close()
@@ -117,15 +117,15 @@ def run_graph_flot_query():
         endDate = date.today()
     if startDate == "none":
         startDate = endDate - timedelta(days=84)
-    query = "select date,bug from alerts where date > '%s' and date < '%s'" % (startDate, endDate)
+    query = "select push_date,bug from alerts where push_date > '%s' and push_date < '%s'" % (startDate, endDate)
     cursor.execute(query)
     query_results = cursor.fetchall()
     data = {}
-    data['date'] = []
+    data['push_date'] = []
     data['bug'] = []
     data['begining'] = str(startDate)
     for i in query_results:
-        data['date'].append(str(i[0]))
+        data['push_date'].append(str(i[0]))
         data['bug'].append(i[1])
     cursor.close()
     db.close()
@@ -136,10 +136,10 @@ def run_graph_flot_query():
 @json_response
 def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
-    where_clause = "where mergedfrom!='' and (status='' or status='NEW' or status='Investigating') order by date DESC, keyrevision";
+    where_clause = "where mergedfrom!='' and (status='' or status='NEW' or status='Investigating') order by push_date DESC, keyrevision";
     return {'alerts': run_query(where_clause)}
 
-#    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
+#    for id, keyrevision, bugcount, bug, status, push_date, mergedfrom in alerts:
 @app.route('/alertsbyexpiredrev')
 @json_response
 def run_alertsbyrev_expired_query():
@@ -157,9 +157,9 @@ def run_alertsbyrev_expired_query():
                 else:
                     query += "%s='%s' " % (key, val)
                     flag = 1
-        query += "and date < '%s'" % str(d);
+        query += "and push_date < '%s'" % str(d);
         return {'alerts': run_query(query, True)}
-    where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
+    where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and push_date < '%s' order by push_date DESC, keyrevision" % str(d);
     return {'alerts': run_query(where_clause)}
 
 
@@ -182,12 +182,12 @@ def run_alertsbyrev_query():
         return {'alerts': run_query(query, True)}
     where_clause = """
         where
-            date > NOW() - INTERVAL 127 DAY and
+            push_date > NOW() - INTERVAL 127 DAY and
             left(keyrevision, 1) <> '{' and
             mergedfrom = '' and
             (status='' or status='NEW' or status='Investigating')
         order by
-            date DESC, keyrevision
+            push_date DESC, keyrevision
         """
     return {'alerts': run_query(where_clause)}
 
@@ -228,7 +228,7 @@ def run_values_query():
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
+    where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by push_date,keyrevision ASC" % keyrev;
     return {'alerts': run_query(where_clause)}
 
 

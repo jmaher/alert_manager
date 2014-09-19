@@ -94,7 +94,7 @@ function hideMerged(originalkeyrev, showall) {
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
+        var fields = ["push_date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
         var alerts = raw_data.alerts;
 
         var keyrev = "";
@@ -146,7 +146,7 @@ function addMergedLinks(showall) {
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
+        var fields = ["id", "push_date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
         var alerts = raw_data.alerts;
 
         var count = 0;
@@ -217,7 +217,7 @@ function addAlertToUI(tbl, alert, showall) {
 
 
 // Function idDescending sorts the objects in the descending order of their id. This way, we can view the most recent alerts at the top.
-// The objects have been sorted based on their id and not on their date as sorting by the date field was not working.
+// The objects have been sorted based on their id and not on their push_date as sorting by the push_date field was not working.
 function idDescending(a, b) {
     if (a["id"] < b["id"]) {
         return 1;

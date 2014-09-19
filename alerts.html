@@ -10,7 +10,7 @@
     <script type="text/javascript">
 
         function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
-            var fields = ["date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
+            var fields = ["push_date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
 
             var cname = "data";
             if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
@@ -79,17 +79,17 @@
                         defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                     }
                     investigate += defaultValue;
-                    
+
                     value = investigate;
-                    cell.onclick = "";                
+                    cell.onclick = "";
                 }
 
                 textNode = value || 0;
-                cell.innerHTML = textNode; 
+                cell.innerHTML = textNode;
             }
             return 1
         }
-      
+
         var results;
         $(document).ready(function () {
             // parse get parameters

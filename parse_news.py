@@ -42,7 +42,7 @@ REV_RE = re.compile(
 
 
 fields = ('branch', 'test', 'platform', 'percent',
-          'graphurl', 'changeset', 'keyrevision', 'bugcount', 'body', 'date',
+          'graphurl', 'changeset', 'keyrevision', 'bugcount', 'body', 'push_date',
           'comment', 'bug', 'status')
 record = namedtuple('record', fields)
 
@@ -277,7 +277,7 @@ def build_tbpl_link(record):
 @database_conn
 def get_csets(db_cursor):
     query = """SELECT keyrevision, changesets FROM alerts
-               WHERE DATE_SUB(CURDATE(), INTERVAL 14 DAY) < DATE;"""
+               WHERE DATE_SUB(CURDATE(), INTERVAL 14 DAY) < PUSH_DATE;"""
     db_cursor.execute(query)
 
     results = []
@@ -383,7 +383,7 @@ def check_for_backout(db_cursor, record):
                WHERE platform=%s AND test=%s AND branch=%s
                AND ABS(SUBSTRING_INDEX(percent, "%%", 1)) between %s and %s
                AND backout IS NULL
-               AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) < date;"""
+               AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) < push_date;"""
 
     percent = float(record.percent[1:-1])
     query_params = (
@@ -403,12 +403,12 @@ def update_database(db_cursor, record, merged, link, csets):
     query = """INSERT into alerts
                (branch, test, platform, percent,
                graphurl, changeset, keyrevision, bugcount,
-               body, date, comment, bug,
+               body, push_date, comment, bug,
                status, mergedfrom, tbplurl, changesets)
                VALUES
                (%(branch)s, %(test)s, %(platform)s, %(percent)s,
                %(graphurl)s, %(changeset)s, %(keyrevision)s, %(bugcount)s,
-               %(body)s, %(date)s, %(comment)s, %(bug)s, %(status)s,
+               %(body)s, %(push_date)s, %(comment)s, %(bug)s, %(status)s,
                %(merged)s, %(tbpl_url)s, %(csets)s)"""
 
     data = record._asdict()
