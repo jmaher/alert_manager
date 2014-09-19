@@ -1,14 +1,14 @@
 from optparse import OptionParser
 import ConfigParser
 import os
+import sys
 
 from flask import Flask
 from pymysql import connect
-import sys
-
+from flask.ext.compress import Compress
 
 app = Flask(__name__, static_url_path='', static_folder='.')
-application = app
+Compress(app)
 
 
 def create_db_connnection():

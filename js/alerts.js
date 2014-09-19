@@ -285,6 +285,7 @@ function loadAllAlerts(showall, rev, test, platform, current) {
         url += flag + "platform=" + platform;
     }
     req.open('get', (root_url + url), true);
+	req.setRequestHeader("Accept-Encoding", "gzip,deflate");
     req.send();
 }
 

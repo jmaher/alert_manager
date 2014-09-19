@@ -1,6 +1,7 @@
 # main packages
 pymysql
 Flask==0.10.1
+flask-compress
 requests==2.3.0
 
 # optional package for pre-commit hook
