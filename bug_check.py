@@ -48,12 +48,14 @@ def get_investigating_bugs():
     buglist = []
     for bugid in ids:
         buglist.append(bugid[0])
-    
     cursor.close()
     db.close()
     bugslist = []
     for bugid in buglist:
-        bugs = [x.strip() for x in bugid.split(',')]
+        try : 
+            bugs = [int(x.strip()) for x in bugid.split(',')]
+        except :
+            pass
         bugslist.extend(bugs)
     bugslist.sort()
     allbugs = []
