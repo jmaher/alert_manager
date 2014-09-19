@@ -13,6 +13,8 @@ import logging
 from bug_check import *
 from db import *
 
+DEBUG = True
+
 def serialize_to_json(object):
     """Serialize class objects to json"""
     try:
@@ -41,6 +43,8 @@ def run_query(where_clause, body=False):
     if body:
         fields.append('body')
     sql = "select %s from alerts %s;" %(','.join(fields), where_clause)
+    if DEBUG:
+        print sql
     cursor.execute(sql)
 
     alerts = cursor.fetchall()
