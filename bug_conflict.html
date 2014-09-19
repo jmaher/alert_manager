@@ -3,8 +3,10 @@
 <head>
     <title>Conflicting Bugs</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <link rel="stylesheet" type="text/css" href="menu.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/menu.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/custom.css">
     <script src="js/AddCommentUI.js"></script>
     <script src="js/alerts.js"></script> 
     <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
@@ -41,7 +43,7 @@ $(function() {
                     var cell7 = row1.insertCell(6);
                     var cell8 = row1.insertCell(7);
                     
-                    value = "<select id=\"" + id + "-status\" onChange=\"updateStatus(" + id + ", '" + duplicate + "', '" + bug + "', '" + mergedfrom + "');\">";
+                    value = "<select class='form-control' id=\"" + id + "-status\" onChange=\"updateStatus(" + id + ", '" + duplicate + "', '" + bug + "', '" + mergedfrom + "');\">";
                     var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
                     for (var x = 0; x < options.length; x++) {
                         value += "<option ";
