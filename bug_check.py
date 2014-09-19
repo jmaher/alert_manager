@@ -88,8 +88,8 @@ def get_conflicting_bugs():
         query = "select status from alerts where bug = '%s'" % (bugid)
         cursor.execute(query)
         param = cursor.fetchall()       
-            if not(param and param[0]):
-                continue           
+        if not(param and param[0]):
+            continue           
         if (param[0][0] == 'Resolved'):
             conflicting.append(bugid)
     cursor.close()
