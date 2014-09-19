@@ -41,7 +41,7 @@ def run_query(where_clause, body=False):
     fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
     if body:
         fields.append('body')
-    sql = "select %s from alerts%s;" %(','.join(fields), where_clause)
+    sql = "select %s from alerts %s;" %(','.join(fields), where_clause)
     cursor.execute(sql)
 
     alerts = cursor.fetchall()
@@ -136,7 +136,7 @@ def run_graph_flot_query():
 @json_response
 def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
-    where_clause = "where mergedfrom != '' and (status='NEW' or status='Investigating') order by date DESC, keyrevision";
+    where_clause = "where mergedfrom!='' and (status='' or status='NEW' or status='Investigating') order by date DESC, keyrevision";
     return {'alerts': run_query(where_clause)}
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
@@ -159,7 +159,7 @@ def run_alertsbyrev_expired_query():
                     flag = 1
         query += "and date < '%s'" % str(d);
         return {'alerts': run_query(query, True)}
-    where_clause = "where mergedfrom = '' and (status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
+    where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
     return {'alerts': run_query(where_clause)}
 
 
@@ -228,7 +228,7 @@ def run_values_query():
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
+    where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
     return {'alerts': run_query(where_clause)}
 
 
