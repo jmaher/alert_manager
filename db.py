@@ -1,8 +1,11 @@
-from flask import Flask, request
 from optparse import OptionParser
-import MySQLdb
 import ConfigParser
 import os
+
+from flask import Flask
+from pymysql import connect
+import sys
+
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 application = app
@@ -14,11 +17,11 @@ def create_db_connnection():
     except KeyError:
         getConfig()
 
-    return MySQLdb.connect(host=app.config['host'],
+    return connect(host=app.config['host'],
         user=app.config['username'],
         passwd=app.config['password'],
         db=app.config['database'])
-        
+
 def getConfig():
     op = OptionParser()
     op.add_option("--config",

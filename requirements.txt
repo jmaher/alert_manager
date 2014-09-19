@@ -1,5 +1,5 @@
 # main packages
-MySQL-python==1.2.5
+pymysql
 Flask==0.10.1
 requests==2.3.0
 

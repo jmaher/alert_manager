@@ -7,7 +7,6 @@ import requests
 from flask import Flask, request
 from functools import wraps
 from datetime import date, timedelta
-import MySQLdb
 import ConfigParser
 from optparse import OptionParser
 import logging
