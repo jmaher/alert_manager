@@ -316,6 +316,16 @@ def run_submittbpl_data():
     #TODO: verify via return value in alerts
     return retVal
 
+@app.route('/shutdown', methods=['POST'])
+@json_response
+def shutdown():
+    # from http://flask.pocoo.org/snippets/67/
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        return {"response": 'Not running with the Werkzeug Server'}
+    func()
+    return {"response": 'Server shutting down...'}
+
 
 
 if __name__ == '__main__':
