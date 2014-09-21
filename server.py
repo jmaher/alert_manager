@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
 import os
-import json
 import sys
 import requests
-from flask import Flask, request
-from functools import wraps
+from flask import Flask, request, jsonify
 from datetime import date, timedelta
 import MySQLdb
 import ConfigParser
@@ -13,25 +11,6 @@ from optparse import OptionParser
 import logging
 from bug_check import *
 from db import *
-
-def serialize_to_json(object):
-    """Serialize class objects to json"""
-    try:
-        return object.__dict__
-    except AttributeError:
-        raise TypeError(repr(object) + 'is not JSON serializable')
-
-
-def json_response(func):
-    """Decorator: Serialize response to json"""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        return json.dumps(result or {'error': 'No data found for your request'},
-            default=serialize_to_json)
-
-    return wrapper
 
 
 def run_query(where_clause, body=False):
@@ -60,7 +39,6 @@ def run_query(where_clause, body=False):
 
 
 @app.route('/conflicted_bugs')
-@json_response
 def get_conflicting_alerts():
     alerts=[]
     bugs = get_conflicting_bugs()
@@ -73,17 +51,15 @@ def get_conflicting_alerts():
         alerts.append(search_results)
     cursor.close()
     db.close()        
-    return { 'bugs' : alerts}
+    return jsonify(bugs=alerts)
 
 
 @app.route('/alert')
-@json_response
 def run_alert_query():
     inputid = request.args['id']
-    return {'alerts': run_query("where id=%s" % inputid, True)}
+    return jsonify(alerts=run_query("where id=%s" % inputid, True))
 
 @app.route('/bugzilla_reports')
-@json_response
 def run_bugzilla_query():
 
     query_dict = request.args.to_dict()
@@ -99,10 +75,9 @@ def run_bugzilla_query():
     search_results = cursor.fetchall()
     cursor.close()
     db.close()
-    return {'bugs': search_results}
+    return jsonify(bugs=search_results)
 
 @app.route('/graph/flot')
-@json_response
 def run_graph_flot_query():
     query_dict = request.args.to_dict()
     startDate = query_dict['startDate']
@@ -129,19 +104,17 @@ def run_graph_flot_query():
         data['bug'].append(i[1])
     cursor.close()
     db.close()
-    return {'alerts': data}
+    return jsonify(alerts=data)
 
 
 @app.route('/mergedids')
-@json_response
 def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
     where_clause = "where mergedfrom!='' and (status='' or status='NEW' or status='Investigating') order by date DESC, keyrevision";
-    return {'alerts': run_query(where_clause)}
+    return jsonify(alerts=run_query(where_clause))
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
 @app.route('/alertsbyexpiredrev')
-@json_response
 def run_alertsbyrev_expired_query():
     query_dict = request.args.to_dict()
     if 'rev' in query_dict:
@@ -160,11 +133,10 @@ def run_alertsbyrev_expired_query():
         query += "and date < '%s'" % str(d);
         return {'alerts': run_query(query, True)}
     where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
-    return {'alerts': run_query(where_clause)}
+    return jsonify(alerts=run_query(where_clause))
 
 
 @app.route('/alertsbyrev')
-@json_response
 def run_alertsbyrev_query():
     query_dict = request.args.to_dict()
     if 'rev' in query_dict:
@@ -189,11 +161,10 @@ def run_alertsbyrev_query():
         order by
             date DESC, keyrevision
         """
-    return {'alerts': run_query(where_clause)}
+    return jsonify(alerts=run_query(where_clause))
 
 
 @app.route("/getvalues")
-@json_response
 def run_values_query():
     db = create_db_connnection()
     cursor = db.cursor()
@@ -220,20 +191,18 @@ def run_values_query():
     for rev in revs:
         retVal['rev'].append(rev)
 
-    return retVal
+    return jsonify(**retVal)
 
 
 @app.route("/mergedalerts")
-@json_response
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
 
     where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
-    return {'alerts': run_query(where_clause)}
+    return jsonify(alerts=run_query(where_clause))
 
 
 @app.route("/submit", methods=['POST'])
-@json_response
 def run_submit_data():
     retVal = {}
     data = request.form
@@ -246,11 +215,10 @@ def run_submit_data():
     alerts = cursor.fetchall()
 
     #TODO: verify via return value in alerts
-    return retVal
+    return jsonify(**retVal)
 
 
 @app.route("/updatestatus", methods=['POST'])
-@json_response
 def run_updatestatus_data():
     retVal = {}
     data = request.form
@@ -263,11 +231,10 @@ def run_updatestatus_data():
     alerts = cursor.fetchall()
 
     #TODO: verify via return value in alerts
-    return retVal
+    return jsonify(**retVal)
 
 
 @app.route("/submitduplicate", methods=['POST'])
-@json_response
 def run_submitduplicate_data():
     retVal = {}
     data = request.form
@@ -280,11 +247,10 @@ def run_submitduplicate_data():
     alerts = cursor.fetchall()
 
     #TODO: verify via return value in alerts
-    return retVal
+    return jsonify(**retVal)
 
 
 @app.route("/submitbug", methods=['POST'])
-@json_response
 def run_submitbug_data():
     retVal = {}
     data = request.form
@@ -297,11 +263,10 @@ def run_submitbug_data():
     alerts = cursor.fetchall()
 
     #TODO: verify via return value in alerts
-    return retVal
+    return jsonify(**retVal)
 
 
 @app.route("/submittbpl", methods=['POST'])
-@json_response
 def run_submittbpl_data():
     retVal = {}
     data = request.form
@@ -314,7 +279,7 @@ def run_submittbpl_data():
     alerts = cursor.fetchall()
 
     #TODO: verify via return value in alerts
-    return retVal
+    return jsonify(**retVal)
 
 
 
