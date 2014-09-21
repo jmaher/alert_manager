@@ -263,7 +263,9 @@ function loadAllAlerts(showall, rev, test, platform, current) {
                 $(document.getElementById(keyrev + "-hdr")).html("");
             }
         }
-        addMergedLinks(showall);
+	if (showall === 1) {
+            addMergedLinks(showall);
+        }
         AddCommentUI.init();
         AddDuplicateUI.init();
         AddBugUI.init();
