@@ -2,10 +2,7 @@ var root_url = window.location.protocol + '//' + window.location.host;
 var revision = getJsonFromUrl()['rev'];
 var data,det_row;
 var row_exists = false;
-if(revision == '') {
-    alert("Table view is available per revision and not for entire list");
-    window.open(root_url+'/alerts.html', "_self");
-}
+
 function loadSelectors() {
     $.getJSON(root_url + "/getvalues", function (data) {
 
@@ -257,6 +254,10 @@ function showDetails(i) {
 }
 
 function loadAllAlertsTable(showall, rev, test, platform, current) {
+    if(revision == '') {
+        document.getElementById("warn").innerHTML = "<h3><font color=red>Table view is available per revision and not for the entire list</font></h3>";
+    }
+    document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+revision+"&showall=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -265,7 +266,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
         var tests = [];
         var rowlist = [];
         var celllist= [];
-        document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+revision+"&showall=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
+        
         var table = document.getElementById("data");
         var row = table.insertRow(0);
         var cell = row.insertCell(0);

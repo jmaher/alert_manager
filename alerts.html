@@ -10,8 +10,7 @@
     <script src="js/AddCommentUI.js"></script>
     <script src="js/alerts.js"></script>
     <script type="text/javascript">
-       
-        function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
+       function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
             var fields = ["date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
             var e = document.getElementById("rev");
             var revision = e.options[e.selectedIndex].value;
@@ -249,6 +248,7 @@
         </tr>
     </table>
   </div>
+    <p id = "warn" align = "center"></p>
     <div id = "jump" align = "center"></div>
 </body>
 </html>
