@@ -22,7 +22,7 @@ $(function() {
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
-        var data = raw_data.data;
+        var data = raw_data.alerts;
         var plats = [];
         var tests = [];
         var rowlist = [];
@@ -33,18 +33,18 @@ $(function() {
         var cell = row.insertCell(0);
         cell.innerHTML=" ";
         for(var i=0;i<data.length;i++) {
-            if(plats.indexOf(data[i][1]) == -1) {
-                plats.push(data[i][1]);
+            if(plats.indexOf(data[i]["platform"]) == -1) {
+                plats.push(data[i]["platform"]);
                 cell = row.insertCell(1);
-                cell.innerHTML="<b>"+data[i][1]+"</b>";
+                cell.innerHTML="<b>"+data[i]["platform"]+"</b>";
             }
             
-            if(tests.indexOf(data[i][0]) == -1) {
-                tests.push(data[i][0]);
+            if(tests.indexOf(data[i]["test"]) == -1) {
+                tests.push(data[i]["test"]);
                 var row0 = table.insertRow(1);
                 rowlist.push(row0);
                 var cell0 = row0.insertCell(0);
-                cell0.innerHTML ="<b>"+data[i][0]+"</b>";
+                cell0.innerHTML ="<b>"+data[i]["test"]+"</b>";
             }
         }
         for(var y=0;y<tests.length;y++) {
@@ -54,21 +54,21 @@ $(function() {
             }
         }
         for(var i=0;i<data.length;i++) {
-            var cell1 = celllist[(tests.indexOf(data[i][0])*plats.length)+plats.indexOf(data[i][1])];
-            var percent = parseInt((data[i][2].split("%"))[0]);
+            var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
+            var percent = parseInt((data[i]["percent"].split("%"))[0]);
             var format="";
             if(percent<=-10)
-                format = "<font color = red>"+data[i][2]+"<font>";
+                format = "<font color = red>"+data[i]["percent"]+"<font>";
             else if(percent<0 && percent>-10)
-                format = "<font color = orange>"+data[i][2]+"<font>";
+                format = "<font color = orange>"+data[i]["percent"]+"<font>";
             else if(percent>0 && percent<10)
-                format = "<font color = lime>"+data[i][2]+"<font>";
+                format = "<font color = lime>"+data[i]["percent"]+"<font>";
             else
-                format = "<font color = green>"+data[i][2]+"<font>";
+                format = "<font color = green>"+data[i]["percent"]+"<font>";
             cell1.innerHTML = "<b>"+format+"<b>";          
         }
     }
-    req.open('get', root_url+'/table_alerts?rev='+revision, true);
+    req.open('get', root_url+'/alertsbyrev?keyrevision='+revision, true);
     req.send();
 });
 

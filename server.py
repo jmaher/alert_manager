@@ -82,21 +82,6 @@ def run_alert_query():
     inputid = request.args['id']
     return {'alerts': run_query("where id=%s" % inputid, True)}
 
-@app.route('/table_alerts')
-@json_response
-def get_alerts_data():
-    query_dict = request.args.to_dict()
-    rev = query_dict['rev']
-    db = create_db_connnection()
-    cursor = db.cursor()
-    query="select test,platform,percent from alerts where keyrevision='%s'" % (rev)
-    cursor.execute(query)
-    search_results = cursor.fetchall()
-    cursor.close()
-    db.close()
-    return {'data': search_results}
-
-
 @app.route('/bugzilla_reports')
 @json_response
 def run_bugzilla_query():
