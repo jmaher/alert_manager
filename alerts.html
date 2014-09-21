@@ -16,7 +16,7 @@
             var e = document.getElementById("rev");
             var revision = e.options[e.selectedIndex].value;
            
-            document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alert_table.html?rev="+revision+">Toggle View</a></h4>";
+            document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+revision+"&table=1>Toggle View</a></h4>";
             var cname = "data";
             if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
                 cname = "mergeddata";
@@ -116,7 +116,11 @@
             document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
             loadSelectors();
-            loadAllAlerts(showAll, rev, test, platform, current);
+            
+            if(results['table']==1)
+                loadAllAlertsTable(showAll, rev, test, platform, current);
+            else
+                loadAllAlerts(showAll, rev, test, platform, current);
         });
 
     </script>
@@ -233,6 +237,19 @@
             </form>
         </div>
     </div>
+    <div align="center" >
+        <table class="sortable" id="data" border=1>
+            <tr>
+            </tr>
+        </table>
+    </div>
+<div align = "center">
+    <table id = "detail">
+        <tr>
+        </tr>
+    </table>
+  </div>
+    <div id = "jump" align = "center"></div>
     <div id = "jump" align = "center"></div>
 </body>
 </html>
