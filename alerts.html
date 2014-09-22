@@ -115,9 +115,11 @@
             document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
             loadSelectors();
-            
-            if (results['table'] == 1)
-                loadAllAlertsTable(showAll, rev, test, platform, current);
+            var improve = results['improve'];
+            if (improve != 1)
+                improve = 0;
+            if (results['table'] == 1) 
+                loadAllAlertsTable(showAll, rev, test, platform, current , improve);
             else
                 loadAllAlerts(showAll, rev, test, platform, current);
         });
@@ -236,6 +238,7 @@
             </form>
         </div>
     </div>
+    <div id = "hide" align = "left"></div>
     <div align="center" >
         <table class="sortable" id="data" border=1>
             <tr>
