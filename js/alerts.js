@@ -232,7 +232,7 @@ function idDescending(a, b) {
 
 function showDetails(i) {
     var table = document.getElementById("detail");
-    if(row_exists) {
+    if (row_exists) {
         
         det_row.deleteCell(0);
         det_row.deleteCell(0);
@@ -254,10 +254,10 @@ function showDetails(i) {
 }
 
 function loadAllAlertsTable(showall, rev, test, platform, current) {
-    if(revision == '') {
+    if (rev == '') {
         document.getElementById("warn").innerHTML = "<h3><font color=red>Table view is available per revision and not for the entire list</font></h3>";
     }
-    document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+revision+"&showall=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
+    document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showall=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -272,13 +272,13 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
         var cell = row.insertCell(0);
         cell.innerHTML=" ";
         for(var i=0;i<data.length;i++) {
-            if(plats.indexOf(data[i]["platform"]) == -1) {
+            if (plats.indexOf(data[i]["platform"]) == -1) {
                 plats.push(data[i]["platform"]);
                 cell = row.insertCell(1);
                 cell.innerHTML="<b>"+data[i]["platform"]+"</b>";
             }
             
-            if(tests.indexOf(data[i]["test"]) == -1) {
+            if (tests.indexOf(data[i]["test"]) == -1) {
                 tests.push(data[i]["test"]);
                 var row0 = table.insertRow(1);
                 rowlist.push(row0);
@@ -296,18 +296,18 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
             var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
             var format="";
-            if(percent<=-10)
+            if (percent<=-10)
                 format = "<font color = red>"+data[i]["percent"]+"<font>";
-            else if(percent<0 && percent>-10)
+            else if (percent<0 && percent>-10)
                 format = "<font color = orange>"+data[i]["percent"]+"<font>";
-            else if(percent>0 && percent<10)
+            else if (percent>0 && percent<10)
                 format = "<font color = lime>"+data[i]["percent"]+"<font>";
             else
                 format = "<font color = green>"+data[i]["percent"]+"<font>";
             cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+format+"<b></p>";          
         }
     }
-    req.open('get', root_url+'/alertsbyrev?keyrevision='+revision, true);
+    req.open('get', root_url+'/alertsbyrev?keyrevision='+rev, true);
     req.send();
 }
 
