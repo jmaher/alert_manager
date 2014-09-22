@@ -1,5 +1,4 @@
 var root_url = window.location.protocol + '//' + window.location.host;
-var revision = getJsonFromUrl()['rev'];
 var data,det_row;
 var row_exists = false;
 
