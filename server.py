@@ -201,28 +201,22 @@ def run_values_query():
     db = create_db_connnection()
     cursor = db.cursor()
 
-    retVal = {}
-    retVal['test'] = []
-    retVal['rev'] = []
-    retVal['platform'] = []
+    retVal = {
+        'test': [],
+        'rev': [],
+        'platform': []
+    }
 
-    cursor.execute("select DISTINCT test from alerts;")
-    tests = cursor.fetchall()
-    for test in tests:
-        retVal['test'].append(test)
-
-    cursor.execute("select DISTINCT platform from alerts;")
-    platforms = cursor.fetchall()
-
-    for platform in platforms:
-        retVal['platform'].append(platform)
-
-    cursor.execute("select DISTINCT keyrevision from alerts;")
-    revs = cursor.fetchall()
-
-    for rev in revs:
-        retVal['rev'].append(rev)
-
+    cursor.execute("""
+        select DISTINCT 'test' AS name, test AS value FROM alerts WHERE push_date > NOW() - INTERVAL 127 DAY
+        UNION ALL
+        select DISTINCT 'platform' AS name, platform AS value FROM alerts WHERE push_date > NOW() - INTERVAL 127 DAY
+        UNION ALL
+        select DISTINCT 'rev' AS name, keyrevision AS value FROM alerts WHERE push_date > NOW() - INTERVAL 127 DAY
+        """)
+    data = cursor.fetchall()
+    for d in data:
+        retVal[d[0]] = d[1]
     return retVal
 
 
