@@ -187,7 +187,7 @@ def run_values_query():
         """)
     data = cursor.fetchall()
     for d in data:
-        retVal[d[0]] = d[1]
+        retVal[d[0]].append(d[1])
     return jsonify(**retVal)
 
 
