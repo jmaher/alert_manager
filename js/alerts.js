@@ -303,8 +303,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
             else if (percent>0 && percent<10) {
                 cell1.style.backgroundColor="lime";
             }
-            else {
-                
+            else {               
                 cell1.style.backgroundColor="green";
             }
             cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+";<b></p>";          
