@@ -23,21 +23,21 @@ function loadSelectors() {
         for (var i in tests) {
             var newoption = document.createElement("option");
             newoption.id = "test";
-            var value = tests[i][0];
+            var value = tests[i];
             $("#test").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
         for (i in revs) {
             var newoption = document.createElement("option");
             newoption.id = "rev";
-            var value = revs[i][0];
+            var value = revs[i];
             $("#rev").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
         for (i in platforms) {
             var newoption = document.createElement("option");
             newoption.id = "platform";
-            var value = platforms[i][0];
+            var value = platforms[i];
             $("#platform").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
