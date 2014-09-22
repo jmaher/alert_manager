@@ -295,14 +295,22 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
             var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
             var format="";
-            if (percent<=-10)
-                format = "<font color = red>"+data[i]["percent"]+"<font>";
-            else if (percent<0 && percent>-10)
-                format = "<font color = orange>"+data[i]["percent"]+"<font>";
-            else if (percent>0 && percent<10)
-                format = "<font color = lime>"+data[i]["percent"]+"<font>";
-            else
-                format = "<font color = green>"+data[i]["percent"]+"<font>";
+            if (percent<=-10) {
+                format = data[i]["percent"];
+                cell1.style.backgroundColor="red";
+            }
+            else if (percent<0 && percent>-10) {
+                format = data[i]["percent"];
+                cell1.style.backgroundColor="orange";
+            }
+            else if (percent>0 && percent<10) {
+                format = data[i]["percent"];
+                cell1.style.backgroundColor="lime";
+            }
+            else {
+                format = data[i]["percent"];
+                cell1.style.backgroundColor="green";
+            }
             cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+format+"<b></p>";          
         }
     }

@@ -10,11 +10,12 @@
     <script src="js/AddCommentUI.js"></script>
     <script src="js/alerts.js"></script>
     <script type="text/javascript">
-        function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
+       function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
             var fields = ["date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
             var e = document.getElementById("rev");
+            var revision = e.options[e.selectedIndex].value;
            
-            document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+originalKeyRevision+"&table=1>Toggle View</a></h4>";
+            document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+revision+"&table=1>Toggle View</a></h4>";
             var cname = "data";
             if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
                 cname = "mergeddata";
