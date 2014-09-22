@@ -306,7 +306,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
             else {               
                 cell1.style.backgroundColor="green";
             }
-            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+";<b></p>";          
+            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";          
         }
     }
     req.open('get', root_url+'/alertsbyrev?keyrevision='+rev, true);
