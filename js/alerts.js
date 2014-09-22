@@ -294,24 +294,20 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
         for (var i=0;i<data.length;i++) {
             var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
-            var format="";
             if (percent<=-10) {
-                format = data[i]["percent"];
                 cell1.style.backgroundColor="red";
             }
             else if (percent<0 && percent>-10) {
-                format = data[i]["percent"];
                 cell1.style.backgroundColor="orange";
             }
             else if (percent>0 && percent<10) {
-                format = data[i]["percent"];
                 cell1.style.backgroundColor="lime";
             }
             else {
-                format = data[i]["percent"];
+                
                 cell1.style.backgroundColor="green";
             }
-            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+format+"<b></p>";          
+            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+";<b></p>";          
         }
     }
     req.open('get', root_url+'/alertsbyrev?keyrevision='+rev, true);
