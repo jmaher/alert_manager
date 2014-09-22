@@ -1,4 +1,7 @@
 var root_url = window.location.protocol + '//' + window.location.host;
+var revision = getJsonFromUrl()['rev'];
+var data,det_row;
+var row_exists = false;
 
 function loadSelectors() {
     $.getJSON(root_url + "/getvalues", function (data) {
@@ -225,6 +228,87 @@ function idDescending(a, b) {
     else {
         return -1;
     }
+}
+
+function showDetails(i) {
+    var table = document.getElementById("detail");
+    if (row_exists) {
+        
+        det_row.deleteCell(0);
+        det_row.deleteCell(0);
+        det_row.deleteCell(0);
+        det_row.deleteCell(0);
+        row_exists = false;
+        
+    }
+    det_row = table.insertRow(0);
+    var cell0 = det_row.insertCell(0);
+    cell0.innerHTML = "<a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+data[i]["bug"]+">&nbsp;"+ data[i]["bug"] +"&nbsp;</a>";
+    var cell1 = det_row.insertCell(1);
+    cell1.innerHTML = "<a href="+data[i]["graphurl"]+">&nbsp; graphurl &nbsp;</a>";
+    var cell2 = det_row.insertCell(2);
+    cell2.innerHTML = "<a href="+data[i]["tbplurl"]+">&nbsp; tbplurl &nbsp; </a>";
+    var cell3 = det_row.insertCell(3);
+    cell3.innerHTML = "<a href="+data[i]["changeset"]+">&nbsp; changeset &nbsp; </a>";
+    row_exists=true;
+}
+
+function loadAllAlertsTable(showall, rev, test, platform, current) {
+    if (rev == '') {
+        document.getElementById("warn").innerHTML = "<h3><font color=red>Table view is available per revision and not for the entire list</font></h3>";
+    }
+    document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showall=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        data = raw_data.alerts;
+        var plats = [];
+        var tests = [];
+        var rowlist = [];
+        var celllist= [];
+        
+        var table = document.getElementById("data");
+        var row = table.insertRow(0);
+        var cell = row.insertCell(0);
+        cell.innerHTML=" ";
+        for (var i=0;i<data.length;i++) {
+            if (plats.indexOf(data[i]["platform"]) == -1) {
+                plats.push(data[i]["platform"]);
+                cell = row.insertCell(1);
+                cell.innerHTML="<b>"+data[i]["platform"]+"</b>";
+            }
+            
+            if (tests.indexOf(data[i]["test"]) == -1) {
+                tests.push(data[i]["test"]);
+                var row0 = table.insertRow(1);
+                rowlist.push(row0);
+                var cell0 = row0.insertCell(0);
+                cell0.innerHTML ="<b>"+data[i]["test"]+"</b>";
+            }
+        }
+        for (var y=0;y<tests.length;y++) {
+            for (var x=0;x<plats.length;x++) {
+                var cell00= rowlist[y].insertCell(1)
+                celllist.push(cell00);
+            }
+        }
+        for (var i=0;i<data.length;i++) {
+            var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
+            var percent = parseInt((data[i]["percent"].split("%"))[0]);
+            var format="";
+            if (percent<=-10)
+                format = "<font color = red>"+data[i]["percent"]+"<font>";
+            else if (percent<0 && percent>-10)
+                format = "<font color = orange>"+data[i]["percent"]+"<font>";
+            else if (percent>0 && percent<10)
+                format = "<font color = lime>"+data[i]["percent"]+"<font>";
+            else
+                format = "<font color = green>"+data[i]["percent"]+"<font>";
+            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+format+"<b></p>";          
+        }
+    }
+    req.open('get', root_url+'/alertsbyrev?keyrevision='+rev, true);
+    req.send();
 }
 
 function loadAllAlerts(showall, rev, test, platform, current) {
