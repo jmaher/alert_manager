@@ -271,7 +271,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
         var row = table.insertRow(0);
         var cell = row.insertCell(0);
         cell.innerHTML=" ";
-        for(var i=0;i<data.length;i++) {
+        for (var i=0;i<data.length;i++) {
             if (plats.indexOf(data[i]["platform"]) == -1) {
                 plats.push(data[i]["platform"]);
                 cell = row.insertCell(1);
@@ -286,13 +286,13 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
                 cell0.innerHTML ="<b>"+data[i]["test"]+"</b>";
             }
         }
-        for(var y=0;y<tests.length;y++) {
-            for(var x=0;x<plats.length;x++) {
+        for (var y=0;y<tests.length;y++) {
+            for (var x=0;x<plats.length;x++) {
                 var cell00= rowlist[y].insertCell(1)
                 celllist.push(cell00);
             }
         }
-        for(var i=0;i<data.length;i++) {
+        for (var i=0;i<data.length;i++) {
             var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
             var format="";
