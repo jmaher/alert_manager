@@ -297,16 +297,13 @@ function loadAllAlertsTable(showall, rev, test, platform, current, improve) {
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
             if (percent<=-10) {
                 cell1.style.backgroundColor="red";
-            }
-            else if (percent<0 && percent>-10) {
+            } else if (percent<0 && percent>-10) {
                 cell1.style.backgroundColor="orange";
-            }
-            else if (percent>0 && percent<10) {
+            } else if (percent>0 && percent<10) {
                 if(improve == 1)
                     continue;
                 cell1.style.backgroundColor="lime";
-            }
-            else { 
+            } else { 
                 if(improve == 1)
                     continue;                                 
                 cell1.style.backgroundColor="green";
