@@ -214,7 +214,7 @@ function updateTbplURL(alertid, tbplurl) {
 }
 
 function addAlertToUI(tbl, alert, showall) {
-    addMergedAlertToUI(tbl, alert, showall, "");
+    addMergedAlertToUI(tbl, alert, showall);
 }
 
 
