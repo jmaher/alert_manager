@@ -1,5 +1,4 @@
 var root_url = window.location.protocol + '//' + window.location.host;
-var revision = getJsonFromUrl()['rev'];
 var data,det_row;
 var row_exists = false;
 
@@ -215,7 +214,7 @@ function updateTbplURL(alertid, tbplurl) {
 }
 
 function addAlertToUI(tbl, alert, showall) {
-    addMergedAlertToUI(tbl, alert, showall, "");
+    addMergedAlertToUI(tbl, alert, showall);
 }
 
 
@@ -253,11 +252,12 @@ function showDetails(i) {
     row_exists=true;
 }
 
-function loadAllAlertsTable(showall, rev, test, platform, current) {
+function loadAllAlertsTable(showall, rev, test, platform, current, improve) {
     if (rev == '') {
         document.getElementById("warn").innerHTML = "<h3><font color=red>Table view is available per revision and not for the entire list</font></h3>";
     }
     document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showall=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
+    document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&improve="+(1-improve)+">Toggle Improvement</a></b></h5>";
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -295,16 +295,20 @@ function loadAllAlertsTable(showall, rev, test, platform, current) {
         for (var i=0;i<data.length;i++) {
             var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
-            var format="";
-            if (percent<=-10)
-                format = "<font color = red>"+data[i]["percent"]+"<font>";
-            else if (percent<0 && percent>-10)
-                format = "<font color = orange>"+data[i]["percent"]+"<font>";
-            else if (percent>0 && percent<10)
-                format = "<font color = lime>"+data[i]["percent"]+"<font>";
-            else
-                format = "<font color = green>"+data[i]["percent"]+"<font>";
-            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+format+"<b></p>";          
+            if (percent<=-10) {
+                cell1.style.backgroundColor="red";
+            } else if (percent<0 && percent>-10) {
+                cell1.style.backgroundColor="orange";
+            } else if (percent>0 && percent<10) {
+                if(improve == 1)
+                    continue;
+                cell1.style.backgroundColor="lime";
+            } else { 
+                if(improve == 1)
+                    continue;                                 
+                cell1.style.backgroundColor="green";
+            }
+            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";          
         }
     }
     req.open('get', root_url+'/alertsbyrev?keyrevision='+rev, true);

@@ -10,11 +10,11 @@
     <script src="js/AddCommentUI.js"></script>
     <script src="js/alerts.js"></script>
     <script type="text/javascript">
-        function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
+        function addMergedAlertToUI(tbl, alert, showall) {
             var fields = ["date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
             var e = document.getElementById("rev");
-           
-            document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+originalKeyRevision+"&table=1>Toggle View</a></h4>";
+            var revision = e.options[e.selectedIndex].value; 
+            document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+revision+"&table=1>Toggle View</a></h4>";
             var cname = "data";
             if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
                 cname = "mergeddata";
@@ -27,7 +27,7 @@
             }
 
             var row = tbl.insertRow(-1);
-            row.id = alert["id"] + "-" + originalKeyRevision;
+            row.id = alert["id"] + "-";
             var rev = row.insertCell(0);
 
             for (var i = 0; i < fields.length; i++) {
@@ -114,9 +114,11 @@
             document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
             loadSelectors();
-            
-            if (results['table'] == 1)
-                loadAllAlertsTable(showAll, rev, test, platform, current);
+            var improve = results['improve'];
+            if (improve != 1)
+                improve = 0;
+            if (results['table'] == 1) 
+                loadAllAlertsTable(showAll, rev, test, platform, current, improve);
             else
                 loadAllAlerts(showAll, rev, test, platform, current);
         });
@@ -235,6 +237,7 @@
             </form>
         </div>
     </div>
+    <div id="hide" align = "left"></div>
     <div align="center" >
         <table class="sortable" id="data" border=1>
             <tr>
