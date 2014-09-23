@@ -13,16 +13,13 @@ from bug_check import *
 from db import *
 
 
-def run_query(where_clause, body=False):
+def run_query(where_clause):
     db = create_db_connnection()
     cursor = db.cursor()
 
     fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
-    if body:
-        fields.append('body')
-    sql = "select %s from alerts %s;" %(','.join(fields), where_clause)
+    sql = "select %s from alerts %s;" %(','.join(fields), where_clause.strip())
     cursor.execute(sql)
-
     alerts = cursor.fetchall()
 
     retVal = []
@@ -57,7 +54,7 @@ def get_conflicting_alerts():
 @app.route('/alert')
 def run_alert_query():
     inputid = request.args['id']
-    return jsonify(alerts=run_query("where id=%s" % inputid, True))
+    return jsonify(alerts=run_query("where id=%s" % inputid))
 
 @app.route('/bugzilla_reports')
 def run_bugzilla_query():
@@ -131,7 +128,7 @@ def run_alertsbyrev_expired_query():
                     query += "%s='%s' " % (key, val)
                     flag = 1
         query += "and date < '%s'" % str(d);
-        return {'alerts': run_query(query, True)}
+        return jsonify(alerts=run_query(query))
     where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
     return jsonify(alerts=run_query(where_clause))
 
@@ -151,7 +148,7 @@ def run_alertsbyrev_query():
                 else:
                     query += "%s='%s' " % (key, val)
                     flag = 1
-        return {'alerts': run_query(query, True)}
+        return jsonify(alerts=run_query(query))
     where_clause = """
         where
             date > NOW() - INTERVAL 127 DAY and
