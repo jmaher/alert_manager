@@ -114,11 +114,11 @@
             document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
             loadSelectors();
-            var improve = results['improve'];
-            if (improve != 1)
-                improve = 0;
+            var show_improvement = results['show_improvement'];
+            if (show_improvement != 0)
+                show_improvement = 1;
             if (results['table'] == 1) 
-                loadAllAlertsTable(showAll, rev, test, platform, current, improve);
+                loadAllAlertsTable(showAll, rev, test, platform, current, show_improvement);
             else
                 loadAllAlerts(showAll, rev, test, platform, current);
         });
