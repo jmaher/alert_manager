@@ -257,11 +257,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
         document.getElementById("warn").innerHTML = "<h3><font color=red>Table view is available per revision and not for the entire list</font></h3>";
     }
     document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showall=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
-    if (show_improvement == 1)
-        document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&show_improvement=0>Hide Improvement</a></b></h5>";
-    else
-        document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&show_improvement=1>Show Improvement</a></b></h5>";
-
+    document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&show_improvement="+(1-show_improvement)+">Toggle Improvement</a></b></h5>";
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -270,7 +266,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
         var tests = [];
         var rowlist = [];
         var celllist= [];
-        document.getElementById("revision").innerHTML = "<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showall=1&testIndex=0&platIndex=0>"+rev+"</a></h4>";
+        
         var table = document.getElementById("data");
         var row = table.insertRow(0);
         var cell = row.insertCell(0);
@@ -287,7 +283,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                 var row0 = table.insertRow(1);
                 rowlist.push(row0);
                 var cell0 = row0.insertCell(0);
-                cell0.innerHTML ="<b> "+data[i]["test"]+" </b>";
+                cell0.innerHTML ="<b>"+data[i]["test"]+"</b>";
             }
         }
         for (var y=0;y<tests.length;y++) {
