@@ -12,9 +12,8 @@
     <script type="text/javascript">
         function addMergedAlertToUI(tbl, alert, showall, rev) {
             var fields = ["date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
-            //var e = document.getElementById("rev");
-            //var revision = e.options[e.selectedIndex].value; 
-            document.getElementById("jump").innerHTML="<h5><a href="+root_url+"/alerts.html?rev="+rev+"&table=1>Toggle View</a></h5>";
+            if(rev != "")
+                document.getElementById("jump").innerHTML="<h5><a href="+root_url+"/alerts.html?rev="+rev+"&table=1>Toggle View</a></h5>";
             var cname = "data";
             if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
                 cname = "mergeddata";
