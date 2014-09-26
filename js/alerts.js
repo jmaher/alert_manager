@@ -282,8 +282,22 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                 tests.push(data[i]["test"]);
                 var row0 = table.insertRow(1);
                 rowlist.push(row0);
+               // var testLen = (data[i]["test"]).length;
                 var cell0 = row0.insertCell(0);
-                cell0.innerHTML ="<b>&nbsp;"+data[i]["test"]+"&nbsp;</b>";
+               // if(testLen < 40)
+                    cell0.innerHTML ="<b>&nbsp;"+data[i]["test"]+"&nbsp;</b>";
+            /*    else {
+                var testName = "";
+                    do
+                    {
+                      var pos=0;
+                      testName = testName + data[i]["test"].substring(pos,pos+40)+"<br />";
+                      testLen = testLen - 40;
+                      pos+=40;  
+                    } while(testLen-40 > 40) ;
+                    testName = testName + data[i]["test"].substring(pos,data[i]["test"].length);
+                    cell0.innerHTML ="<b>"+testName+"</b>";
+                }*/
             }
         }
         for (var y=0;y<tests.length;y++) {
