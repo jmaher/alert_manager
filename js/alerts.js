@@ -213,8 +213,8 @@ function updateTbplURL(alertid, tbplurl) {
     AddTbplUI.openTbplBox(alertid, tbplurl);
 }
 
-function addAlertToUI(tbl, alert, showall) {
-    addMergedAlertToUI(tbl, alert, showall);
+function addAlertToUI(tbl, alert, showall, rev) {
+    addMergedAlertToUI(tbl, alert, showall, rev);
 }
 
 
@@ -287,7 +287,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                 var row0 = table.insertRow(1);
                 rowlist.push(row0);
                 var cell0 = row0.insertCell(0);
-                cell0.innerHTML ="<b> "+data[i]["test"]+" </b>";
+                cell0.innerHTML ="<b>&nbsp;"+data[i]["test"]+"&nbsp;</b>";
             }
         }
         for (var y=0;y<tests.length;y++) {
@@ -350,7 +350,7 @@ function loadAllAlerts(showall, rev, test, platform, current) {
                 $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
-            var r = addAlertToUI(tbl, alerts[alert], showall);
+            var r = addAlertToUI(tbl, alerts[alert], showall, rev);
             if ($(document.getElementById(keyrev + '-tbl')).find('tr').size() == 0) {
                 $(document.getElementById(keyrev + "-hdr")).html("");
             }
