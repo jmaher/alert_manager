@@ -115,7 +115,7 @@ function hideMerged(originalkeyrev, showall) {
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
 
-        $(document.getElementById(originalkeyrev + "-hdr")).html("<a href=?rev=" + originalkeyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);
+        $(document.getElementById(originalkeyrev + "-hdr")).html("<a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -137,7 +137,7 @@ function showMerged(originalkeyrev, showall) {
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
-        $(document.getElementById(originalkeyrev + "-hdr")).html("<h3><a href=?rev=" + originalkeyrev + "&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
+        $(document.getElementById(originalkeyrev + "-hdr")).html("<h3><a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -256,8 +256,12 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
     if (rev == '') {
         document.getElementById("warn").innerHTML = "<h3><font color=red>Table view is available per revision and not for the entire list</font></h3>";
     }
-    document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showall=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
-    document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&show_improvement="+(1-show_improvement)+">Toggle Improvement</a></b></h5>";
+    document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showAll=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
+    if (show_improvement == 1)
+        document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&show_improvement=0>Hide Improvement</a></b></h5>";
+    else
+        document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&show_improvement=1>Show Improvement</a></b></h5>";
+
     var req = new XMLHttpRequest();
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
@@ -266,7 +270,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
         var tests = [];
         var rowlist = [];
         var celllist= [];
-        
+        document.getElementById("revision").innerHTML = "<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showAll=1&testIndex=0&platIndex=0>"+rev+"</a></h4>";
         var table = document.getElementById("data");
         var row = table.insertRow(0);
         var cell = row.insertCell(0);
@@ -282,22 +286,8 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                 tests.push(data[i]["test"]);
                 var row0 = table.insertRow(1);
                 rowlist.push(row0);
-               // var testLen = (data[i]["test"]).length;
                 var cell0 = row0.insertCell(0);
-               // if(testLen < 40)
-                    cell0.innerHTML ="<b>&nbsp;"+data[i]["test"]+"&nbsp;</b>";
-            /*    else {
-                var testName = "";
-                    do
-                    {
-                      var pos=0;
-                      testName = testName + data[i]["test"].substring(pos,pos+40)+"<br />";
-                      testLen = testLen - 40;
-                      pos+=40;  
-                    } while(testLen-40 > 40) ;
-                    testName = testName + data[i]["test"].substring(pos,data[i]["test"].length);
-                    cell0.innerHTML ="<b>"+testName+"</b>";
-                }*/
+                cell0.innerHTML ="<b>&nbsp;"+data[i]["test"]+"&nbsp;</b>";
             }
         }
         for (var y=0;y<tests.length;y++) {
@@ -347,7 +337,7 @@ function loadAllAlerts(showall, rev, test, platform, current) {
                     newdiv.id = keyrev;
                     $("#revisions").append(newdiv);
 
-                    $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
+                    $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
 
                 }
                 if ($(document.getElementById(keyrev + "-tbl")).html() == null) {
@@ -357,7 +347,7 @@ function loadAllAlerts(showall, rev, test, platform, current) {
                     $(document.getElementById(keyrev)).append(newtbl);
                 }
 
-                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
+                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
             var r = addAlertToUI(tbl, alerts[alert], showall, rev);
