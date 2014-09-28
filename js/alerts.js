@@ -280,6 +280,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                 plats.push(data[i]["platform"]);
                 cell = row.insertCell(1);
                 cell.innerHTML="<b>"+data[i]["platform"]+"</b>";
+                cell.style.backgroundColor="#CCCCCC"; // light grey
             }
             
             if (tests.indexOf(data[i]["test"]) == -1) {
@@ -288,6 +289,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                 rowlist.push(row0);
                 var cell0 = row0.insertCell(0);
                 cell0.innerHTML ="<b>&nbsp;"+data[i]["test"]+"&nbsp;</b>";
+                cell0.style.backgroundColor="#CCCCCC"; // light grey
             }
         }
         for (var y=0;y<tests.length;y++) {
@@ -299,18 +301,18 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
         for (var i=0;i<data.length;i++) {
             var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
-            if (percent<=-10) {
-                cell1.style.backgroundColor="red";
+            if (percent <= -10) {
+                cell1.style.backgroundColor="#EA9999"; //red
             } else if (percent<0 && percent>-10) {
-                cell1.style.backgroundColor="orange";
+                cell1.style.backgroundColor="#FCE5CD"; //orange
             } else if (percent>0 && percent<10) {
-                if(show_improvement == 0)
+                if (show_improvement == 0)
                     continue;
-                cell1.style.backgroundColor="lime";
-            } else { 
-                if(show_improvement == 0)
-                    continue;                                 
-                cell1.style.backgroundColor="green";
+                cell1.style.backgroundColor="#B6D7A8"; //light green
+            } else {
+                if (show_improvement == 0)
+                    continue;
+                cell1.style.backgroundColor="#93C47D"; // green
             }
             cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";          
         }
