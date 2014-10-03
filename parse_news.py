@@ -1,4 +1,4 @@
-
+import ast
 import logging
 import mailbox
 import os
@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from email.utils import parsedate
 from itertools import chain
 from urllib import urlencode
-from urlparse import parse_qsl, urlsplit, urlunsplit
+from urlparse import parse_qs, parse_qsl, urlsplit, urlunsplit
 
 import requests
 
@@ -46,6 +46,7 @@ fields = ('branch', 'test', 'platform', 'percent',
           'comment', 'bug', 'status')
 record = namedtuple('record', fields)
 
+ 
 
 def parse_mailbox():
     """Main routine"""
@@ -172,7 +173,7 @@ def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
 
     match = graphurl_re.search(body)
     if match:
-        graph_url = match.group(1)
+        graph_url = unshorten_then_extend(match.group(1))
 
     match = cset_re.search(body)
     if match:
@@ -273,6 +274,100 @@ def build_tbpl_link(record):
 
     return link
 
+def unshorten_then_extend(url):
+    return extend_branches(unshorten_url(url))
+
+def unshorten_url(url):
+    """unshortens a shorten url
+    
+    Returns None if any exception is raised when trying to access
+    resource via http connection
+    """
+    try:
+        r = requests.head(url)
+        return r.headers.get("location")
+    except requests.exceptions.RequestException as e:
+        logger.warning("Unabled to unshorten url: {}".format(url))
+        return None
+
+def unparse_qs(qs):
+    return "&".join(['{}={}'.format(k,v) for k, v in qs.iteritems()])
+
+def extend_branches(graphurl):
+    """extends a given graph url to include graphs of referecne branches
+
+    For instance, given a graph url
+
+            http://graphs.mozilla.org/graph.html#tests=[[297,132,25]]&sel=1401221472000,1401394272000
+
+    consider the the query tests=<data set>. Each data set is a list of 3 elements, where
+
+        dataset[0] = test reference #
+        dataset[1] = build reference #
+        dataset[2] = platform reference #
+
+    We are interested in extending this dataset to include dataset of other branches so that 
+    the performance graph displays the graph originally in question along with the reference
+    data points.
+
+    Returns the extend graphurl suitable to be stored in the database or None if url passed
+    is not in an expected format
+    """
+    OTHER_BRANCHES = {}
+    OTHER_BRANCHES['Inbound'] = {'pgo':    {'id': 63, 'name': 'Mozilla-Inbound'},
+                                 'nonpgo': {'id': 131, 'name': 'Mozilla-Inbound-Non-PGO'}}
+    OTHER_BRANCHES['Fx-Team'] = {'pgo':    {'id': 64, 'name': 'Fx-Team'},
+                                 'nonpgo': {'id': 132, 'name': 'Fx-Team-Non-PGO'}}
+
+    if not graphurl:
+        logger.warning("Unable to extend an empty url".format(graphurl))
+        return None
+
+    parsed = urlsplit(graphurl)
+    ## extracts out "fragments" (i.e. #tests=...&select=...)
+    fragments =  parsed.fragment
+
+    ## converts extracted fragment into a dict
+    frags = parse_qs(fragments)
+
+    ## note: prase_qs returns a list for each of the query
+    try:
+        tests = frags['tests'][0]
+    except KeyError:
+        logger.warning("Unvalid graphurl: {}".format(graphurl))
+        return None
+
+    ## for ease of manipulation, we turn our "string list"
+    ## to an actual python list
+    current_tests = ast.literal_eval(tests)
+
+    ## we create addtional data sets (i.e. [1,2,3])
+    ## based on the first (and the only) data set 
+    ## parsed from the current graphurl
+    current_test = current_tests[0] 
+
+    for branch in OTHER_BRANCHES.values():
+        for build in branch.values():
+            ## append ONLY if the build in consideration
+            ## is NOT the original data set's build id
+            if build['id'] != current_test[1]:
+                ## making a copy of a list
+                new_test = list(current_test)
+                ## replacing the branch number
+                new_test[1] = build['id']
+                ## append to the data set
+                current_tests.append((new_test))
+
+    ## update query fragment with the updated data sets
+    frags['tests'] = current_tests
+
+    ## convert dict into valid fragment string
+    fragments = unparse_qs(frags)
+
+    ## update fragment 
+    replaced = parsed._replace(fragment=fragments)
+
+    return urlunsplit(replaced)
 
 @database_conn
 def get_csets(db_cursor):
