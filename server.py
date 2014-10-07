@@ -22,7 +22,6 @@ def home():
 def expired():
     return render_template('expired.html')
 
-
 @app.route('/report')
 def report():
     return render_template('report.html')
