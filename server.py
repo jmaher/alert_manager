@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from flask import render_template, redirect, flash,url_for,session, request
 import os
 import json
 import sys
@@ -13,6 +13,21 @@ from optparse import OptionParser
 import logging
 from bug_check import *
 from db import *
+
+
+@app.route('/')
+def home():
+    return render_template('alerts.html')
+
+@app.route('/expired')
+def expired():
+    return render_template('expired.html')
+
+
+@app.route('/report')
+def report():
+    return render_template('report.html')
+
 
 def serialize_to_json(object):
     """Serialize class objects to json"""
