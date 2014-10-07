@@ -14,7 +14,6 @@ import logging
 from bug_check import *
 from db import *
 
-
 @app.route('/')
 def home():
     return render_template('alerts.html')
@@ -28,6 +27,9 @@ def expired():
 def report():
     return render_template('report.html')
 
+@app.route('/bug_conflict')
+def bug_conflict():
+    return render_template('bug_conflict.html')
 
 def serialize_to_json(object):
     """Serialize class objects to json"""
@@ -35,7 +37,6 @@ def serialize_to_json(object):
         return object.__dict__
     except AttributeError:
         raise TypeError(repr(object) + 'is not JSON serializable')
-
 
 def json_response(func):
     """Decorator: Serialize response to json"""
@@ -47,7 +48,6 @@ def json_response(func):
             default=serialize_to_json)
 
     return wrapper
-
 
 def run_query(where_clause, body=False):
     db = create_db_connnection()
