@@ -5,7 +5,6 @@
     <title>Reports</title>
     <link href="css/graph_style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/custom.css">
    
     <script language="javascript" type="text/javascript" src="js/sorttable.js"></script>
     <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
@@ -333,7 +332,7 @@ function getJsonFromUrl() {
 </head>
 <body>
     <div align="center">
-        <table>
+        <table class="table">
             <tr>
                 <td><a href="/" id="alerts" >Alerts</a></td>
                 <td></td>
@@ -351,10 +350,10 @@ function getJsonFromUrl() {
 	<div id="content">
 
 		<h3 id="title"></h3>
-		<table>
+		<table class="table">
 		    <tr>
 		        <td>
-		            <div align = "center">
+		            <div class="row" align = "center">
                         <form>
                             <label for="from">Start date: </label>
                             <input type="text" id="from" size="10" name="startDate"/>
@@ -372,7 +371,7 @@ function getJsonFromUrl() {
 		            <h3 align="center">Alerts|Bugs Per Week</h3>
 		        </td>
 		        <td>
-		            <div id="menu">
+		            <div class="row" id="menu">
                         <form >
                             Date (for Bugzilla queries): 
                             <input type="text" id="date" size="10" name="date"/>
@@ -381,7 +380,7 @@ function getJsonFromUrl() {
 	                        </p>
                         </form>
 		            </div>
-		            <p></p>
+		            
                     <div id = "date_disp" align="center"></div>
 		                <div class="demo-container">
                     <div id="days_open" class="demo-placeholder"></div>
