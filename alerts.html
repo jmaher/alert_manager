@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<style>
+   #data td { width:100px; word-wrap:break-word; padding:5px}
+   #data td:first-child { width:200px; word-wrap:break-word; padding:5px}
+</style>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/menu.css">
@@ -10,10 +14,10 @@
     <script src="js/AddCommentUI.js"></script>
     <script src="js/alerts.js"></script>
     <script type="text/javascript">
-
-        function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
-            var fields = ["push_date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
-
+        function addMergedAlertToUI(tbl, alert, showall, rev) {
+	        var fields = ["push_date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
+            if(rev != "")
+                document.getElementById("jump").innerHTML="<h5><a href="+root_url+"/alerts.html?rev="+rev+"&table=1>Toggle View</a></h5>";
             var cname = "data";
             if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
                 cname = "mergeddata";
@@ -26,7 +30,7 @@
             }
 
             var row = tbl.insertRow(-1);
-            row.id = alert["id"] + "-" + originalKeyRevision;
+            row.id = alert["id"] + "-";
             var rev = row.insertCell(0);
 
             for (var i = 0; i < fields.length; i++) {
@@ -114,7 +118,13 @@
             document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
             loadSelectors();
-            loadAllAlerts(showAll, rev, test, platform, current);
+            var show_improvement = results['show_improvement'];
+            if (show_improvement != 0)
+                show_improvement = 1;
+            if (results['table'] == 1)
+                loadAllAlertsTable(showAll, rev, test, platform, current, show_improvement);
+            else
+                loadAllAlerts(showAll, rev, test, platform, current);
         });
 
     </script>
@@ -171,7 +181,7 @@
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>
-
+        <div id = "jump" align = "right"></div>
         <div id="revisions">
         </div>
 
@@ -199,7 +209,6 @@
                     <input type="submit" value="Add Bug">
             </form>
         </div>
-
         <div id="addTBPLPopup" class="popupForm" style="display: none;">
             <a class="closePopup" href="javascript:hideDiv('addTBPLPopup');">close</a>
 
@@ -231,5 +240,20 @@
             </form>
         </div>
     </div>
+    <div id="hide" align="left"></div>
+    <div id="revision" align="center"></div>
+    <div align="center">
+        <table class="sortable" id="data" border="1">
+            <tr>
+            </tr>
+        </table>
+    </div>
+<div align="center">
+    <table id="detail">
+        <tr>
+        </tr>
+    </table>
+  </div>
+    <p id="warn" align="center"></p>
 </body>
 </html>
