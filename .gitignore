@@ -43,3 +43,5 @@ config.ini
 /.idea
 
 /*.iml
+/alerts_new.7z
+/alerts_new.sql
