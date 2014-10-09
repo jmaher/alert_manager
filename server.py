@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from flask import render_template, redirect, flash, url_for, session, request
 import os
 import sys
 import requests
@@ -12,8 +12,41 @@ import logging
 from bug_check import *
 from db import *
 
+@app.route('/')
+def home():
+    return render_template('alerts.html')
 
-def run_query(where_clause):
+@app.route('/expired')
+def expired():
+    return render_template('expired.html')
+
+@app.route('/report')
+def report():
+    return render_template('report.html')
+
+@app.route('/bug_conflict')
+def bug_conflict():
+    return render_template('bug_conflict.html')
+
+def serialize_to_json(object):
+    """Serialize class objects to json"""
+    try:
+        return object.__dict__
+    except AttributeError:
+        raise TypeError(repr(object) + 'is not JSON serializable')
+
+def json_response(func):
+    """Decorator: Serialize response to json"""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        return json.dumps(result or {'error': 'No data found for your request'},
+            default=serialize_to_json)
+
+    return wrapper
+
+def run_query(where_clause, body=False):
     db = create_db_connnection()
     cursor = db.cursor()
 

@@ -67,7 +67,7 @@ function loadSelectors() {
         document.cookie = "platform = " + platform;
         document.cookie = "test = " + test;
 
-        var href = "alerts.html";
+        var href = "/";
         var flag = '?';
         if (rev && rev != '') {
             href += flag + "rev=" + rev;

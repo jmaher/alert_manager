@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" type="text/css" href="css/menu.css">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/custom.css">
-    <script src="js/jquery.js"></script>
-    <script src="js/AddCommentUI.js"></script>
-    <script src="js/alerts.js"></script>
-    <script type="text/javascript">
+{% extends 'base.html' %}
+
+{% block expired %}
+
+<script type="text/javascript">
 
     var showAll = 1;
     function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
@@ -35,13 +28,12 @@
             break;
         }
     }
-
-
     if (pass) {
     pass = false;
     var row = tbl.insertRow(-1);
     row.id = alert["id"] + "-" + originalKeyRevision;
     var rev = row.insertCell(0);
+
     for (var i=0; i < fields.length; i++) {
         var test = fields[i];
         cell = row.insertCell(-1);
@@ -95,148 +87,33 @@
     return 1
 }
 
-// parse get parameters
-document.title = 'Talos Alerts';
+    // parse get parameters
+    document.title = 'Talos Alerts';
 
-var results = getJsonFromUrl();
-var showAll = 1;
-if (parseInt(results['showAll']) != 1) {
-  showAll = 0;
-}
-var rev = results['rev'];
-if(!rev) {
-    rev = "";
-}
-var test = getCookie("test");
-if(!test) {
-    test = "";
-}
+    var results = getJsonFromUrl();
+    var showAll = 1;
+    if (parseInt(results['showAll']) != 1) {
+      showAll = 0;
+    }
+    var rev = results['rev'];
+    if(!rev) {
+        rev = "";
+    }
+    var test = getCookie("test");
+    if(!test) {
+        test = "";
+    }
 
-var platform = getCookie("platform");
-if(!platform) {
-    platform = "";
-}
-var current = "false";
-document.cookie = "platform =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-loadAllAlerts(showAll, rev, test, platform, current);
-    </script>
-</head>
-<body class="noscript">
-    <div class="container-fluid">
-        <div text-align="center">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <tr>
-                        <td><a href="http://54.215.155.53:8080/alerts.html">Alerts</a></td>
-                        <td></td>
-                        <td><a href="http://54.215.155.53:8080/expired.html">Expired alerts</a></td>
-                        <td></td>
-                        <td><a href="http://54.215.155.53:8080/report.html">Reports</a></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <nav class="navbar navbar-default" role="navigation">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="alerts.html">Talos Alert Manager</a>
-            </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav top-nav">
-                    <li class="dropdown">
-                        <select class="form-control" id="rev">
-                                <option value="">Select Revision</option>
-                        </select>
-                    </li>
-                    <li class="dropdown">
-                        <select class="form-control" id="test">
-                            <option value="">Select Test</option>
-                        </select>
-                    </li >
-                    <li class="dropdown">
-                          <select class="form-control" id="platform">
-                                <option value="">Select Platform</option>
-                            </select>
-                    </li>
+    var platform = getCookie("platform");
+    if(!platform) {
+        platform = "";
+    }
+    var current = "false";
+    document.cookie = "platform =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = "test =; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    loadAllAlerts(showAll, rev, test, platform, current);
+    
+</script>
 
-                    <li >
-                        <u>ShowAll</u>
-                        <input type="checkbox" id="checkbox" Value="Show All"/>
+{% endblock %}
 
-                        <input type="button" class="btn btn-primary" class="button" id="button" type="button" value="Filter"/>
-                    </li>
-                </ul>
-            </div><!-- /.navbar-collapse -->
-        </nav>
-    <div id="revisions">
-    </div>
-
-<div id="addDuplicatePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
-  <form id="addDuplicateForm">
-    <h2>Mark as duplicate of original revision</h2>
-    <p>
-    <input required type="text" id="logDuplicateText" value="">
-    <input type="submit" value="Mark as Duplicate">
-  </form>
-</div>
-
-<div id="addBugPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
-  <form id="addBugForm">
-    <h2>Bug that tracks this regression</h2>
-    <p>
-    <input required type="text" id="logBugText" value="">
-    <input type="hidden" id="logBugStatusText" value="">
-    <input type="submit" value="Add Bug">
-  </form>
-</div>
-
-<div id="addTBPLPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
-  <form id="addTBPLForm">
-    <h2>Link to TBPL view of jobs</h2>
-    <p>
-    <input required type="text" id="logTbplText" value="">
-    <input type="submit" value="Add Link">
-  </form>
-</div>
-
-<div id="addNotePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
-  <form id="addNoteForm">
-    <h2>Add a Comment</h2>
-    <table>
-      <tr>
-        <th><label for="logNoteEmail">Name/nick:</label></th>
-        <td><input required type="text" id="logNoteEmail" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteStatus">Status:</label></th>
-        <td><input type="text" id="logNoteStatus" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteBug">Bug #:</label></th>
-        <td><input type="text" id="logNoteBug" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteBody">Alert Content:</label></th>
-        <td id="logNoteBody"><span class="lnBody"></span></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteText">Comment:</label></th>
-        <td><textarea required cols="40" rows="15" id="logNoteText"></textarea></td>
-      </tr>
-    </table>
-    <p><input type="submit" value="Add Comment">
-  </form>
-</div>
-
-</body>
-</html>
