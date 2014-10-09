@@ -1,4 +1,3 @@
-import ast
 import logging
 import mailbox
 import os
@@ -10,7 +9,7 @@ from datetime import datetime, timedelta
 from email.utils import parsedate
 from itertools import chain
 from urllib import urlencode
-from urlparse import parse_qs, parse_qsl, urlsplit, urlunsplit
+from urlparse import parse_qsl, urlsplit, urlunsplit
 
 import requests
 
