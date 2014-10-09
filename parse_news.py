@@ -46,7 +46,6 @@ fields = ('branch', 'test', 'platform', 'percent',
           'comment', 'bug', 'status')
 record = namedtuple('record', fields)
 
- 
 
 def parse_mailbox():
     """Main routine"""
@@ -274,8 +273,10 @@ def build_tbpl_link(record):
 
     return link
 
+
 def unshorten_then_extend(url):
     return extend_branches(unshorten_url(url))
+
 
 def unshorten_url(url):
     """unshortens a shorten url
@@ -289,9 +290,6 @@ def unshorten_url(url):
     except requests.exceptions.RequestException as e:
         logger.warning("Unabled to unshorten url: {}".format(url))
         return None
-
-def unparse_qs(qs):
-    return "&".join(['{}={}'.format(k,v) for k, v in qs.iteritems()])
 
 def extend_branches(graphurl):
     """extends a given graph url to include graphs of referecne branches
@@ -313,61 +311,57 @@ def extend_branches(graphurl):
     Returns the extend graphurl suitable to be stored in the database or None if url passed
     is not in an expected format
     """
-    OTHER_BRANCHES = {}
-    OTHER_BRANCHES['Inbound'] = {'pgo':    {'id': 63, 'name': 'Mozilla-Inbound'},
-                                 'nonpgo': {'id': 131, 'name': 'Mozilla-Inbound-Non-PGO'}}
-    OTHER_BRANCHES['Fx-Team'] = {'pgo':    {'id': 64, 'name': 'Fx-Team'},
-                                 'nonpgo': {'id': 132, 'name': 'Fx-Team-Non-PGO'}}
+    INTEGRATION_BRANCHES = {}
+    INTEGRATION_BRANCHES['Inbound'] = {'pgo':    {'id': 63, 'name': 'Mozilla-Inbound'},
+                                       'nonpgo': {'id': 131, 'name': 'Mozilla-Inbound-Non-PGO'}}
+    INTEGRATION_BRANCHES['Fx-Team'] = {'pgo':    {'id': 64, 'name': 'Fx-Team'},
+                                       'nonpgo': {'id': 132, 'name': 'Fx-Team-Non-PGO'}}
+    OSX = [13, 21, 24]
 
     if not graphurl:
         logger.warning("Unable to extend an empty url".format(graphurl))
         return None
 
-    parsed = urlsplit(graphurl)
-    ## extracts out "fragments" (i.e. #tests=...&select=...)
-    fragments =  parsed.fragment
+    url_head, data_sets, url_tail = chop_graph_url(graphurl)
+    platform, branch, test = get_graph_description(data_sets)
 
-    ## converts extracted fragment into a dict
-    frags = parse_qs(fragments)
+    for ibranch in INTEGRATION_BRANCHES.values():
+        branch_type = 'nonpgo'
+        if test in OSX:
+            branch_type = 'pgo'
+        #candidate = generate_branch(ibranch[branch_type], platform, branch, test)
+        candidate = [platform, ibranch[branch_type]['id'], test]
 
-    ## note: prase_qs returns a list for each of the query
+        ## only add the candidate branch IF its branch id is not the original
+        if candidate[1] != branch:
+            data_sets.append(candidate)
+
+    ## reconstruct the url
+    newurl  = "{}{}{}".format(url_head, data_sets, url_tail)
+    return newurl
+
+def chop_graph_url(graphurl):
+    """
+    chops a graph url into three pieces - head, dataset, and tail
+
+    For instance:
+            http://graphs.mozilla.org/graph.html#tests=[[297,132,25]]&sel=1401221472000,1401394272000
+    returns
+        ('http://graphs.mozilla.org/graph.html#tests=', [['297', '132', '25']], '&sel=1401221472000,1401394272000')
+    """
     try:
-        tests = frags['tests'][0]
-    except KeyError:
-        logger.warning("Unvalid graphurl: {}".format(graphurl))
-        return None
+        url_head, tail = graphurl.split("[[")
+        data, url_tail = tail.split("]]")
+        ## data is currently an illformed string 
+        ## we would like to convert it into a list of list of ints
+        data = [map(int,x.split(',')) for x in data.split('],[')]
+        return url_head, data, url_tail
+    except ValueError as e:
+        ## graphurl is not in an expected form
+        return None, None, None
 
-    ## for ease of manipulation, we turn our "string list"
-    ## to an actual python list
-    current_tests = ast.literal_eval(tests)
-
-    ## we create addtional data sets (i.e. [1,2,3])
-    ## based on the first (and the only) data set 
-    ## parsed from the current graphurl
-    current_test = current_tests[0] 
-
-    for branch in OTHER_BRANCHES.values():
-        for build in branch.values():
-            ## append ONLY if the build in consideration
-            ## is NOT the original data set's build id
-            if build['id'] != current_test[1]:
-                ## making a copy of a list
-                new_test = list(current_test)
-                ## replacing the branch number
-                new_test[1] = build['id']
-                ## append to the data set
-                current_tests.append((new_test))
-
-    ## update query fragment with the updated data sets
-    frags['tests'] = current_tests
-
-    ## convert dict into valid fragment string
-    fragments = unparse_qs(frags)
-
-    ## update fragment 
-    replaced = parsed._replace(fragment=fragments)
-
-    return urlunsplit(replaced)
+def get_graph_description(data_set):
+    return tuple(map(int,data_set[0]))
 
 @database_conn
 def get_csets(db_cursor):
