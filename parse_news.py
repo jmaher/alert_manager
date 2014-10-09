@@ -328,7 +328,6 @@ def extend_branches(graphurl):
         branch_type = 'nonpgo'
         if test in OSX:
             branch_type = 'pgo'
-        #candidate = generate_branch(ibranch[branch_type], platform, branch, test)
         candidate = [platform, ibranch[branch_type]['id'], test]
 
         ## only add the candidate branch IF its branch id is not the original
