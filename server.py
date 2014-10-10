@@ -111,9 +111,11 @@ def run_mergedids_query():
     return jsonify(alerts=run_query(where_clause))
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
-@app.route('/alertsbyexpiredrev')
-def run_alertsbyrev_expired_query():
+
+@app.route('/alertsbyrev')
+def run_alertsbyrev_query():
     query_dict = request.args.to_dict()
+    expired = query_dict.pop('expired')
     if 'rev' in query_dict:
         query_dict['keyrevision'] = query_dict.pop('rev')
     query = "where "
@@ -127,37 +129,23 @@ def run_alertsbyrev_expired_query():
                 else:
                     query += "%s='%s' " % (key, val)
                     flag = 1
-        query += "and date < '%s'" % str(d);
+        if int(expired) == 1:
+            query += "and date < '%s'" % str(d);
+       
         return jsonify(alerts=run_query(query))
-    where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
-    return jsonify(alerts=run_query(where_clause))
-
-
-@app.route('/alertsbyrev')
-def run_alertsbyrev_query():
-    query_dict = request.args.to_dict()
-    if 'rev' in query_dict:
-        query_dict['keyrevision'] = query_dict.pop('rev')
-    query = "where "
-    flag = 0
-    if any(query_dict):
-        for key, val in query_dict.iteritems():
-            if val:
-                if flag:
-                    query += "and %s='%s' " % (key, val)
-                else:
-                    query += "%s='%s' " % (key, val)
-                    flag = 1
-        return jsonify(alerts=run_query(query))
-    where_clause = """
-        where
-            date > NOW() - INTERVAL 127 DAY and
-            left(keyrevision, 1) <> '{' and
-            mergedfrom = '' and
-            (status='' or status='NEW' or status='Investigating')
-        order by
-            date DESC, keyrevision
-        """
+      
+    if int(expired) == 0:
+        where_clause = """
+            where
+                date > NOW() - INTERVAL 127 DAY and
+                left(keyrevision, 1) <> '{' and
+                mergedfrom = '' and
+                (status='' or status='NEW' or status='Investigating')
+            order by
+                date DESC, keyrevision
+            """
+    else:
+        where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);    
     return jsonify(alerts=run_query(where_clause))
 
 

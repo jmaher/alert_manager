@@ -364,19 +364,18 @@ function loadAllAlerts(showall, rev, test, platform, current) {
         AddTbplUI.init();
     }
     if (current == "true") {
-        url = "/alertsbyrev";
+        url = "/alertsbyrev?expired=0";
     } else {
-        url = "/alertsbyexpiredrev";
+        url = "/alertsbyrev?expired=1";
     }
-    flag = '?';
     if (rev && rev != '') {
-        url += flag + "rev=" + rev;
+        url += "rev=" + rev;
     }
     if (test && test != '') {
-        url += flag + "test=" + test;
+        url += "test=" + test;
     }
     if (platform && platform != '') {
-        url += flag + "platform=" + platform;
+        url += "platform=" + platform;
     }
     req.open('get', (root_url + url), true);
     req.send();
