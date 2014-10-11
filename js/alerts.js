@@ -317,7 +317,7 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
             cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";          
         }
     }
-    req.open('get', root_url+'/alertsbyrev?keyrevision='+rev, true);
+    req.open('get', root_url+'/alertsbyrev?expired=0&keyrevision='+rev, true);
     req.send();
 }
 
@@ -369,13 +369,13 @@ function loadAllAlerts(showall, rev, test, platform, current) {
         url = "/alertsbyrev?expired=1";
     }
     if (rev && rev != '') {
-        url += "rev=" + rev;
+        url += "&rev=" + rev;
     }
     if (test && test != '') {
-        url += "test=" + test;
+        url += "&test=" + test;
     }
     if (platform && platform != '') {
-        url += "platform=" + platform;
+        url += "&platform=" + platform;
     }
     req.open('get', (root_url + url), true);
     req.send();
