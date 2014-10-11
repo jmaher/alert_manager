@@ -133,19 +133,13 @@ def run_alertsbyrev_query():
             query += "and date < '%s'" % str(d);
        
         return jsonify(alerts=run_query(query))
-      
-    if int(expired) == 0:
-        where_clause = """
-            where
-                date > NOW() - INTERVAL 127 DAY and
-                left(keyrevision, 1) <> '{' and
-                mergedfrom = '' and
-                (status='' or status='NEW' or status='Investigating')
-            order by
-                date DESC, keyrevision
-            """
+    
+    if int(expired) == 1:
+        comparator = "<"
     else:
-        where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);    
+        comparator = ">"
+        
+    where_clause = "where left(keyrevision, 1) <> '{' and mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date "+comparator+" '%s' order by date DESC, keyrevision" % str(d);    
     return jsonify(alerts=run_query(where_clause))
 
 
