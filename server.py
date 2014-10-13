@@ -115,7 +115,9 @@ def run_mergedids_query():
 @app.route('/alertsbyrev')
 def run_alertsbyrev_query():
     query_dict = request.args.to_dict()
-    expired = query_dict.pop('expired')
+    expired = 0
+    if 'expired' in query_dict:
+        expired = query_dict.pop('expired')
     if 'rev' in query_dict:
         query_dict['keyrevision'] = query_dict.pop('rev')
     query = "where "
