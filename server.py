@@ -199,10 +199,20 @@ def run_submit_data():
 
 @app.route("/updatestatus", methods=['POST'])
 def run_updatestatus_data():
+    query_dict = request.args.to_dict()
+    typeVal = 0;
+    if 'type' in query_dict:
+        typeVal = query_dict.pop('type')
     retVal = {}
     data = request.form
-
-    sql = "update alerts set status='%s' where id=%s;" % (data['status'], data['id'])
+    if int(typeVal) == 1:
+        sql = "update alerts set status='%s', duplicate='%s' where id=%s;" % (data['status'], data['duplicate'], data['id'])
+    elif int(typeVal) == 2:
+        sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
+    elif int(typeVal) == 3:
+        sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
+    else:
+        sql = "update alerts set status='%s' where id=%s;" % (data['status'], data['id'])
 
     db = create_db_connnection()
     cursor = db.cursor()
@@ -211,55 +221,6 @@ def run_updatestatus_data():
 
     #TODO: verify via return value in alerts
     return jsonify(**retVal)
-
-
-@app.route("/submitduplicate", methods=['POST'])
-def run_submitduplicate_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set status='%s', duplicate='%s' where id=%s;" % (data['status'], data['duplicate'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
-    return jsonify(**retVal)
-
-
-@app.route("/submitbug", methods=['POST'])
-def run_submitbug_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
-    return jsonify(**retVal)
-
-
-@app.route("/submittbpl", methods=['POST'])
-def run_submittbpl_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
-    return jsonify(**retVal)
-
 
 
 if __name__ == '__main__':
