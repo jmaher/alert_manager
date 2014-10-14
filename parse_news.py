@@ -275,9 +275,6 @@ def build_tbpl_link(record):
     return link
 
 
-def debug_unshorten(url):
-    return extend_branches(unshorten_url(url))
-
 def unshorten_url(url):
     """unshortens a shortened url
     
@@ -290,6 +287,7 @@ def unshorten_url(url):
     except requests.exceptions.RequestException as e:
         logger.warning("Unabled to unshorten url: {}".format(url))
         return None
+
 
 def extend_branches(graphurl):
     """extends a given graph url to include graphs of referecne branches
@@ -329,6 +327,7 @@ def extend_branches(graphurl):
     newurl  = "{}{}{}".format(url_head, data_sets, url_tail)
     return newurl
 
+
 def chop_graph_url(graphurl):
     """chops a graph url into three pieces - head, dataset, and tail
 
@@ -347,6 +346,7 @@ def chop_graph_url(graphurl):
         ## graphurl is not in an expected form
         return None, None, None
 
+
 def get_graph_description(data_set):
     """handles a list of string of the form ['platform', 'branch', 'test']
 
@@ -358,7 +358,6 @@ def get_graph_description(data_set):
     except ValueError as e:
         ## data_set is not in an expected form
         return None, None, None
-
 
 
 @database_conn
