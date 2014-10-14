@@ -269,8 +269,10 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
         var plats = [];
         var tests = [];
         var rowlist = [];
-        var celllist= [];
-        document.getElementById("revision").innerHTML = "<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showAll=1&testIndex=0&platIndex=0>"+rev+"</a></h4>";
+        var celllist = [];
+        // HACK: to get the comments displayed
+        var comment = rev + " : " + data[0]['comment'];
+        document.getElementById("revision").innerHTML = "<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showAll=1&testIndex=0&platIndex=0>" + comment + "</a></h4>";
         var table = document.getElementById("data");
         var row = table.insertRow(0);
         var cell = row.insertCell(0);
