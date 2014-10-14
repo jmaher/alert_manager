@@ -200,20 +200,20 @@ def run_submit_data():
 @app.route("/updatestatus", methods=['POST'])
 def run_updatestatus_data():
     query_dict = request.args.to_dict()
-    typeVal = 0;
+    typeVal = "";
     if 'type' in query_dict:
         typeVal = query_dict.pop('type')
     retVal = {}
     data = request.form
-    if int(typeVal) == 1:
+    if typeVal == "duplicate":
         sql = "update alerts set status='%s', duplicate='%s' where id=%s;" % (data['status'], data['duplicate'], data['id'])
-    elif int(typeVal) == 2:
+    elif typeVal == "bug":
         sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
-    elif int(typeVal) == 3:
+    elif typeVal == "tbpl":
         sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
     else:
         sql = "update alerts set status='%s' where id=%s;" % (data['status'], data['id'])
-
+    
     db = create_db_connnection()
     cursor = db.cursor()
     cursor.execute(sql)

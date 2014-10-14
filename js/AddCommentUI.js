@@ -123,7 +123,7 @@ var AddDuplicateUI = {
 
   _postDuplicate: function addDuplicateUI__postDuplicate(alertID, duprev) {
     $.ajax({
-      url: root_url + "/updatestatus?type=1",
+      url: root_url + "/updatestatus?type=duplicate",
       type: "POST",
       data: {
         id: alertID,
@@ -170,7 +170,7 @@ var AddBugUI = {
 
   _postBug: function addBugUI__postBug(alertID, bugID, status) {
     $.ajax({
-      url: root_url + "/updatestatus?type=2",
+      url: root_url + "/updatestatus?type=bug",
       type: "POST",
       data: {
         id: alertID,
@@ -211,7 +211,7 @@ var AddTbplUI = {
 
   _postLink: function addTbplUI__postLink(alertID, tbplurl) {
     $.ajax({
-      url: root_url + "/updatestatus?type=3",
+      url: root_url + "/updatestatus?type=tbpl",
       type: "POST",
       data: {
         id: alertID,
