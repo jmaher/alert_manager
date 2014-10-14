@@ -171,7 +171,9 @@ def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
 
     match = graphurl_re.search(body)
     if match:
-        graph_url = unshorten_then_extend(match.group(1))
+        shortend_url = match.group(1)
+        unshortened_url = unshorten_url(shortened_url)
+        graph_url = extend_branches(unshortened_url)
 
     match = cset_re.search(body)
     if match:
@@ -273,12 +275,11 @@ def build_tbpl_link(record):
     return link
 
 
-def unshorten_then_extend(url):
+def debug_unshorten(url):
     return extend_branches(unshorten_url(url))
 
-
 def unshorten_url(url):
-    """unshortens a shorten url
+    """unshortens a shortened url
     
     Returns None if any exception is raised when trying to access
     resource via http connection
@@ -293,22 +294,8 @@ def unshorten_url(url):
 def extend_branches(graphurl):
     """extends a given graph url to include graphs of referecne branches
 
-    For instance, given a graph url
-
-            http://graphs.mozilla.org/graph.html#tests=[[297,132,25]]&sel=1401221472000,1401394272000
-
-    consider the the query tests=<data set>. Each data set is a list of 3 elements, where
-
-        dataset[0] = test reference #
-        dataset[1] = build reference #
-        dataset[2] = platform reference #
-
-    We are interested in extending this dataset to include dataset of other branches so that 
-    the performance graph displays the graph originally in question along with the reference
-    data points.
-
-    Returns the extend graphurl suitable to be stored in the database or None if url passed
-    is not in an expected format
+    returns the extend graphurl suitable to be stored in the database 
+    or None if url passed is ill-formated
     """
     INTEGRATION_BRANCHES = {}
     INTEGRATION_BRANCHES['Inbound'] = {'pgo':    {'id': 63, 'name': 'Mozilla-Inbound'},
@@ -318,15 +305,19 @@ def extend_branches(graphurl):
     OSX = [13, 21, 24]
 
     if not graphurl:
-        logger.warning("Unable to extend an empty url".format(graphurl))
+        logger.warning("Unable to extend an empty url")
         return None
 
     url_head, data_sets, url_tail = chop_graph_url(graphurl)
     platform, branch, test = get_graph_description(data_sets)
 
+    if not platform:
+        logger.warning("Unable to extend url: {}".format(graphurl))
+        return None
+        
     for ibranch in INTEGRATION_BRANCHES.values():
         branch_type = 'nonpgo'
-        if test in OSX:
+        if platform in OSX:
             branch_type = 'pgo'
         candidate = [platform, ibranch[branch_type]['id'], test]
 
@@ -339,14 +330,12 @@ def extend_branches(graphurl):
     return newurl
 
 def chop_graph_url(graphurl):
-    """
-    chops a graph url into three pieces - head, dataset, and tail
+    """chops a graph url into three pieces - head, dataset, and tail
 
-    For instance:
-            http://graphs.mozilla.org/graph.html#tests=[[297,132,25]]&sel=1401221472000,1401394272000
-    returns
-        ('http://graphs.mozilla.org/graph.html#tests=', [['297', '132', '25']], '&sel=1401221472000,1401394272000')
+    returns a tuple of (head, dataset, tail)
+    or (None, None, None) if the url is ill-formated
     """
+
     try:
         url_head, tail = graphurl.split("[[")
         data, url_tail = tail.split("]]")
@@ -359,7 +348,18 @@ def chop_graph_url(graphurl):
         return None, None, None
 
 def get_graph_description(data_set):
-    return tuple(map(int,data_set[0]))
+    """handles a list of string of the form ['platform', 'branch', 'test']
+
+    returns a 3-tuple of integers containing platform, branch, and test
+    or (None, None, None) if the data_set is ill-formated
+    """
+    try:
+        return tuple(map(int,data_set[0]))
+    except ValueError as e:
+        ## data_set is not in an expected form
+        return None, None, None
+
+
 
 @database_conn
 def get_csets(db_cursor):
