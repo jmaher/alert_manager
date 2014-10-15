@@ -1,4 +1,5 @@
+
 SET PYTHONPATH=.
 SET TARGET_ENVIRONMENT=development
-CALL pypy server.py
-EXIT
+CALL .env\bin\activate
+CALL .env\bin\pypy.exe server.py
