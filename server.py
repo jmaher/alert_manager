@@ -2,6 +2,7 @@
 
 import os
 import sys
+from pyLibrary.cnv import CNV
 import requests
 from flask import Flask, request, jsonify
 from datetime import date, timedelta
@@ -164,13 +165,15 @@ def run_values_query():
         'platform': []
     }
 
+    now = CNV.str2datetime(unicode(app.config["now"]))
+
     cursor.execute("""
-        select DISTINCT 'test' AS name, test AS value FROM alerts WHERE push_date > NOW() - INTERVAL 127 DAY
+        select DISTINCT 'test' AS name, test AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
         UNION ALL
-        select DISTINCT 'platform' AS name, platform AS value FROM alerts WHERE push_date > NOW() - INTERVAL 127 DAY
+        select DISTINCT 'platform' AS name, platform AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
         UNION ALL
-        select DISTINCT 'rev' AS name, keyrevision AS value FROM alerts WHERE push_date > NOW() - INTERVAL 127 DAY
-        """)
+        select DISTINCT 'rev' AS name, keyrevision AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
+        """, (now,now,now))
     data = cursor.fetchall()
     for d in data:
         retVal[d[0]].append(d[1])

@@ -1,11 +1,7 @@
-from optparse import OptionParser
-import ConfigParser
-import os
-import sys
-
 from flask import Flask
 from pymysql import connect
 from flask.ext.compress import Compress
+from config import get_config
 
 app = Flask(__name__, static_url_path='', static_folder='.')
 Compress(app)

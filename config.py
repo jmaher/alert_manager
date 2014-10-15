@@ -4,6 +4,8 @@ import ConfigParser
 from optparse import OptionParser
 import os
 import sys
+from pyLibrary.struct import nvl
+from pyLibrary.times.dates import Date
 
 filename = 'config.ini'
 db_host = 'localhost'
@@ -54,6 +56,7 @@ def get_config():
         'host': parser.get('alerts', 'host'),
         'database': parser.get('alerts', 'database'),
         'maildir': parser.get('alerts', 'maildir'),
+        'now': nvl(parser.get('alerts', 'now'), Date.eod()),
         'DEBUG': parser.getboolean('alerts', 'debug'),
     }
 
