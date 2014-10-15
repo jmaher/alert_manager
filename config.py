@@ -49,6 +49,12 @@ def get_config():
     parser = ConfigParser.RawConfigParser(defaults={'debug': 'false'})
     parser.read(options.config)
 
+    now = Date.eod()
+    try:
+        now = parser.get('alerts', 'now')
+    except Exception:
+        pass
+
 
     return {
         'username': parser.get('alerts', 'username'),
@@ -56,7 +62,7 @@ def get_config():
         'host': parser.get('alerts', 'host'),
         'database': parser.get('alerts', 'database'),
         'maildir': parser.get('alerts', 'maildir'),
-        'now': nvl(parser.get('alerts', 'now'), Date.eod()),
+        'now': now,
         'DEBUG': parser.getboolean('alerts', 'debug'),
     }
 
