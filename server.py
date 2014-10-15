@@ -132,7 +132,7 @@ def run_alertsbyrev_query():
                     query += "%s='%s' " % (key, val)
                     flag = 1
         if int(expired) == 1:
-            query += "and date < '%s'" % str(d);
+            query += "and push_date < '%s'" % str(d);
 
         return jsonify(alerts=run_query(query))
 
@@ -146,9 +146,9 @@ def run_alertsbyrev_query():
             left(keyrevision, 1) <> '{' and
             mergedfrom = '' and
             (status='' or status='NEW' or status='Investigating') and
-            date """+comparator+""" '%s'
+            push_date """+comparator+""" '%s'
         order by
-            date DESC, keyrevision
+            push_date DESC, keyrevision
         """ % str(d)
     return jsonify(alerts=run_query(where_clause))
 
