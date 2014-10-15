@@ -22,30 +22,11 @@ def create_db_connnection():
         passwd=app.config['password'],
         db=app.config['database'])
 
+
 def getConfig():
-    op = OptionParser()
-    op.add_option("--config",
-        action="store", type="string", dest="config",
-        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.ini'),
-        help="path to the config file [config.ini]")
+    configuration = get_config()
 
-    options, args = op.parse_args()
-
-    if not os.path.exists(options.config):
-        print "ERROR: %s doesn't exist" % (os.path.abspath(options.config))
-        sys.exit(1)
-
-    parser = ConfigParser.RawConfigParser(defaults={'debug': 'false'})
-    parser.read(options.config)
-
-    app.config.update({
-        'username': parser.get('alerts', 'username'),
-        'password': parser.get('alerts', 'password'),
-        'host': parser.get('alerts', 'host'),
-        'database': parser.get('alerts', 'database'),
-        'maildir': parser.get('alerts', 'maildir'),
-        'DEBUG': parser.getboolean('alerts', 'debug'),
-    })
+    app.config.update(configuration)
 
 
 

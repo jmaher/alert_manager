@@ -79,18 +79,19 @@ You will also either need a subscription to the mozilla.dev.tree-management
 newsgroup, or make use of the sample data packaged in the sample folder.
 
 ## Database configuration:
-Create the MySQL database using the schema.sql script as follows, where the
-specified username matches the one in config.ini:
+Database setup and configuration scripts can all be found in <code>tests/resources/scripts</code>.
+There are scripts for scrubbing and extracting the production database, plus
+scripts for making a test database.
 
-    mysql --user <username> --password < schemes/0000_create_database.sql
+To create a test database for your dev machine
 
-This will create a database called alerts, with a single table, also called
-alerts. You can use the parse_news.py script to populate the database if
-you wish, but sample data is also included in the sample folder. To use it:
+    python tests/resources/scripts/create_db.py
 
-    cd sample
-    bunzip2 july_alerts.sql.bz2
-    mysql --user <username> --password --database alerts < july_alerts.sql
+it uses your config.ini file to find **AND REPLACE** the schema with test data.
+
+The database is populated by an instance of (datazilla-alerts)[https://github.com/klahnakoski/datazilla-alerts],
+which is a whole other project.
+
 
 ## Start the app
 Start the application:
