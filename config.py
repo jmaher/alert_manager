@@ -49,7 +49,7 @@ def get_config():
     parser = ConfigParser.RawConfigParser(defaults={'debug': 'false'})
     parser.read(options.config)
 
-    now = Date.eod()
+    now = Date.eod().format("%y%m%d")
     try:
         now = parser.get('alerts', 'now')
     except Exception:
