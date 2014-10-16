@@ -1,4 +1,3 @@
-
 import logging
 import mailbox
 import os
@@ -172,7 +171,12 @@ def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
 
     match = graphurl_re.search(body)
     if match:
-        graph_url = match.group(1)
+        shortend_url = match.group(1)
+        unshortened_url = unshorten_url(shortened_url)
+        graph_url = extend_branches(unshortened_url)
+
+        if not graph_url:
+            graph_url = shorten_url
 
     match = cset_re.search(body)
     if match:
@@ -272,6 +276,91 @@ def build_tbpl_link(record):
         link = link.replace(' ', '%20')
 
     return link
+
+
+def unshorten_url(url):
+    """unshortens a shortened url
+    
+    Returns None if any exception is raised when trying to access
+    resource via http connection
+    """
+    try:
+        r = requests.head(url)
+        return r.headers.get("location")
+    except requests.exceptions.RequestException as e:
+        logger.warning("Unabled to unshorten url: {}".format(url))
+        return None
+
+
+def extend_branches(graphurl):
+    """extends a given graph url to include graphs of referecne branches
+
+    returns the extend graphurl suitable to be stored in the database 
+    or None if url passed is ill-formated
+    """
+    INTEGRATION_BRANCHES = {}
+    INTEGRATION_BRANCHES['Inbound'] = {'pgo':    {'id': 63, 'name': 'Mozilla-Inbound'},
+                                       'nonpgo': {'id': 131, 'name': 'Mozilla-Inbound-Non-PGO'}}
+    INTEGRATION_BRANCHES['Fx-Team'] = {'pgo':    {'id': 64, 'name': 'Fx-Team'},
+                                       'nonpgo': {'id': 132, 'name': 'Fx-Team-Non-PGO'}}
+    OSX = [13, 21, 24]
+
+    if not graphurl:
+        logger.warning("Unable to extend an empty url")
+        return None
+
+    url_head, data_sets, url_tail = chop_graph_url(graphurl)
+    platform, branch, test = get_graph_description(data_sets)
+
+    if not platform:
+        logger.warning("Unable to extend url: {}".format(graphurl))
+        return None
+        
+    for ibranch in INTEGRATION_BRANCHES.values():
+        branch_type = 'nonpgo'
+        if platform in OSX:
+            branch_type = 'pgo'
+        candidate = [platform, ibranch[branch_type]['id'], test]
+
+        ## only add the candidate branch IF its branch id is not the original
+        if candidate[1] != branch:
+            data_sets.append(candidate)
+
+    ## reconstruct the url
+    newurl  = "{}{}{}".format(url_head, data_sets, url_tail)
+    return newurl
+
+
+def chop_graph_url(graphurl):
+    """chops a graph url into three pieces - head, dataset, and tail
+
+    returns a tuple of (head, dataset, tail)
+    or (None, None, None) if the url is ill-formated
+    """
+
+    try:
+        url_head, tail = graphurl.split("[[")
+        data, url_tail = tail.split("]]")
+        ## data is currently an illformed string 
+        ## we would like to convert it into a list of list of ints
+        data = [map(int,x.split(',')) for x in data.split('],[')]
+        return url_head, data, url_tail
+    except ValueError as e:
+        ## graphurl is not in an expected form
+        return None, None, None
+
+
+def get_graph_description(data_set):
+    """handles a list of string of the form ['platform', 'branch', 'test']
+
+    returns a 3-tuple of integers containing platform, branch, and test
+    or (None, None, None) if the data_set is ill-formated
+    """
+    try:
+        return tuple(map(int,data_set[0]))
+    except ValueError as e:
+        ## data_set is not in an expected form
+        return None, None, None
 
 
 @database_conn
