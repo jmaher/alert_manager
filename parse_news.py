@@ -175,6 +175,9 @@ def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
         unshortened_url = unshorten_url(shortened_url)
         graph_url = extend_branches(unshortened_url)
 
+        if not graph_url:
+            graph_url = shorten_url
+
     match = cset_re.search(body)
     if match:
         parsed_url = urlsplit(match.group(1))
