@@ -200,7 +200,7 @@ def run_submit_data():
 @app.route("/updatestatus", methods=['POST'])
 def run_updatestatus_data():
     query_dict = request.args.to_dict()
-    typeVal = "";
+    typeVal = ""
     if 'type' in query_dict:
         typeVal = query_dict.pop('type')
     retVal = {}
