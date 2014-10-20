@@ -211,7 +211,7 @@ var AddTbplUI = {
 
   _postLink: function addTbplUI__postLink(alertID, tbplurl) {
     $.ajax({
-      url: root_url + "/updatestatus?type=tbpl",
+      url: root_url + "/updatestatus?type=tbplurl",
       type: "POST",
       data: {
         id: alertID,

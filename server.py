@@ -205,21 +205,30 @@ def run_updatestatus_data():
         typeVal = query_dict.pop('type')
     retVal = {}
     data = request.form
-    if typeVal == "duplicate":
-        sql = "update alerts set status='%s', duplicate='%s' where id=%s;" % (data['status'], data['duplicate'], data['id'])
-    elif typeVal == "bug":
-        sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
-    elif typeVal == "tbpl":
-        sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
-    else:
-        sql = "update alerts set status='%s' where id=%s;" % (data['status'], data['id'])
     
+    sql = """update alerts set status='%s'"""
+    if typeVal != "":
+        sql += """,%s='%s'"""   
+    sql += """ where id=%s;"""
+    
+    if typeVal == "duplicate":
+        specific_data = data['duplicate']
+    elif typeVal == "bug":
+        specific_data = data['bug']
+    elif typeVal == "tbplurl":
+        specific_data = data['tbplurl']
+    
+    if typeVal != "":
+        sql = sql % (data['status'],typeVal,specific_data,data['id'])
+    else:
+        sql = sql % (data['status'],data['id'])
+
     db = create_db_connnection()
     cursor = db.cursor()
     cursor.execute(sql)
     alerts = cursor.fetchall()
-
     #TODO: verify via return value in alerts
+
     return jsonify(**retVal)
 
 
