@@ -252,7 +252,15 @@ function showDetails(i) {
     row_exists=true;
 }
 
+function loadAllAlertsTable_win8(showall, rev, test, platform, current, show_improvement) {
+    loadAllAlertsTable_raw(showall, rev, test, platform, current, show_improvement, 'win8only');
+}
+
 function loadAllAlertsTable(showall, rev, test, platform, current, show_improvement) {
+    loadAllAlertsTable_raw(showall, rev, test, platform, current, show_improvement, 'alertsbyrev');
+}
+
+function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_improvement, queryname) {
     if (rev == '') {
         document.getElementById("warn").innerHTML = "<h3><font color=red>Table view is available per revision and not for the entire list</font></h3>";
     }
@@ -319,11 +327,19 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
             cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";          
         }
     }
-    req.open('get', root_url+'/alertsbyrev?expired=0&keyrevision='+rev, true);
+    req.open('get', root_url+'/' + queryname + '?expired=0&keyrevision='+rev, true);
     req.send();
 }
 
 function loadAllAlerts(showall, rev, test, platform, current) {
+    loadAllAlerts_raw(showall, rev, test, platform, current, 'alertsbyrev');
+}
+
+function loadAllAlerts_win8(showall, rev, test, platform, current) {
+    loadAllAlerts_raw(showall, rev, test, platform, current, 'win8only');
+}
+
+function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
     var req = new XMLHttpRequest();
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
@@ -365,10 +381,11 @@ function loadAllAlerts(showall, rev, test, platform, current) {
         AddBugUI.init();
         AddTbplUI.init();
     }
+    url = '/' + queryname;
     if (current == "true") {
-        url = "/alertsbyrev?expired=0";
+        url += "?expired=0";
     } else {
-        url = "/alertsbyrev?expired=1";
+        url += "?expired=1";
     }
     if (rev && rev != '') {
         url += "&rev=" + rev;

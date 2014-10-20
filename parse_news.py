@@ -171,12 +171,12 @@ def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
 
     match = graphurl_re.search(body)
     if match:
-        shortend_url = match.group(1)
+        shortened_url = match.group(1)
         unshortened_url = unshorten_url(shortened_url)
         graph_url = extend_branches(unshortened_url)
 
         if not graph_url:
-            graph_url = shorten_url
+            graph_url = shortened_url
 
     match = cset_re.search(body)
     if match:
