@@ -40,13 +40,13 @@
                 cell.setAttribute('field_name', fields[i]);
                 cell.onclick = editAlert(alert["id"], alert["body"]);
                 var value = alert[test];
-                if(!(alert['status'] == "NEW" || alert['status'] == "Investigating" || alert['status'] == "")){
+               if (!(checkStatusActive(alert['status']))) {
                     value = "<strike>"+value+"</strike>";
                 }
 
                 if (fields[i] == "reference") {
                     value = "<p><a href=\"" + alert['graphurl'] + "\">" + 'graphurl' + "</a></p>"+ "<p><a href=\"" + alert['changeset'] + "\">" + 'changeset' + "</a></p>";
-                    if(!(alert['status'] == "NEW" || alert['status'] == "Investigating" || alert['status'] == "")){
+                    if (!(checkStatusActive(alert['status']))) {
                         value = "<strike>"+value+"</strike>";
                         }
                     cell.onclick = "";
@@ -89,7 +89,7 @@
                     }
                     investigate += defaultValue;
                     value = investigate;
-                    if(!(alert['status'] == "NEW" || alert['status'] == "Investigating" || alert['status'] == "")){
+                    if (!(checkStatusActive(alert['status']))) {
                         value = "<strike>"+value+"</strike>";
                         }
                     cell.onclick = "";                

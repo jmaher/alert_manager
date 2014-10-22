@@ -314,17 +314,27 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                     continue;
                 cell1.style.backgroundColor="#93C47D"; // green
             }
-            value = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";  
-            if(!(data[i]['status'] == "NEW" || data[i]['status'] == "Investigating" || data[i]['status'] == "")){
-                value = "<strike>"+value+"</strike>";
+            value = cell1.innerHTML;
+            var prevVal = 0;
+            var curVal = parseInt(data[i]["percent"].split("%")[0]);
+            if (value != "") {
+                var tempVal = value.split("%");
+                tempVal = tempVal[tempVal.length-2].split("b>");
+                prevVal = parseInt(tempVal[tempVal1.length-1]);
+                if (curVal != prevVal)
+                    value = value + "<hr style=border-color:black; />";
             }
-            
-            if (data[i]['branch'].endsWith("Non-PGO"))
-            {
-                value = value + "<hr style=border-color:black; />Non-PGO";
+            if (curVal != prevVal) {
+                value =  value + "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"];
+                if (!(data[i]['branch'].endsWith("Non-PGO"))) {
+                    value = value +"(P)";   
+                }
+                value = value + "<b></p>";
+                if (!(checkStatusActive(data[i]['status']))) {
+                    value = "<strike>"+value+"</strike>";
+                }
             }
-            
-            cell1.innerHTML = value;
+            cell1.innerHTML = value
         }
     }
     req.open('get', root_url+'/alertsbyrev?expired=0&keyrevision='+rev, true);
@@ -422,6 +432,13 @@ function getJsonFromUrl() {
     return result;
 }
 
+function checkStatusActive(status) {
+    if (status == "NEW" || status == "Investigating" || status == "") {
+        return true;
+    }
+    
+    return false;
+}
 
 //RETURN FIRST NOT NULL, AND DEFINED VALUE
 function nvl() {
