@@ -314,7 +314,17 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                     continue;
                 cell1.style.backgroundColor="#93C47D"; // green
             }
-            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";          
+            value = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";  
+            if(!(data[i]['status'] == "NEW" || data[i]['status'] == "Investigating" || data[i]['status'] == "")){
+                value = "<strike>"+value+"</strike>";
+            }
+            
+            if (data[i]['branch'].endsWith("Non-PGO"))
+            {
+                value = value + "<hr style=border-color:black; />Non-PGO";
+            }
+            
+            cell1.innerHTML = value;
         }
     }
     req.open('get', root_url+'/alertsbyrev?expired=0&keyrevision='+rev, true);
