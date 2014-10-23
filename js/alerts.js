@@ -314,22 +314,24 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                     continue;
                 cell1.style.backgroundColor="#93C47D"; // green
             }
-            value = cell1.innerHTML;
+            value = cell1.innerHTML;//Since we are adding to the existing data, we are getting its pre-existing value.
+      
             var prevVal = 0;
-            var curVal = parseInt(data[i]["percent"].split("%")[0]);
+            var curVal = parseInt(data[i]["percent"].split("%")[0]); //This is the current Value of the percent in int
             if (value != "") {
                 var tempVal = value.split("%");
                 tempVal = tempVal[tempVal.length-2].split("b>");
-                prevVal = parseInt(tempVal[tempVal1.length-1]);
-                if (curVal != prevVal)
+                prevVal = parseInt(tempVal[tempVal1.length-1]); //We are grabbing the last populated value of the cell
+                if (curVal != prevVal) //We will be adding furthur data only if there are no duplicates
                     value = value + "<hr style=border-color:black; />";
             }
             if (curVal != prevVal) {
                 value =  value + "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"];
                 if (!(data[i]['branch'].endsWith("Non-PGO"))) {
-                    value = value +"(P)";   
+                    value = "<font color=blue>"+value +"</font>"; //PGO Values are highlighted in blue
                 }
                 value = value + "<b></p>";
+                
                 if (!(checkStatusActive(data[i]['status']))) {
                     value = "<strike>"+value+"</strike>";
                 }
