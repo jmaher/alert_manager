@@ -183,6 +183,10 @@ def run_mergedalerts_query():
     where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by push_date,keyrevision ASC" % keyrev;
     return jsonify(alerts=run_query(where_clause))
 
+@app.route("/win8only")
+def run_win8only_query():
+    where_clause = "where platform='WINNT 6.2 x64' and percent<0 and status!='Duplicate' and mergedfrom='' and status!='False Alarm' and status!='Not Tracking' and keyrevision not in (select distinct keyrevision from alerts where platform!='WINNT 6.2 x64') order by date,keyrevision ASC"
+    return jsonify(alerts=run_query(where_clause))
 
 @app.route("/submit", methods=['POST'])
 def run_submit_data():
@@ -202,65 +206,36 @@ def run_submit_data():
 
 @app.route("/updatestatus", methods=['POST'])
 def run_updatestatus_data():
+    query_dict = request.args.to_dict()
+    typeVal = ""
+    if 'type' in query_dict:
+        typeVal = query_dict.pop('type')
     retVal = {}
     data = request.form
-
-    sql = "update alerts set status='%s' where id=%s;" % (data['status'], data['id'])
+    
+    sql = """update alerts set status='%s'"""
+    if typeVal != "":
+        sql += """,%s='%s'"""   
+    sql += """ where id=%s;"""
+    
+    if typeVal == "duplicate":
+        specific_data = data['duplicate']
+    elif typeVal == "bug":
+        specific_data = data['bug']
+    elif typeVal == "tbplurl":
+        specific_data = data['tbplurl']
+    
+    if typeVal != "":
+        sql = sql % (data['status'],typeVal,specific_data,data['id'])
+    else:
+        sql = sql % (data['status'],data['id'])
 
     db = create_db_connnection()
     cursor = db.cursor()
     cursor.execute(sql)
     alerts = cursor.fetchall()
-
     #TODO: verify via return value in alerts
-    return jsonify(**retVal)
 
-
-@app.route("/submitduplicate", methods=['POST'])
-def run_submitduplicate_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set status='%s', duplicate='%s' where id=%s;" % (data['status'], data['duplicate'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
-    return jsonify(**retVal)
-
-
-@app.route("/submitbug", methods=['POST'])
-def run_submitbug_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
-    return jsonify(**retVal)
-
-
-@app.route("/submittbpl", methods=['POST'])
-def run_submittbpl_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
     return jsonify(**retVal)
 
 @app.route('/shutdown', methods=['POST'])
@@ -271,7 +246,6 @@ def shutdown():
         return {"response": 'Not running with the Werkzeug Server'}
     func()
     return jsonify(response='Server shutting down...')
-
 
 
 if __name__ == '__main__':
