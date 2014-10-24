@@ -123,7 +123,7 @@ def run_alertsbyrev_query():
         query_dict['keyrevision'] = query_dict.pop('rev')
     query = "where "
     flag = 0
-    d = date.today() - timedelta(days=126)
+    d = app.config["today"] - timedelta(days=126)
     if any(query_dict):
         for key, val in query_dict.iteritems():
             if val:
@@ -165,7 +165,7 @@ def run_values_query():
         'platform': []
     }
 
-    now = CNV.str2datetime(unicode(app.config["now"]))
+    now = app.config["now"]
 
     cursor.execute("""
         select DISTINCT 'test' AS name, test AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY

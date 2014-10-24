@@ -1,8 +1,5 @@
-
 import logging
 import mailbox
-import os
-import re
 import string
 import time
 from collections import namedtuple
@@ -14,6 +11,9 @@ from urlparse import parse_qsl, urlsplit, urlunsplit
 
 import requests
 
+from db import app
+import os
+import re
 import settings
 from lib.decorators import database_conn, memoize
 
@@ -276,9 +276,12 @@ def build_tbpl_link(record):
 
 @database_conn
 def get_csets(db_cursor):
+
+    now = app.config["now"]
+
     query = """SELECT keyrevision, changesets FROM alerts
-               WHERE DATE_SUB(CURDATE(), INTERVAL 14 DAY) < PUSH_DATE;"""
-    db_cursor.execute(query)
+               WHERE DATE_SUB(%s, INTERVAL 14 DAY) < PUSH_DATE;"""
+    db_cursor.execute(query, (now,))
 
     results = []
     for keyrev, csets in db_cursor.fetchall():
@@ -383,12 +386,17 @@ def check_for_backout(db_cursor, record):
                WHERE platform=%s AND test=%s AND branch=%s
                AND ABS(SUBSTRING_INDEX(percent, "%%", 1)) between %s and %s
                AND backout IS NULL
-               AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) < push_date;"""
+               AND DATE_SUB(%s, INTERVAL 7 DAY) < push_date;"""
 
     percent = float(record.percent[1:-1])
     query_params = (
-        record.platform, record.test, record.branch,
-        percent * 0.9, percent * 1.1)
+        record.platform,
+        record.test,
+        record.branch,
+        percent * 0.9,
+        percent * 1.1,
+        app.config["now"]
+    )
 
     db_cursor.execute(query, query_params)
 
