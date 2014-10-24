@@ -324,16 +324,17 @@ function loadAllAlertsTable(showall, rev, test, platform, current, show_improvem
                  
             }
             //The new data is added if it is not a duplicate of existing data
+           // window.alert(prevVal+"=="+curVal);
             if (curVal != prevVal) {           
                 var strike_value = data[i]['percent'];
                 if (!(checkStatusActive(data[i]['status']))) {
-                    strike_value = "<strike>"+strike_value+"</strike>";
+                    strike_value = "<strike><b>"+strike_value+"</b></strike>";
                 }
                 if (isPGO(i)) {
-                    value =  value + "<p onmouseover='showDetails("+i+")'><b>"+strike_value;
+                    value =  value + "<p onmouseover='showDetails("+i+")'>"+strike_value;
                     //PGO Values are highlighted in blue
-                    value = "<font color=blue>"+value +"</font>"; 
-                    value = value + "</b></p>";
+                    value = "<font color=blue><b>"+value +"</b></font>"; 
+                    value = value + "</p>";
                 }
                 else
                 {
@@ -362,8 +363,7 @@ function parseHTML(value)
 {
     var tempVal = value.split("%");
     var tempVal1 = tempVal[tempVal.length-2].split("b>");
-    var prevVal = parseInt(tempVal[tempVal1.length-1]); 
-    
+    var prevVal = parseInt(tempVal1[tempVal1.length-1]); 
     return prevVal;
 }
 
