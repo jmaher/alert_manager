@@ -44,3 +44,4 @@ config.ini
 /*.iml
 
 /.env
+/config_staging.ini

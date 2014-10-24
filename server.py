@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 
-import os
-import sys
-from pyLibrary.cnv import CNV
-import requests
-from flask import Flask, request, jsonify
 from datetime import date, timedelta
-import ConfigParser
-from optparse import OptionParser
 import logging
+
+from flask import request, jsonify
+
 from bug_check import *
-from db import *
+
 
 DEBUG = True
 

@@ -4,6 +4,7 @@ import ConfigParser
 from optparse import OptionParser
 import os
 import sys
+from pyLibrary.cnv import CNV
 from pyLibrary.struct import nvl
 from pyLibrary.times.dates import Date
 
@@ -49,9 +50,11 @@ def get_config():
     parser = ConfigParser.RawConfigParser(defaults={'debug': 'false'})
     parser.read(options.config)
 
-    now = Date.eod().format("%y%m%d")
+    now = Date.eod().value
+    today = Date.today().value
     try:
-        now = parser.get('alerts', 'now')
+        now = CNV.string2datetime(parser.get('alerts', 'now'))
+        today = now
     except Exception:
         pass
 
@@ -63,6 +66,7 @@ def get_config():
         'database': parser.get('alerts', 'database'),
         'maildir': parser.get('alerts', 'maildir'),
         'now': now,
+        'today': today,
         'DEBUG': parser.getboolean('alerts', 'debug'),
     }
 
