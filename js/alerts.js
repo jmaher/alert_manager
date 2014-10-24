@@ -324,11 +324,62 @@ function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_impr
                     continue;
                 cell1.style.backgroundColor="#93C47D"; // green
             }
-            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";          
+            
+            //Obtaining the pre-existing value of each cell and also the current value to be added.
+            value = cell1.innerHTML           
+            var prevVal = 0;
+            var curVal = getCurrent(data[i]); 
+            if (value != "") {
+                 prevVal = parseHTML(value);
+                 
+            }
+            //The new data is added if it is not a duplicate of existing data
+            if (curVal != prevVal) {           
+                var strike_value = data[i]['percent'];
+                if (!(checkStatusActive(data[i]['status']))) {
+                    strike_value = "<strike>"+strike_value+"</strike>";
+                }
+                if (isPGO(i)) {
+                    value =  value + "<p onmouseover='showDetails("+i+")'><b>"+strike_value;
+                    //PGO Values are highlighted in blue
+                    value = "<font color=blue>"+value +"</font>"; 
+                    value = value + "</b></p>";
+                }
+                else
+                {
+                    value =  "<p onmouseover='showDetails("+i+")'><b>"+strike_value+"</b></p>"+value;
+                }
+                
+                
+                
+            }
+            cell1.innerHTML = value;
+           
         }
     }
     req.open('get', root_url+'/' + queryname + '?expired=0&keyrevision='+rev, true);
     req.send();
+}
+
+function isPGO(i)
+{
+    if (data[i]['branch'].endsWith("Non-PGO"))
+        return false;
+    return true;
+}
+
+function parseHTML(value)
+{
+    var tempVal = value.split("%");
+    var tempVal1 = tempVal[tempVal.length-2].split("b>");
+    var prevVal = parseInt(tempVal[tempVal1.length-1]); 
+    
+    return prevVal;
+}
+
+function getCurrent(values)
+{
+    return parseInt(values["percent"].split("%")[0]);
 }
 
 function loadAllAlerts(showall, rev, test, platform, current) {
@@ -431,6 +482,13 @@ function getJsonFromUrl() {
     return result;
 }
 
+function checkStatusActive(status) {
+    if (status == "NEW" || status == "Investigating" || status == "") {
+        return true;
+    }
+    
+    return false;
+}
 
 //RETURN FIRST NOT NULL, AND DEFINED VALUE
 function nvl() {
