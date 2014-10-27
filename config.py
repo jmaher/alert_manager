@@ -54,7 +54,7 @@ def get_config():
         return Date.eod().value
 
     def today():
-        Date.today().value
+        return Date.today().value
 
     try:
         const = CNV.string2datetime(parser.get('alerts', 'now'))
