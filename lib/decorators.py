@@ -1,6 +1,7 @@
 
 from contextlib import closing
 from functools import wraps
+from pymysql import connect
 
 from settings import DATABASE as db_config
 
