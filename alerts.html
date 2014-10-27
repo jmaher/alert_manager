@@ -40,8 +40,15 @@
                 cell.setAttribute('field_name', fields[i]);
                 cell.onclick = editAlert(alert["id"], alert["body"]);
                 var value = alert[test];
+               if (!(checkStatusActive(alert['status']))) {
+                    value = "<strike>"+value+"</strike>";
+                }
+
                 if (fields[i] == "reference") {
                     value = "<p><a href=\"" + alert['graphurl'] + "\">" + 'graphurl' + "</a></p>"+ "<p><a href=\"" + alert['changeset'] + "\">" + 'changeset' + "</a></p>";
+                    if (!(checkStatusActive(alert['status']))) {
+                        value = "<strike>"+value+"</strike>";
+                        }
                     cell.onclick = "";
 
                 } else if (fields[i] == "status") {
@@ -82,6 +89,9 @@
                     }
                     investigate += defaultValue;
                     value = investigate;
+                    if (!(checkStatusActive(alert['status']))) {
+                        value = "<strike>"+value+"</strike>";
+                        }
                     cell.onclick = "";
                 }
                 textNode = value || 0;
@@ -104,6 +114,7 @@
             if (!rev) {
                 rev = "";
             }
+
             var test = getCookie("test");
             if (!test) {
                 test = "";
