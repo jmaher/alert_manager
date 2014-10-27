@@ -281,7 +281,7 @@ def build_tbpl_link(record):
 
 def unshorten_url(url):
     """unshortens a shortened url
-    
+
     Returns None if any exception is raised when trying to access
     resource via http connection
     """
@@ -296,7 +296,7 @@ def unshorten_url(url):
 def extend_branches(graphurl):
     """extends a given graph url to include graphs of referecne branches
 
-    returns the extend graphurl suitable to be stored in the database 
+    returns the extend graphurl suitable to be stored in the database
     or None if url passed is ill-formated
     """
     INTEGRATION_BRANCHES = {}
@@ -316,7 +316,7 @@ def extend_branches(graphurl):
     if not platform:
         logger.warning("Unable to extend url: {}".format(graphurl))
         return None
-        
+
     for ibranch in INTEGRATION_BRANCHES.values():
         branch_type = 'nonpgo'
         if platform in OSX:
@@ -342,7 +342,7 @@ def chop_graph_url(graphurl):
     try:
         url_head, tail = graphurl.split("[[")
         data, url_tail = tail.split("]]")
-        ## data is currently an illformed string 
+        ## data is currently an illformed string
         ## we would like to convert it into a list of list of ints
         data = [map(int,x.split(',')) for x in data.split('],[')]
         return url_head, data, url_tail
@@ -367,7 +367,7 @@ def get_graph_description(data_set):
 @database_conn
 def get_csets(db_cursor):
 
-    now = app.config["now"]
+    now = app.config["now"]()
 
     query = """SELECT keyrevision, changesets FROM alerts
                WHERE DATE_SUB(%s, INTERVAL 14 DAY) < PUSH_DATE;"""
@@ -485,7 +485,7 @@ def check_for_backout(db_cursor, record):
         record.branch,
         percent * 0.9,
         percent * 1.1,
-        app.config["now"]
+        app.config["now"]()
     )
 
     db_cursor.execute(query, query_params)

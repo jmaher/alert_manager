@@ -84,7 +84,7 @@ def run_graph_flot_query():
     db = create_db_connnection()
     cursor = db.cursor()
     if endDate == "none":
-        endDate = date.today()
+        endDate = app.config["now"]()
     if startDate == "none":
         startDate = endDate - timedelta(days=84)
     query = "select push_date,bug from alerts where push_date > '%s' and push_date < '%s'" % (startDate, endDate)
@@ -119,7 +119,7 @@ def run_alertsbyrev_query():
         query_dict['keyrevision'] = query_dict.pop('rev')
     query = "where "
     flag = 0
-    d = app.config["today"] - timedelta(days=126)
+    d = app.config["today"]() - timedelta(days=126)
     if any(query_dict):
         for key, val in query_dict.iteritems():
             if val:
@@ -161,7 +161,7 @@ def run_values_query():
         'platform': []
     }
 
-    now = app.config["now"]
+    now = app.config["now"]()
 
     cursor.execute("""
         select DISTINCT 'test' AS name, test AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
@@ -212,19 +212,19 @@ def run_updatestatus_data():
         typeVal = query_dict.pop('type')
     retVal = {}
     data = request.form
-    
+
     sql = """update alerts set status='%s'"""
     if typeVal != "":
-        sql += """,%s='%s'"""   
+        sql += """,%s='%s'"""
     sql += """ where id=%s;"""
-    
+
     if typeVal == "duplicate":
         specific_data = data['duplicate']
     elif typeVal == "bug":
         specific_data = data['bug']
     elif typeVal == "tbplurl":
         specific_data = data['tbplurl']
-    
+
     if typeVal != "":
         sql = sql % (data['status'],typeVal,specific_data,data['id'])
     else:

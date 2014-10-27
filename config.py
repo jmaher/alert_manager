@@ -50,10 +50,18 @@ def get_config():
     parser = ConfigParser.RawConfigParser(defaults={'debug': 'false'})
     parser.read(options.config)
 
-    now = Date.eod().value
-    today = Date.today().value
+    def now():
+        return Date.eod().value
+
+    def today():
+        Date.today().value
+
     try:
-        now = CNV.string2datetime(parser.get('alerts', 'now'))
+        const = CNV.string2datetime(parser.get('alerts', 'now'))
+
+        def now():
+            return const
+
         today = now
     except Exception:
         pass
