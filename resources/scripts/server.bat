@@ -1,3 +1,4 @@
+REM FOR STAGING SERVER AT klahnakoski-es.corp.tor1.mozilla.com
 
 SET PYTHONPATH=.
 SET TARGET_ENVIRONMENT=development
