@@ -19,7 +19,7 @@ var bug_count = [];
 var no_of_days = 84;
 var diffDay = [];
 var raw_date = getJsonFromUrl();
-var date = raw_date['date'];
+var date = raw_date['push_date'];
 if (date == "" || date == null) {
     date = "none"
 }
@@ -47,12 +47,12 @@ $(function() {
     req.onload = function(e) {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;
-        var date_prev = alerts["date"][0].split(" ");
+        var date_prev = alerts["push_date"][0].split(" ");
         count[0] = 0;
         bug_count[0] = 0;
 
-        for (var i = 1; i < alerts["date"].length -1; i++) {   
-           date_next = alerts["date"][i].split(" ");
+        for (var i = 1; i < alerts["push_date"].length -1; i++) {
+           date_next = alerts["push_date"][i].split(" ");
            if (date_next[0] == date_prev[0]) {
                count[alert_count] = count[alert_count] + 1;
                if (alerts["bug"][i] != "") {
@@ -81,7 +81,7 @@ $(function() {
             }
             week = (dateObj1).toString().split("00:")[0];
             d2.push([week , weekly_alert]);
-            d1.push([week , weekly_bug]);        
+            d1.push([week , weekly_bug]);
         }
         $.plot("#bugs_per_week", [ { data: d2, label: "Alerts"} , { data: d1, label: "Bugs"}], {
             series: {
@@ -128,7 +128,7 @@ $(function() {
             var end = new Date(parseInt(endDate_pieces[0]),parseInt(endDate_pieces[1]),parseInt(endDate_pieces[2]));
             diffDays = Math.ceil(Math.abs((start.getTime() - end.getTime())/(oneDay)))+1;
             diffDay[bugs[i][id]] = diffDays;
-            
+
             if (diffDays < 8) {
                 collection[0]++;
             } else if (diffDays > 7 && diffDays < 14) {
@@ -141,8 +141,8 @@ $(function() {
                 collection[4]++;
             } else if (diffDays > 90) {
                 collection[5]++;
-            }               
-                        
+            }
+
         }
         for (var i=0; i<collection.length; i++) {
             data[i] = {
@@ -155,7 +155,7 @@ $(function() {
         days_holder.unbind();
         $.plot(days_holder, data, {
             series: {
-                pie: { 
+                pie: {
                     innerRadius: 0.5,
                     show: true
                 }
@@ -181,11 +181,11 @@ $(function() {
     req.open('get', root_url+'/bugzilla_reports?date='+date, 'true');
     req.send();
 });
-	
+
 $(function() {
 
     var req = new XMLHttpRequest();
-    
+
     req.onload = function(e) {
         var raw_bugs = JSON.parse(req.response);
         var id = 0;
@@ -207,9 +207,9 @@ $(function() {
             res_count[resolutions[i]] = 0;
         }
         for (var i=0; i<bugs.length; i++) {
-            status_count[bugs[i][status]]++;  
-            res_count[bugs[i][resolution]]++; 
-            
+            status_count[bugs[i][status]]++;
+            res_count[bugs[i][resolution]]++;
+
             var table = document.getElementById("data");
             var row = table.insertRow(1);
             var cell1 = row.insertCell(0);
@@ -218,7 +218,7 @@ $(function() {
             var cell4 = row.insertCell(3);
             var cell5 = row.insertCell(4);
             var cell6 = row.insertCell(5);
-            
+
             cell1.innerHTML = "<a href = https://bugzilla.mozilla.org/show_bug.cgi?id="+bugs[i][id]+">"+bugs[i][id]+"</a>";
             if (diffDay[bugs[i][id]] != null) {
                 cell2.innerHTML = diffDay[bugs[i][id]];
@@ -230,20 +230,20 @@ $(function() {
                 var start = new Date(parseInt(startDate_pieces[0]),parseInt(startDate_pieces[1]),parseInt(startDate_pieces[2]));
                 cell2.innerHTML = Math.ceil(Math.abs((start.getTime() - end.getTime())/(oneDay)))+1;
             }
-            cell3.innerHTML = bugs[i][status]; 
-            if (bugs[i][resolution] == "") { 
+            cell3.innerHTML = bugs[i][status];
+            if (bugs[i][resolution] == "") {
                 cell4.innerHTML = "OPEN"
             } else {
-                 cell4.innerHTML = bugs[i][resolution]; 
+                 cell4.innerHTML = bugs[i][resolution];
             }
-            cell5.innerHTML = bugs[i][creation_time].split("T")[0]; 
-            if (bugs[i][cf_last_resolved] == null) { 
+            cell5.innerHTML = bugs[i][creation_time].split("T")[0];
+            if (bugs[i][cf_last_resolved] == null) {
                 cell6.innerHTML = "OPEN";
             } else {
-                cell6.innerHTML = bugs[i][cf_last_resolved].split("T")[0]; 
+                cell6.innerHTML = bugs[i][cf_last_resolved].split("T")[0];
             }
         }
-    
+
         for (var i=0; i<statuses.length; i++) {
             data[i] = {
                 label: statuses[i],
@@ -262,13 +262,13 @@ $(function() {
                 data : res_count[resolutions[i]]
                 }
             }
-            
+
         }
         var status_holder = $("#status");
         status_holder.unbind();
         $.plot(status_holder, data, {
             series: {
-                pie: { 
+                pie: {
                     innerRadius: 0.5,
                     show: true
                 }
@@ -289,7 +289,7 @@ $(function() {
         resolution_holder.unbind();
         $.plot(resolution_holder, data1, {
             series: {
-                pie: { 
+                pie: {
                     innerRadius: 0.5,
                     show: true
                 }
@@ -310,7 +310,7 @@ $(function() {
     req.open('get', root_url+'/bugzilla_reports?date='+date, 'true');
     req.send();
 });
-	
+
 
 
 function setCode(lines) {
@@ -372,7 +372,7 @@ function getJsonFromUrl() {
 		        <td>
 		            <div id="menu">
                         <form >
-                            Date (for Bugzilla queries): 
+                            Date (for Bugzilla queries):
                             <input type="text" id="date" size="10" name="date"/>
                             <p align="center">
 	                            <input type="submit" value="Show Data" />
@@ -384,7 +384,7 @@ function getJsonFromUrl() {
 		                <div class="demo-container">
                     <div id="days_open" class="demo-placeholder"></div>
 		            </div>
-		
+
 		            <h3 align="center">How long the bugs remain open</h3>
 		        </td>
 		    </tr>

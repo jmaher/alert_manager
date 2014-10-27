@@ -13,8 +13,8 @@
 
     var showAll = 1;
     function addMergedAlertToUI(tbl, alert, showall, originalKeyRevision) {
-    // var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
-    var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
+    // var fields = ["push_date", "branch", "test", "platform", "percent", "graphurl", "changeset", "comment", "bug", "status"]
+    var fields = ["push_date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "bug", "status"]
 
     var cname = "data";
     if (alert["mergedfrom"] != "" && alert["mergedfrom"] != undefined) {
@@ -237,6 +237,6 @@ loadAllAlerts(showAll, rev, test, platform, current);
     <p><input type="submit" value="Add Comment">
   </form>
 </div>
-
+</div>
 </body>
 </html>

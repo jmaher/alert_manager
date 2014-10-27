@@ -1,7 +1,5 @@
 import logging
 import mailbox
-import os
-import re
 import string
 import time
 from collections import namedtuple
@@ -13,6 +11,9 @@ from urlparse import parse_qsl, urlsplit, urlunsplit
 
 import requests
 
+from db import app
+import os
+import re
 import settings
 from lib.decorators import database_conn, memoize
 
@@ -41,7 +42,7 @@ REV_RE = re.compile(
 
 
 fields = ('branch', 'test', 'platform', 'percent',
-          'graphurl', 'changeset', 'keyrevision', 'bugcount', 'body', 'date',
+          'graphurl', 'changeset', 'keyrevision', 'bugcount', 'body', 'push_date',
           'comment', 'bug', 'status')
 record = namedtuple('record', fields)
 
@@ -280,7 +281,7 @@ def build_tbpl_link(record):
 
 def unshorten_url(url):
     """unshortens a shortened url
-    
+
     Returns None if any exception is raised when trying to access
     resource via http connection
     """
@@ -295,7 +296,7 @@ def unshorten_url(url):
 def extend_branches(graphurl):
     """extends a given graph url to include graphs of referecne branches
 
-    returns the extend graphurl suitable to be stored in the database 
+    returns the extend graphurl suitable to be stored in the database
     or None if url passed is ill-formated
     """
     INTEGRATION_BRANCHES = {}
@@ -315,7 +316,7 @@ def extend_branches(graphurl):
     if not platform:
         logger.warning("Unable to extend url: {}".format(graphurl))
         return None
-        
+
     for ibranch in INTEGRATION_BRANCHES.values():
         branch_type = 'nonpgo'
         if platform in OSX:
@@ -341,7 +342,7 @@ def chop_graph_url(graphurl):
     try:
         url_head, tail = graphurl.split("[[")
         data, url_tail = tail.split("]]")
-        ## data is currently an illformed string 
+        ## data is currently an illformed string
         ## we would like to convert it into a list of list of ints
         data = [map(int,x.split(',')) for x in data.split('],[')]
         return url_head, data, url_tail
@@ -365,9 +366,12 @@ def get_graph_description(data_set):
 
 @database_conn
 def get_csets(db_cursor):
+
+    now = app.config["now"]()
+
     query = """SELECT keyrevision, changesets FROM alerts
-               WHERE DATE_SUB(CURDATE(), INTERVAL 14 DAY) < DATE;"""
-    db_cursor.execute(query)
+               WHERE DATE_SUB(%s, INTERVAL 14 DAY) < PUSH_DATE;"""
+    db_cursor.execute(query, (now,))
 
     results = []
     for keyrev, csets in db_cursor.fetchall():
@@ -472,12 +476,17 @@ def check_for_backout(db_cursor, record):
                WHERE platform=%s AND test=%s AND branch=%s
                AND ABS(SUBSTRING_INDEX(percent, "%%", 1)) between %s and %s
                AND backout IS NULL
-               AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) < date;"""
+               AND DATE_SUB(%s, INTERVAL 7 DAY) < push_date;"""
 
     percent = float(record.percent[1:-1])
     query_params = (
-        record.platform, record.test, record.branch,
-        percent * 0.9, percent * 1.1)
+        record.platform,
+        record.test,
+        record.branch,
+        percent * 0.9,
+        percent * 1.1,
+        app.config["now"]()
+    )
 
     db_cursor.execute(query, query_params)
 
@@ -492,12 +501,12 @@ def update_database(db_cursor, record, merged, link, csets):
     query = """INSERT into alerts
                (branch, test, platform, percent,
                graphurl, changeset, keyrevision, bugcount,
-               body, date, comment, bug,
+               body, push_date, comment, bug,
                status, mergedfrom, tbplurl, changesets)
                VALUES
                (%(branch)s, %(test)s, %(platform)s, %(percent)s,
                %(graphurl)s, %(changeset)s, %(keyrevision)s, %(bugcount)s,
-               %(body)s, %(date)s, %(comment)s, %(bug)s, %(status)s,
+               %(body)s, %(push_date)s, %(comment)s, %(bug)s, %(status)s,
                %(merged)s, %(tbpl_url)s, %(csets)s)"""
 
     data = record._asdict()

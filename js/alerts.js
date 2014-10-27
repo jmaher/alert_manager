@@ -25,21 +25,21 @@ function loadSelectors() {
         for (var i in tests) {
             var newoption = document.createElement("option");
             newoption.id = "test";
-            var value = tests[i][0];
+            var value = tests[i];
             $("#test").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
         for (i in revs) {
             var newoption = document.createElement("option");
             newoption.id = "rev";
-            var value = revs[i][0];
+            var value = revs[i];
             $("#rev").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
         for (i in platforms) {
             var newoption = document.createElement("option");
             newoption.id = "platform";
-            var value = platforms[i][0];
+            var value = platforms[i];
             $("#platform").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
@@ -96,7 +96,7 @@ function hideMerged(originalkeyrev, showall) {
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
+        var fields = ["push_date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
         var alerts = raw_data.alerts;
 
         var keyrev = "";
@@ -148,7 +148,7 @@ function addMergedLinks(showall) {
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
+        var fields = ["id", "push_date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
         var alerts = raw_data.alerts;
 
         var count = 0;
@@ -219,7 +219,7 @@ function addAlertToUI(tbl, alert, showall, rev) {
 
 
 // Function idDescending sorts the objects in the descending order of their id. This way, we can view the most recent alerts at the top.
-// The objects have been sorted based on their id and not on their date as sorting by the date field was not working.
+// The objects have been sorted based on their id and not on their push_date as sorting by the push_date field was not working.
 function idDescending(a, b) {
     if (a["id"] < b["id"]) {
         return 1;
@@ -448,6 +448,7 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
         url += "&platform=" + platform;
     }
     req.open('get', (root_url + url), true);
+	req.setRequestHeader("Accept-Encoding", "gzip,deflate");
     req.send();
 }
 

@@ -39,7 +39,9 @@ local_settings/development.py
 tmpcset
 config.ini
 *.log
-/alert_manager
 /.idea
 
 /*.iml
+
+/.env
+/config_staging.ini

@@ -15,7 +15,7 @@
     <script src="js/alerts.js"></script>
     <script type="text/javascript">
         function addMergedAlertToUI(tbl, alert, showall, rev) {
-            var fields = ["date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
+	        var fields = ["push_date", "branch", "test", "platform", "percent", "reference", "investigate", "status"]    //fields have been changed to adjust the cell elements.
             if(rev != "")
                 document.getElementById("jump").innerHTML="<h5><a href="+root_url+"/alerts.html?rev="+rev+"&table=1>Toggle View</a></h5>";
             var cname = "data";
@@ -92,13 +92,14 @@
                     if (!(checkStatusActive(alert['status']))) {
                         value = "<strike>"+value+"</strike>";
                         }
-                    cell.onclick = "";                
+                    cell.onclick = "";
                 }
                 textNode = value || 0;
-                cell.innerHTML = textNode; 
+                cell.innerHTML = textNode;
             }
             return 1
         }
+
         var results;
         $(document).ready(function () {
             // parse get parameters
@@ -113,7 +114,7 @@
             if (!rev) {
                 rev = "";
             }
-         
+
             var test = getCookie("test");
             if (!test) {
                 test = "";
@@ -131,7 +132,7 @@
             var show_improvement = results['show_improvement'];
             if (show_improvement != 0)
                 show_improvement = 1;
-            if (results['table'] == 1) 
+            if (results['table'] == 1)
                 loadAllAlertsTable(showAll, rev, test, platform, current, show_improvement);
             else
                 loadAllAlerts(showAll, rev, test, platform, current);

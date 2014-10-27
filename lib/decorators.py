@@ -2,8 +2,6 @@
 from contextlib import closing
 from functools import wraps
 
-import MySQLdb
-
 from settings import DATABASE as db_config
 
 
@@ -11,7 +9,7 @@ def database_conn(func):
     """Provides db cursor for decorated func."""
     @wraps(func)
     def wrapper(*args, **kwargs):
-        db = MySQLdb.connect(host=db_config['host'],
+        db = connect(host=db_config['host'],
                              user=db_config['username'],
                              passwd=db_config['password'],
                              db=db_config['database'])
