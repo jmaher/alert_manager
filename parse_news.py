@@ -11,7 +11,7 @@ from urlparse import parse_qsl, urlsplit, urlunsplit
 
 import requests
 
-from db import app
+from db import app, getConfig
 import os
 import re
 import settings
@@ -63,7 +63,7 @@ def parse_mailbox():
             logger.info('Message can not be parsed')
             continue
 
-        if record.date >= two_weeks:
+        if record.push_date >= two_weeks:
             csets = get_revisions(record.changeset)
         else:
             csets = set()
@@ -537,6 +537,7 @@ def clean_up():
 
 
 if __name__ == "__main__":
+    getConfig()
     create_tmp_directories()
     parse_mailbox()
     clean_up()
