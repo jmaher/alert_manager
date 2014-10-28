@@ -58,7 +58,7 @@ def run_alert_query():
 def run_bugzilla_query():
 
     query_dict = request.args.to_dict()
-    push_date = query_dict['push_date']
+    push_date = query_dict['date']
     db = create_db_connnection()
     cursor = db.cursor()
     if push_date == "none":

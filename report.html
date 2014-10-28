@@ -19,7 +19,7 @@ var bug_count = [];
 var no_of_days = 84;
 var diffDay = [];
 var raw_date = getJsonFromUrl();
-var date = raw_date['push_date'];
+var date = raw_date['date'];
 if (date == "" || date == null) {
     date = "none"
 }
@@ -48,9 +48,9 @@ $(function() {
         var raw_data = JSON.parse(req.response);
         var alerts = raw_data.alerts;
         var date_prev = alerts["push_date"][0].split(" ");
+    
         count[0] = 0;
-        bug_count[0] = 0;
-
+        bug_count[0] = 0;       
         for (var i = 1; i < alerts["push_date"].length -1; i++) {
            date_next = alerts["push_date"][i].split(" ");
            if (date_next[0] == date_prev[0]) {
@@ -69,12 +69,11 @@ $(function() {
             date1 = alerts["begining"];
         }
         var weekly_alert , weekly_bug, week;
-        var date_elements = date1.split('-');
+        var date_elements = date1.split(' ')[0].split('-');
         for (var i = 0; i <= no_of_days; i = i+7) {
             weekly_alert = 0;
             weekly_bug = 0;
             var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i);
-
             for (var j = 0 ; j < 7 ; j++) {
                 weekly_alert = weekly_alert + count[i+j];
                 weekly_bug = weekly_bug + bug_count[i+j];
