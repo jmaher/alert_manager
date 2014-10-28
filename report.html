@@ -50,8 +50,7 @@ $(function() {
         var date_prev = alerts["push_date"][0].split(" ");
     
         count[0] = 0;
-        bug_count[0] = 0;
-        
+        bug_count[0] = 0;       
         for (var i = 1; i < alerts["push_date"].length -1; i++) {
            date_next = alerts["push_date"][i].split(" ");
            if (date_next[0] == date_prev[0]) {
