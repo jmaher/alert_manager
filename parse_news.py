@@ -303,24 +303,37 @@ def extend_branches(graphurl):
                                        'nonpgo': {'id': 131, 'name': 'Mozilla-Inbound-Non-PGO'}}
     INTEGRATION_BRANCHES['Fx-Team'] = {'pgo':    {'id': 64, 'name': 'Fx-Team'},
                                        'nonpgo': {'id': 132, 'name': 'Fx-Team-Non-PGO'}}
-    OSX = [13, 21, 24]
+    PLATFORM_OSX = [13, 21, 24]
+    PLATFORM_ANDROID = [20, 29]
+    BRANCH_AURORA = 52
+    BRANCH_BETA = 53
 
     if not graphurl:
         logger.warning("Unable to extend an empty url")
         return None
 
     url_head, data_sets, url_tail = chop_graph_url(graphurl)
-    platform, branch, test = get_graph_description(data_sets)
+    test, branch, platform = get_graph_description(data_sets)
 
     if not platform:
         logger.warning("Unable to extend url: {}".format(graphurl))
         return None
         
     for ibranch in INTEGRATION_BRANCHES.values():
+        if branch == BRANCH_BETA:
+            candidate = [test, BRANCH_AURORA, platform]
+            data_sets.append(candidate)
+            break
+ 
         branch_type = 'nonpgo'
-        if platform in OSX:
+
+        if platform in (PLATFORM_OSX + PLATFORM_ANDROID):
             branch_type = 'pgo'
-        candidate = [platform, ibranch[branch_type]['id'], test]
+
+        if branch == BRANCH_AURORA:
+            branch_type = 'pgo'
+
+        candidate = [test, ibranch[branch_type]['id'], platform]
 
         ## only add the candidate branch IF its branch id is not the original
         if candidate[1] != branch:
@@ -351,7 +364,7 @@ def chop_graph_url(graphurl):
 
 
 def get_graph_description(data_set):
-    """handles a list of string of the form ['platform', 'branch', 'test']
+    """handles a list of string of the form ['test', 'branch', 'platform']
 
     returns a 3-tuple of integers containing platform, branch, and test
     or (None, None, None) if the data_set is ill-formated
