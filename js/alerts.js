@@ -311,18 +311,19 @@ function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_impr
         for (var i=0;i<data.length;i++) {
             var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
+            var color="";
             if (percent <= -10) {
-                cell1.style.backgroundColor="#EA9999"; //red
+                color="#EA9999"; //red
             } else if (percent<0 && percent>-10) {
-                cell1.style.backgroundColor="#FCE5CD"; //orange
+                color="#FCE5CD"; //orange
             } else if (percent>0 && percent<10) {
                 if (show_improvement == 0)
                     continue;
-                cell1.style.backgroundColor="#B6D7A8"; //light green
+                color="#B6D7A8"; //light green
             } else {
                 if (show_improvement == 0)
                     continue;
-                cell1.style.backgroundColor="#93C47D"; // green
+                color="#93C47D"; // green
             }
             
             //Obtaining the pre-existing value of each cell and also the current value to be added.
@@ -330,8 +331,7 @@ function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_impr
             var prevVal = 0;
             var curVal = getCurrent(data[i]); 
             if (value != "") {
-                 prevVal = parseHTML(value);
-                 
+                 prevVal = parseHTML(value);                 
             }
             //The new data is added if it is not a duplicate of existing data
            // window.alert(prevVal+"=="+curVal);
@@ -349,13 +349,9 @@ function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_impr
                 else
                 {
                     value =  "<p onmouseover='showDetails("+i+")'><b>"+strike_value+"</b></p>"+value;
-                }
-                
-                
-                
+                }               
             }
-            cell1.innerHTML = value;
-           
+            cell1.innerHTML = "<div style=background:"+color+" class=stitched>"+value+"</div>";
         }
     }
     req.open('get', root_url+'/' + queryname + '?expired=0&keyrevision='+rev, true);
