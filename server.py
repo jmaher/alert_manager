@@ -185,7 +185,7 @@ def run_mergedalerts_query():
 
 @app.route("/win8only")
 def run_win8only_query():
-    where_clause = "where platform='WINNT 6.2 x64' and percent<0 and status!='Duplicate' and mergedfrom='' and status!='False Alarm' and status!='Not Tracking' and keyrevision not in (select distinct keyrevision from alerts where platform!='WINNT 6.2 x64') order by date,keyrevision ASC"
+    where_clause = "where platform='WINNT 6.2 x64' and percent<0 and status!='Duplicate' and mergedfrom='' and status!='False Alarm' and status!='Not Tracking' and keyrevision not in (select distinct keyrevision from alerts where platform!='WINNT 6.2 x64') order by push_date,keyrevision ASC"
     return jsonify(alerts=run_query(where_clause))
 
 @app.route("/submit", methods=['POST'])
