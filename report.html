@@ -73,15 +73,13 @@ $(function() {
         var date_elements = date1.split(' ')[0].split('-');
         for (var i = 0; i <= no_of_days; i = i+7) {
             weekly_alert = 0;
-            weekly_bug = 0;
-           
+            weekly_bug = 0;          
             var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i);
             for (var j = 0 ; j < 7 ; j++) {
                 weekly_alert = weekly_alert + count[i+j];
                 weekly_bug = weekly_bug + bug_count[i+j];
             }
             week = (dateObj1).toString().split("00:")[0];
-            alert(Number(week);
             d2.push([week , weekly_alert]);
             d1.push([week , weekly_bug]);
         }
