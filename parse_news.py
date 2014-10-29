@@ -320,12 +320,12 @@ def extend_branches(graphurl):
         return None
         
     for ibranch in INTEGRATION_BRANCHES.values():
+        branch_type = 'nonpgo'
+
         if branch == BRANCH_BETA:
             candidate = [test, BRANCH_AURORA, platform]
             data_sets.append(candidate)
-            break
- 
-        branch_type = 'nonpgo'
+            branch_type = 'pgo'
 
         if platform in (PLATFORM_OSX + PLATFORM_ANDROID):
             branch_type = 'pgo'
