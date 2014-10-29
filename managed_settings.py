@@ -29,7 +29,7 @@ TBPL_PLATFORMS = {
     'WINNT 5.1 (ix)': 'Windows XP 32-bit',
     'WINNT 5.2': '',
     'WINNT 6.1 (ix)': 'Windows 7 32-bit',
-    'WINNT 6.2 x64': 'WINNT 6.2',
+    'WINNT 6.2 x64': 'Windows 8 64-bit',
     'Ubuntu HW 12.04': 'Ubuntu HW 12.04',
     'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
     'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
