@@ -68,12 +68,16 @@ $(function() {
         if (date1 == "none") {
             date1 = alerts["begining"];
         }
+        var current_date = new Date();
         var weekly_alert , weekly_bug, week;
         var date_elements = date1.split(' ')[0].split('-');
         for (var i = 0; i <= no_of_days; i = i+7) {
             weekly_alert = 0;
             weekly_bug = 0;
             var dateObj1 = new Date(Number(date_elements[0]),Number(date_elements[1]) -1 ,Number(date_elements[2])+i);
+            if(dateObj1 > current_date){
+                break;
+                }
             for (var j = 0 ; j < 7 ; j++) {
                 weekly_alert = weekly_alert + count[i+j];
                 weekly_bug = weekly_bug + bug_count[i+j];
