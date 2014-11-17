@@ -25,21 +25,21 @@ function loadSelectors() {
         for (var i in tests) {
             var newoption = document.createElement("option");
             newoption.id = "test";
-            var value = tests[i][0];
+            var value = tests[i];
             $("#test").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
         for (i in revs) {
             var newoption = document.createElement("option");
             newoption.id = "rev";
-            var value = revs[i][0];
+            var value = revs[i];
             $("#rev").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
         for (i in platforms) {
             var newoption = document.createElement("option");
             newoption.id = "platform";
-            var value = platforms[i][0];
+            var value = platforms[i];
             $("#platform").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
@@ -96,7 +96,7 @@ function hideMerged(originalkeyrev, showall) {
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
+        var fields = ["push_date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
         var alerts = raw_data.alerts;
 
         var keyrev = "";
@@ -148,7 +148,7 @@ function addMergedLinks(showall) {
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
+        var fields = ["id", "push_date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
         var alerts = raw_data.alerts;
 
         var count = 0;
@@ -219,7 +219,7 @@ function addAlertToUI(tbl, alert, showall, rev) {
 
 
 // Function idDescending sorts the objects in the descending order of their id. This way, we can view the most recent alerts at the top.
-// The objects have been sorted based on their id and not on their date as sorting by the date field was not working.
+// The objects have been sorted based on their id and not on their push_date as sorting by the push_date field was not working.
 function idDescending(a, b) {
     if (a["id"] < b["id"]) {
         return 1;
@@ -311,24 +311,71 @@ function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_impr
         for (var i=0;i<data.length;i++) {
             var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
             var percent = parseInt((data[i]["percent"].split("%"))[0]);
+            var color="";
             if (percent <= -10) {
-                cell1.style.backgroundColor="#EA9999"; //red
+                color="#EA9999"; //red
             } else if (percent<0 && percent>-10) {
-                cell1.style.backgroundColor="#FCE5CD"; //orange
+                color="#FCE5CD"; //orange
             } else if (percent>0 && percent<10) {
                 if (show_improvement == 0)
                     continue;
-                cell1.style.backgroundColor="#B6D7A8"; //light green
+                color="#B6D7A8"; //light green
             } else {
                 if (show_improvement == 0)
                     continue;
-                cell1.style.backgroundColor="#93C47D"; // green
+                color="#93C47D"; // green
             }
-            cell1.innerHTML = "<p onmouseover='showDetails("+i+")'><b>"+data[i]["percent"]+"<b></p>";          
+            
+            //Obtaining the pre-existing value of each cell and also the current value to be added.
+            value = cell1.innerHTML           
+            var prevVal = 0;
+            var curVal = getCurrent(data[i]); 
+            if (value != "") {
+                 prevVal = parseHTML(value);                 
+            }
+            //The new data is added if it is not a duplicate of existing data
+           // window.alert(prevVal+"=="+curVal);
+            if (curVal != prevVal) {           
+                var strike_value = data[i]['percent'];
+                if (!(checkStatusActive(data[i]['status']))) {
+                    strike_value = "<strike><b>"+strike_value+"</b></strike>";
+                }
+                if (isPGO(i)) {
+                    value =  value + "<p onmouseover='showDetails("+i+")'>"+strike_value;
+                    //PGO Values are highlighted in blue
+                    value = "<font color=blue><b>"+value +"</b></font>"; 
+                    value = value + "</p>";
+                }
+                else
+                {
+                    value =  "<p onmouseover='showDetails("+i+")'><b>"+strike_value+"</b></p>"+value;
+                }               
+            }
+            cell1.innerHTML = "<div style=background:"+color+" class=stitched>"+value+"</div>";
         }
     }
     req.open('get', root_url+'/' + queryname + '?expired=0&keyrevision='+rev, true);
     req.send();
+}
+
+function isPGO(i)
+{
+    if (data[i]['branch'].endsWith("Non-PGO"))
+        return false;
+    return true;
+}
+
+function parseHTML(value)
+{
+    var tempVal = value.split("%");
+    var tempVal1 = tempVal[tempVal.length-2].split("b>");
+    var prevVal = parseInt(tempVal1[tempVal1.length-1]); 
+    return prevVal;
+}
+
+function getCurrent(values)
+{
+    return parseInt(values["percent"].split("%")[0]);
 }
 
 function loadAllAlerts(showall, rev, test, platform, current) {
@@ -397,6 +444,7 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
         url += "&platform=" + platform;
     }
     req.open('get', (root_url + url), true);
+	req.setRequestHeader("Accept-Encoding", "gzip,deflate");
     req.send();
 }
 
@@ -431,6 +479,13 @@ function getJsonFromUrl() {
     return result;
 }
 
+function checkStatusActive(status) {
+    if (status == "NEW" || status == "Investigating" || status == "") {
+        return true;
+    }
+    
+    return false;
+}
 
 //RETURN FIRST NOT NULL, AND DEFINED VALUE
 function nvl() {
