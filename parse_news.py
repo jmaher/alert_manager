@@ -73,12 +73,12 @@ def parse_mailbox():
         duplicate = check_for_duplicate(record)
         link = build_tbpl_link(record)
 
-        if duplicate:
-            if merged:
-                mark_merged(duplicate, merged)
-            add_tbpl_url(duplicate, link)
-
         update_database(record, merged, link, csets)
+        #TODO: JMAHER: I am not sure how to handle this duplicate code, it needs to be reworked
+        duplicate = check_for_duplicate(record)
+        if merged:
+            mark_merged(duplicate, merged)
+        add_tbpl_url(duplicate, link)
 
     all_read = unread | read
     mbox.set_sequences({'read': all_read})
@@ -232,7 +232,7 @@ def is_merged(record, csets):
     # possibly search top commit for merge & bugcount > 5 ?
 
     merged = ''
-    if csets and record.bugcount > 10:
+    if csets and record.bugcount > 7:
         for keyrev, stored_csets in get_csets():  # search for csets in existing
             if keyrev in csets:
                 # found the key revision in the merged changeset,
