@@ -1,0 +1,7 @@
+[alerts]
+host = database
+database = alerts
+username = alerts_user
+password = 
+maildir = /var/spool/news/mozilla/dev/tree-management
+debug = true

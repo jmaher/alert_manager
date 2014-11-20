@@ -1,0 +1,13 @@
+database:
+  image: ateam/alert_manager_db
+  volumes_from:
+    - alert_manager_data
+  expose:
+    - "3306"
+
+alertmanager:
+  image: ateam/alert_manager_web
+  ports:
+    - "8080:8159"
+  links:
+    - database

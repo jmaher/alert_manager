@@ -17,6 +17,10 @@ develop-eggs
 .installed.cfg
 lib64
 __pycache__
+local
+include
+lib/python-wheels
+lib/python2.7
 
 # Installer logs
 pip-log.txt
@@ -45,3 +49,6 @@ config.ini
 
 /.env
 /config_staging.ini
+
+# docker stuff
+dockerfiles/fig.yml
