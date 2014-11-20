@@ -9,7 +9,7 @@ from pyLibrary.struct import nvl
 from pyLibrary.times.dates import Date
 
 filename = 'config.ini'
-db_host = 'localhost'
+db_host = 'database'
 db_name = 'alerts'
 maildir = '/var/spool/news/mozilla/dev/tree-management'
 debug = 'true'
