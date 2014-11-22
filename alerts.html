@@ -88,7 +88,6 @@
                     if (alert['tbplurl'] != "") {
                         if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
                             var url = alert['tbplurl'].split("talos");
-                            alert['tbplurl'] = url[0] + "pgo%20talos" + url[1];
                             defaultValue = "<p><a href=\"" + alert['tbplurl'] + "\">tbplurl</a><p>";
                         } else {
                             defaultValue = "<p><a href=\"" + alert['tbplurl'] + "\">tbplurl</a></p>";
