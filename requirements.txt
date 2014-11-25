@@ -1,7 +1,9 @@
 # main packages
-MySQL-python==1.2.5
+pymysql
 Flask==0.10.1
+flask-compress
 requests==2.3.0
+pyLibrary==0.3.14288
 
 # optional package for pre-commit hook
 flake8==2.2.2

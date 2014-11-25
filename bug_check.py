@@ -1,5 +1,4 @@
 from db import *
-import MySQLdb
 import requests
 
 #------------------------------------------------------------------------------
@@ -30,7 +29,7 @@ def getStatus(bugid):
         return "None"
 def get_investigating_bugs():
     """
-    Builds a list of bugs for which the status is marked as 'investigating' 
+    Builds a list of bugs for which the status is marked as 'investigating'
     in the local database
 
     INPUTS: None
@@ -48,12 +47,14 @@ def get_investigating_bugs():
     buglist = []
     for bugid in ids:
         buglist.append(bugid[0])
-    
     cursor.close()
     db.close()
     bugslist = []
     for bugid in buglist:
-        bugs = [x.strip() for x in bugid.split(',')]
+        try :
+            bugs = [int(x.strip()) for x in bugid.split(',')]
+        except :
+            pass
         bugslist.extend(bugs)
     bugslist.sort()
     allbugs = []
@@ -85,15 +86,17 @@ def get_conflicting_bugs():
     for bugid in investigating:
         query = "select status from alerts where bug = '%s'" % (bugid)
         cursor.execute(query)
-        param = cursor.fetchall()
+        param = cursor.fetchall()       
+        if not(param and param[0]):
+            continue           
         if (param[0][0] == 'Resolved'):
             conflicting.append(bugid)
     cursor.close()
     db.close()
     return conflicting
-    
+
 def write_bug_report():
-    
+
     conflicting = []
     investigating = get_investigating_bugs()
     db = create_db_connnection()
@@ -110,7 +113,7 @@ def write_bug_report():
         cursor.execute(query)
     cursor.close()
     db.close()
-    
+
 
 if __name__ == "__main__":
     write_bug_report()

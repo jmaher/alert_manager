@@ -1,64 +1,23 @@
 #!/usr/bin/env python
-from flask import render_template, redirect, flash,url_for,session, request
-import os
-import json
-import sys
-import requests
-from flask import Flask, request
-from functools import wraps
+
 from datetime import date, timedelta
-import MySQLdb
-import ConfigParser
-from optparse import OptionParser
 import logging
+
+from flask import request, jsonify
+
 from bug_check import *
-from db import *
 
 
-@app.route('/')
-def home():
-    return render_template('alerts.html')
-
-@app.route('/expired')
-def expired():
-    return render_template('expired.html')
+DEBUG = True
 
 
-@app.route('/report')
-def report():
-    return render_template('report.html')
-
-
-def serialize_to_json(object):
-    """Serialize class objects to json"""
-    try:
-        return object.__dict__
-    except AttributeError:
-        raise TypeError(repr(object) + 'is not JSON serializable')
-
-
-def json_response(func):
-    """Decorator: Serialize response to json"""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        return json.dumps(result or {'error': 'No data found for your request'},
-            default=serialize_to_json)
-
-    return wrapper
-
-
-def run_query(where_clause, body=False):
+def run_query(where_clause):
     db = create_db_connnection()
     cursor = db.cursor()
 
-    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'date', 'mergedfrom', 'duplicate', 'tbplurl']
-    if body:
-        fields.append('body')
-    sql = "select %s from alerts %s;" %(','.join(fields), where_clause)
+    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'push_date', 'mergedfrom', 'duplicate', 'tbplurl']
+    sql = "select %s from alerts %s;" %(','.join(fields), where_clause.strip())
     cursor.execute(sql)
-
     alerts = cursor.fetchall()
 
     retVal = []
@@ -67,7 +26,7 @@ def run_query(where_clause, body=False):
         i = 0
         while i < len(fields):
             data[fields[i]] = alert[i]
-            if fields[i] == 'date':
+            if fields[i] == 'push_date':
                 data[fields[i]] = str(alert[i])
             i += 1
         retVal.append(data)
@@ -75,49 +34,45 @@ def run_query(where_clause, body=False):
 
 
 @app.route('/conflicted_bugs')
-@json_response
 def get_conflicting_alerts():
     alerts=[]
     bugs = get_conflicting_bugs()
     db = create_db_connnection()
     cursor = db.cursor()
     for bugid in bugs:
-        query = "select bug,branch,test,platform,percent,graphurl,tbplurl,changeset,status,id,duplicate,mergedfrom from alerts  where bug = '%s'" % (bugid)     
+        query = "select bug,branch,test,platform,percent,graphurl,tbplurl,changeset,status,id,duplicate,mergedfrom from alerts  where bug = '%s'" % (bugid)
         cursor.execute(query)
         search_results = cursor.fetchall()
         alerts.append(search_results)
     cursor.close()
-    db.close()        
-    return { 'bugs' : alerts}
+    db.close()
+    return jsonify(bugs=alerts)
 
 
 @app.route('/alert')
-@json_response
 def run_alert_query():
     inputid = request.args['id']
-    return {'alerts': run_query("where id=%s" % inputid, True)}
+    return jsonify(alerts=run_query("where id=%s" % inputid))
 
 @app.route('/bugzilla_reports')
-@json_response
 def run_bugzilla_query():
 
     query_dict = request.args.to_dict()
-    date = query_dict['date']
+    push_date = query_dict['date']
     db = create_db_connnection()
     cursor = db.cursor()
-    if date == "none":
+    if push_date == "none":
         query = "select bug,status,resolution,date_opened,date_resolved from details"
     else:
-        query = "select bug,status,resolution,date_opened,date_resolved from details  where date_opened > '%s'" % (date)    
-    
+        query = "select bug,status,resolution,date_opened,date_resolved from details  where date_opened > '%s'" % (push_date)
+
     cursor.execute(query)
     search_results = cursor.fetchall()
     cursor.close()
     db.close()
-    return {'bugs': search_results}
+    return jsonify(bugs=search_results)
 
 @app.route('/graph/flot')
-@json_response
 def run_graph_flot_query():
     query_dict = request.args.to_dict()
     startDate = query_dict['startDate']
@@ -129,63 +84,42 @@ def run_graph_flot_query():
     db = create_db_connnection()
     cursor = db.cursor()
     if endDate == "none":
-        endDate = date.today()
+        endDate = app.config["now"]()
     if startDate == "none":
         startDate = endDate - timedelta(days=84)
-    query = "select date,bug from alerts where date > '%s' and date < '%s'" % (startDate, endDate)
+    query = "select push_date,bug from alerts where push_date > '%s' and push_date < '%s'" % (startDate, endDate)
     cursor.execute(query)
     query_results = cursor.fetchall()
     data = {}
-    data['date'] = []
+    data['push_date'] = []
     data['bug'] = []
     data['begining'] = str(startDate)
     for i in query_results:
-        data['date'].append(str(i[0]))
+        data['push_date'].append(str(i[0]))
         data['bug'].append(i[1])
     cursor.close()
     db.close()
-    return {'alerts': data}
+    return jsonify(alerts=data)
 
 
 @app.route('/mergedids')
-@json_response
 def run_mergedids_query():
     # TODO: ensure we have the capability to view duplicate things by ignoring mergedfrom
-    where_clause = "where mergedfrom!='' and (status='' or status='NEW' or status='Investigating') order by date DESC, keyrevision";
-    return {'alerts': run_query(where_clause)}
+    where_clause = "where mergedfrom!='' and (status='' or status='NEW' or status='Investigating') order by push_date DESC, keyrevision";
+    return jsonify(alerts=run_query(where_clause))
 
 #    for id, keyrevision, bugcount, bug, status, date, mergedfrom in alerts:
-@app.route('/alertsbyexpiredrev')
-@json_response
-def run_alertsbyrev_expired_query():
-    query_dict = request.args.to_dict()
-    if 'rev' in query_dict:
-        query_dict['keyrevision'] = query_dict.pop('rev')
-    query = "where "
-    flag = 0
-    d = date.today() - timedelta(days=126)
-    if any(query_dict):
-        for key, val in query_dict.iteritems():
-            if val:
-                if flag:
-                    query += "and %s='%s' " % (key, val)
-                else:
-                    query += "%s='%s' " % (key, val)
-                    flag = 1
-        query += "and date < '%s'" % str(d);
-        return {'alerts': run_query(query, True)}
-    where_clause = "where mergedfrom = '' and (status='' or status='NEW' or status='Investigating') and date < '%s' order by date DESC, keyrevision" % str(d);
-    return {'alerts': run_query(where_clause)}
-
-
 @app.route('/alertsbyrev')
-@json_response
 def run_alertsbyrev_query():
     query_dict = request.args.to_dict()
+    expired = 0
+    if 'expired' in query_dict:
+        expired = query_dict.pop('expired')
     if 'rev' in query_dict:
         query_dict['keyrevision'] = query_dict.pop('rev')
     query = "where "
     flag = 0
+    d = app.config["today"]() - timedelta(days=126)
     if any(query_dict):
         for key, val in query_dict.iteritems():
             if val:
@@ -194,61 +128,67 @@ def run_alertsbyrev_query():
                 else:
                     query += "%s='%s' " % (key, val)
                     flag = 1
-        return {'alerts': run_query(query, True)}
+        if int(expired) == 1:
+            query += "and push_date < '%s'" % str(d);
+
+        return jsonify(alerts=run_query(query))
+
+    if int(expired) == 1:
+        comparator = "<"
+    else:
+        comparator = ">"
+
     where_clause = """
         where
-            date > NOW() - INTERVAL 127 DAY and
             left(keyrevision, 1) <> '{' and
             mergedfrom = '' and
-            (status='' or status='NEW' or status='Investigating')
+            (status='' or status='NEW' or status='Investigating') and
+            push_date """+comparator+""" '%s'
         order by
-            date DESC, keyrevision
-        """
-    return {'alerts': run_query(where_clause)}
+            push_date DESC, keyrevision
+        """ % str(d)
+    return jsonify(alerts=run_query(where_clause))
 
 
 @app.route("/getvalues")
-@json_response
 def run_values_query():
     db = create_db_connnection()
     cursor = db.cursor()
 
-    retVal = {}
-    retVal['test'] = []
-    retVal['rev'] = []
-    retVal['platform'] = []
+    retVal = {
+        'test': [],
+        'rev': [],
+        'platform': []
+    }
 
-    cursor.execute("select DISTINCT test from alerts;")
-    tests = cursor.fetchall()
-    for test in tests:
-        retVal['test'].append(test)
+    now = app.config["now"]()
 
-    cursor.execute("select DISTINCT platform from alerts;")
-    platforms = cursor.fetchall()
-
-    for platform in platforms:
-        retVal['platform'].append(platform)
-
-    cursor.execute("select DISTINCT keyrevision from alerts;")
-    revs = cursor.fetchall()
-
-    for rev in revs:
-        retVal['rev'].append(rev)
-
-    return retVal
+    cursor.execute("""
+        select DISTINCT 'test' AS name, test AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
+        UNION ALL
+        select DISTINCT 'platform' AS name, platform AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
+        UNION ALL
+        select DISTINCT 'rev' AS name, keyrevision AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
+        """, (now,now,now))
+    data = cursor.fetchall()
+    for d in data:
+        retVal[d[0]].append(d[1])
+    return jsonify(**retVal)
 
 
 @app.route("/mergedalerts")
-@json_response
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by date,keyrevision ASC" % keyrev;
-    return {'alerts': run_query(where_clause)}
+    where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by push_date,keyrevision ASC" % keyrev;
+    return jsonify(alerts=run_query(where_clause))
 
+@app.route("/win8only")
+def run_win8only_query():
+    where_clause = "where platform='WINNT 6.2 x64' and percent<0 and status!='Duplicate' and mergedfrom='' and status!='False Alarm' and status!='Not Tracking' and keyrevision not in (select distinct keyrevision from alerts where platform!='WINNT 6.2 x64') order by push_date,keyrevision ASC"
+    return jsonify(alerts=run_query(where_clause))
 
 @app.route("/submit", methods=['POST'])
-@json_response
 def run_submit_data():
     retVal = {}
     data = request.form
@@ -261,76 +201,51 @@ def run_submit_data():
     alerts = cursor.fetchall()
 
     #TODO: verify via return value in alerts
-    return retVal
+    return jsonify(**retVal)
 
 
 @app.route("/updatestatus", methods=['POST'])
-@json_response
 def run_updatestatus_data():
+    query_dict = request.args.to_dict()
+    typeVal = ""
+    if 'type' in query_dict:
+        typeVal = query_dict.pop('type')
     retVal = {}
     data = request.form
 
-    sql = "update alerts set status='%s' where id=%s;" % (data['status'], data['id'])
+    sql = """update alerts set status='%s'"""
+    if typeVal != "":
+        sql += """,%s='%s'"""
+    sql += """ where id=%s;"""
+
+    if typeVal == "duplicate":
+        specific_data = data['duplicate']
+    elif typeVal == "bug":
+        specific_data = data['bug']
+    elif typeVal == "tbplurl":
+        specific_data = data['tbplurl']
+
+    if typeVal != "":
+        sql = sql % (data['status'],typeVal,specific_data,data['id'])
+    else:
+        sql = sql % (data['status'],data['id'])
 
     db = create_db_connnection()
     cursor = db.cursor()
     cursor.execute(sql)
     alerts = cursor.fetchall()
-
     #TODO: verify via return value in alerts
-    return retVal
 
+    return jsonify(**retVal)
 
-@app.route("/submitduplicate", methods=['POST'])
-@json_response
-def run_submitduplicate_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set status='%s', duplicate='%s' where id=%s;" % (data['status'], data['duplicate'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
-    return retVal
-
-
-@app.route("/submitbug", methods=['POST'])
-@json_response
-def run_submitbug_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set status='%s', bug='%s' where id=%s;" % (data['status'], data['bug'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
-    return retVal
-
-
-@app.route("/submittbpl", methods=['POST'])
-@json_response
-def run_submittbpl_data():
-    retVal = {}
-    data = request.form
-
-    sql = "update alerts set tbplurl='%s' where id=%s;" % (data['tbplurl'], data['id'])
-
-    db = create_db_connnection()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    alerts = cursor.fetchall()
-
-    #TODO: verify via return value in alerts
-    return retVal
-
+@app.route('/shutdown', methods=['POST'])
+def shutdown():
+    # from http://flask.pocoo.org/snippets/67/
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        return {"response": 'Not running with the Werkzeug Server'}
+    func()
+    return jsonify(response='Server shutting down...')
 
 
 if __name__ == '__main__':

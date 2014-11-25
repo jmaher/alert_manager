@@ -1,4 +1,6 @@
 var root_url = window.location.protocol + '//' + window.location.host;
+var data,det_row;
+var row_exists = false;
 
 function loadSelectors() {
     $.getJSON(root_url + "/getvalues", function (data) {
@@ -23,21 +25,21 @@ function loadSelectors() {
         for (var i in tests) {
             var newoption = document.createElement("option");
             newoption.id = "test";
-            var value = tests[i][0];
+            var value = tests[i];
             $("#test").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
         for (i in revs) {
             var newoption = document.createElement("option");
             newoption.id = "rev";
-            var value = revs[i][0];
+            var value = revs[i];
             $("#rev").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
         for (i in platforms) {
             var newoption = document.createElement("option");
             newoption.id = "platform";
-            var value = platforms[i][0];
+            var value = platforms[i];
             $("#platform").append("<option value=\"" + value + "\">" + value + "</option>");
         }
 
@@ -94,7 +96,7 @@ function hideMerged(originalkeyrev, showall) {
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
+        var fields = ["push_date", "branch", "test", "platform", "percent", "graphurl", "changeset", "tbplurl", "comment", "bug", "status"]
         var alerts = raw_data.alerts;
 
         var keyrev = "";
@@ -113,7 +115,7 @@ function hideMerged(originalkeyrev, showall) {
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
 
-        $(document.getElementById(originalkeyrev + "-hdr")).html("<a href=?rev=" + originalkeyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);
+        $(document.getElementById(originalkeyrev + "-hdr")).html("<a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + originalkeyrev + "</h3></a>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -135,7 +137,7 @@ function showMerged(originalkeyrev, showall) {
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
-        $(document.getElementById(originalkeyrev + "-hdr")).html("<h3><a href=?rev=" + originalkeyrev + "&showall=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
+        $(document.getElementById(originalkeyrev + "-hdr")).html("<h3><a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h3>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -146,7 +148,7 @@ function addMergedLinks(showall) {
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
 
-        var fields = ["id", "date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
+        var fields = ["id", "push_date", "bug", "status", "keyrevision", "bugcount", "mergedfrom"]
         var alerts = raw_data.alerts;
 
         var count = 0;
@@ -185,7 +187,7 @@ function updateStatus(alertid, duplicate, bugid, mergedfrom) {
         AddBugUI.openBugBox(alertid, bug, 'Backout');
     } else {
         $.ajax({
-            url: "updatestatus",
+             url: root_url + "/updatestatus",
             type: "POST",
             data: {
                 id: alertid,
@@ -211,13 +213,13 @@ function updateTbplURL(alertid, tbplurl) {
     AddTbplUI.openTbplBox(alertid, tbplurl);
 }
 
-function addAlertToUI(tbl, alert, showall) {
-    addMergedAlertToUI(tbl, alert, showall, "");
+function addAlertToUI(tbl, alert, showall, rev) {
+    addMergedAlertToUI(tbl, alert, showall, rev);
 }
 
 
 // Function idDescending sorts the objects in the descending order of their id. This way, we can view the most recent alerts at the top.
-// The objects have been sorted based on their id and not on their date as sorting by the date field was not working.
+// The objects have been sorted based on their id and not on their push_date as sorting by the push_date field was not working.
 function idDescending(a, b) {
     if (a["id"] < b["id"]) {
         return 1;
@@ -227,7 +229,164 @@ function idDescending(a, b) {
     }
 }
 
+function showDetails(i) {
+    var table = document.getElementById("detail");
+    if (row_exists) {
+        
+        det_row.deleteCell(0);
+        det_row.deleteCell(0);
+        det_row.deleteCell(0);
+        det_row.deleteCell(0);
+        row_exists = false;
+        
+    }
+    det_row = table.insertRow(0);
+    var cell0 = det_row.insertCell(0);
+    cell0.innerHTML = "<a href=https://bugzilla.mozilla.org/show_bug.cgi?id="+data[i]["bug"]+">&nbsp;"+ data[i]["bug"] +"&nbsp;</a>";
+    var cell1 = det_row.insertCell(1);
+    cell1.innerHTML = "<a href="+data[i]["graphurl"]+">&nbsp; graphurl &nbsp;</a>";
+    var cell2 = det_row.insertCell(2);
+    cell2.innerHTML = "<a href="+data[i]["tbplurl"]+">&nbsp; tbplurl &nbsp; </a>";
+    var cell3 = det_row.insertCell(3);
+    cell3.innerHTML = "<a href="+data[i]["changeset"]+">&nbsp; changeset &nbsp; </a>";
+    row_exists=true;
+}
+
+function loadAllAlertsTable_win8(showall, rev, test, platform, current, show_improvement) {
+    loadAllAlertsTable_raw(showall, rev, test, platform, current, show_improvement, 'win8only');
+}
+
+function loadAllAlertsTable(showall, rev, test, platform, current, show_improvement) {
+    loadAllAlertsTable_raw(showall, rev, test, platform, current, show_improvement, 'alertsbyrev');
+}
+
+function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_improvement, queryname) {
+    if (rev == '') {
+        document.getElementById("warn").innerHTML = "<h3><font color=red>Table view is available per revision and not for the entire list</font></h3>";
+    }
+    document.getElementById("jump").innerHTML="<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showAll=1&testIndex=0&platIndex=0>Toggle View</a></h4>";
+    if (show_improvement == 1)
+        document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&show_improvement=0>Hide Improvement</a></b></h5>";
+    else
+        document.getElementById("hide").innerHTML="<h5><b><a href="+root_url+"/alerts.html?rev="+rev+"&table=1&show_improvement=1>Show Improvement</a></b></h5>";
+
+    var req = new XMLHttpRequest();
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        data = raw_data.alerts;
+        var plats = [];
+        var tests = [];
+        var rowlist = [];
+        var celllist = [];
+        // HACK: to get the comments displayed
+        var comment = rev + " : " + data[0]['comment'];
+        document.getElementById("revision").innerHTML = "<h4><a href="+root_url+"/alerts.html?rev="+rev+"&showAll=1&testIndex=0&platIndex=0>" + comment + "</a></h4>";
+        var table = document.getElementById("data");
+        var row = table.insertRow(0);
+        var cell = row.insertCell(0);
+        cell.innerHTML=" ";
+        for (var i=0;i<data.length;i++) {
+            if (plats.indexOf(data[i]["platform"]) == -1) {
+                plats.push(data[i]["platform"]);
+                cell = row.insertCell(1);
+                cell.innerHTML="<b>"+data[i]["platform"]+"</b>";
+                cell.style.backgroundColor="#CCCCCC"; // light grey
+            }
+            
+            if (tests.indexOf(data[i]["test"]) == -1) {
+                tests.push(data[i]["test"]);
+                var row0 = table.insertRow(1);
+                rowlist.push(row0);
+                var cell0 = row0.insertCell(0);
+                cell0.innerHTML ="<b>&nbsp;"+data[i]["test"]+"&nbsp;</b>";
+                cell0.style.backgroundColor="#CCCCCC"; // light grey
+            }
+        }
+        for (var y=0;y<tests.length;y++) {
+            for (var x=0;x<plats.length;x++) {
+                var cell00= rowlist[y].insertCell(1)
+                celllist.push(cell00);
+            }
+        }
+        for (var i=0;i<data.length;i++) {
+            var cell1 = celllist[(tests.indexOf(data[i]["test"])*plats.length)+plats.indexOf(data[i]["platform"])];
+            var percent = parseInt((data[i]["percent"].split("%"))[0]);
+            var color="";
+            if (percent <= -10) {
+                color="#EA9999"; //red
+            } else if (percent<0 && percent>-10) {
+                color="#FCE5CD"; //orange
+            } else if (percent>0 && percent<10) {
+                if (show_improvement == 0)
+                    continue;
+                color="#B6D7A8"; //light green
+            } else {
+                if (show_improvement == 0)
+                    continue;
+                color="#93C47D"; // green
+            }
+            
+            //Obtaining the pre-existing value of each cell and also the current value to be added.
+            value = cell1.innerHTML           
+            var prevVal = 0;
+            var curVal = getCurrent(data[i]); 
+            if (value != "") {
+                 prevVal = parseHTML(value);                 
+            }
+            //The new data is added if it is not a duplicate of existing data
+           // window.alert(prevVal+"=="+curVal);
+            if (curVal != prevVal) {           
+                var strike_value = data[i]['percent'];
+                if (!(checkStatusActive(data[i]['status']))) {
+                    strike_value = "<strike><b>"+strike_value+"</b></strike>";
+                }
+                if (isPGO(i)) {
+                    value =  value + "<p onmouseover='showDetails("+i+")'>"+strike_value;
+                    //PGO Values are highlighted in blue
+                    value = "<font color=blue><b>"+value +"</b></font>"; 
+                    value = value + "</p>";
+                }
+                else
+                {
+                    value =  "<p onmouseover='showDetails("+i+")'><b>"+strike_value+"</b></p>"+value;
+                }               
+            }
+            cell1.innerHTML = "<div style=background:"+color+" class=stitched>"+value+"</div>";
+        }
+    }
+    req.open('get', root_url+'/' + queryname + '?expired=0&keyrevision='+rev, true);
+    req.send();
+}
+
+function isPGO(i)
+{
+    if (data[i]['branch'].endsWith("Non-PGO"))
+        return false;
+    return true;
+}
+
+function parseHTML(value)
+{
+    var tempVal = value.split("%");
+    var tempVal1 = tempVal[tempVal.length-2].split("b>");
+    var prevVal = parseInt(tempVal1[tempVal1.length-1]); 
+    return prevVal;
+}
+
+function getCurrent(values)
+{
+    return parseInt(values["percent"].split("%")[0]);
+}
+
 function loadAllAlerts(showall, rev, test, platform, current) {
+    loadAllAlerts_raw(showall, rev, test, platform, current, 'alertsbyrev');
+}
+
+function loadAllAlerts_win8(showall, rev, test, platform, current) {
+    loadAllAlerts_raw(showall, rev, test, platform, current, 'win8only');
+}
+
+function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
     var req = new XMLHttpRequest();
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
@@ -245,7 +404,7 @@ function loadAllAlerts(showall, rev, test, platform, current) {
                     newdiv.id = keyrev;
                     $("#revisions").append(newdiv);
 
-                    $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
+                    $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
 
                 }
                 if ($(document.getElementById(keyrev + "-tbl")).html() == null) {
@@ -255,10 +414,10 @@ function loadAllAlerts(showall, rev, test, platform, current) {
                     $(document.getElementById(keyrev)).append(newtbl);
                 }
 
-                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showall=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
+                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
-            var r = addAlertToUI(tbl, alerts[alert], showall);
+            var r = addAlertToUI(tbl, alerts[alert], showall, rev);
             if ($(document.getElementById(keyrev + '-tbl')).find('tr').size() == 0) {
                 $(document.getElementById(keyrev + "-hdr")).html("");
             }
@@ -269,22 +428,23 @@ function loadAllAlerts(showall, rev, test, platform, current) {
         AddBugUI.init();
         AddTbplUI.init();
     }
+    url = '/' + queryname;
     if (current == "true") {
-        url = "/alertsbyrev";
+        url += "?expired=0";
     } else {
-        url = "/alertsbyexpiredrev";
+        url += "?expired=1";
     }
-    flag = '?';
     if (rev && rev != '') {
-        url += flag + "rev=" + rev;
+        url += "&rev=" + rev;
     }
     if (test && test != '') {
-        url += flag + "test=" + test;
+        url += "&test=" + test;
     }
     if (platform && platform != '') {
-        url += flag + "platform=" + platform;
+        url += "&platform=" + platform;
     }
     req.open('get', (root_url + url), true);
+	req.setRequestHeader("Accept-Encoding", "gzip,deflate");
     req.send();
 }
 
@@ -319,6 +479,13 @@ function getJsonFromUrl() {
     return result;
 }
 
+function checkStatusActive(status) {
+    if (status == "NEW" || status == "Investigating" || status == "") {
+        return true;
+    }
+    
+    return false;
+}
 
 //RETURN FIRST NOT NULL, AND DEFINED VALUE
 function nvl() {
