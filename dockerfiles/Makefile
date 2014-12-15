@@ -4,14 +4,14 @@ UNAME_S := $(shell uname -s)
 
 help:
 	@echo "Please use 'make <target>' where <target> is one of"
-	@echo " init_data to make the data containers"
-	@echo " clean_data to remove the data containers"
-	@echo " rebuild_data to remove, and then build the data containers"
-	@echo " init_containers to build the application containers"
-	@echo " clean_containers to remove old containers and images"
-	@echo " init_config to build the fig configuration"
-	@echo " clean to remove all docker data, containers, and images"
-	@echo " all to build everything from scratch"
+	@echo "  init_data to make the data containers"
+	@echo "  clean_data to remove the data containers"
+	@echo "  rebuild_data to remove, and then build the data containers"
+	@echo "  init_containers to build the application containers"
+	@echo "  clean_containers to remove old containers and images"
+	@echo "  init_config to build the fig configuration"
+	@echo "  clean to remove all docker data, containers, and images"
+	@echo "  all to build everything from scratch"
 
 APP_CONTAINERS :=web db
 DATA_CONTAINERS :=data
@@ -29,19 +29,21 @@ clean_data:
 rebuild_data: clean_data init_data
 
 init_containers:
-	docker build --no-cache --rm -t ateam/alert_manager_db alert_manager_db
-	fig run --rm database /usr/local/bin/provision_mysql.sh
-	cp ../requirements.txt alert_manager_web/requirements.txt
-	docker build --no-cache --rm -t ateam/alert_manager_web alert_manager_web
-	rm alert_manager_web/requirements.txt
+	docker build --rm -t ateam/alert_manager_db alert_manager_db
+	docker run --rm --volumes-from alert_manager_data ateam/alert_manager_db /usr/local/bin/provision_mysql.sh
+	@cp ../requirements.txt alert_manager_web/requirements.txt
+	docker build --rm -t ateam/alert_manager_web alert_manager_web
+	@rm alert_manager_web/requirements.txt
 
 clean_containers:
-	docker ps -a |grep alert_manager |awk '{print $1}' |xargs docker rm
-	docker images -a |grep alert_manager |awk '{print $3}' |xargs docker rmi
+	-docker ps -a |grep alert_manager |awk '{print $$1}' |xargs docker rm
+
+clean_images:
+	-docker images -a |grep alert_manager |awk '{print $$3}' |xargs docker rmi
 
 make init_config:
-	/bin/bash build_configs.sh
+	@bash build_configs.sh
 
-make clean: clean_data clean_containers
+make clean: clean_data clean_containers clean_images
 
 make all: init_data init_containers init_config

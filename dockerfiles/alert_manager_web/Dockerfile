@@ -6,8 +6,7 @@ MAINTAINER Jamon Camisso <jamon@jamon.ca>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Update the base image
-RUN apt-get update
-#RUN apt-get -y upgrade
+RUN apt-get -q -y update && apt-get -q -y upgrade
 
 # Install packages
 RUN apt-get -q -y install libmysqlclient-dev python-pip git curl bzip2 python-dev mysql-client
