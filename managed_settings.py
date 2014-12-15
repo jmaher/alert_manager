@@ -1,5 +1,5 @@
 
-TBPL_URL = 'https://tbpl.mozilla.org'
+TREEHERDER_URL = 'https://treeherder.mozilla.org/#/jobs'
 DATAZILLA_URL_TEMPLATE = 'https://datazilla.mozilla.org/refdata/pushlog/list/?days_ago=%(days)s&branches=%(branch)s'
 
 TREES = ('Mozilla-Inbound',

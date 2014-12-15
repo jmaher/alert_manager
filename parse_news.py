@@ -247,6 +247,10 @@ def is_merged(record, csets):
 def build_tbpl_link(record):
     # TODO: is branch valid?
     tbpl_branch = record.branch.split('-Non-PGO')[0]
+    if tbpl_branch == 'Firefox':
+        treeherder_repo = 'mozilla-central'
+    else
+        treeherder_repo = tbpl_branch.lower()
 
     dzdata = get_datazilla_data(tbpl_branch)
     vals = get_revision_range(dzdata, record.keyrevision)
@@ -262,13 +266,11 @@ def build_tbpl_link(record):
         if 'OSX' in tbpl_platform:
             tbpl_tree = tbpl_tree.split(' pgo')[0]
 
-        if tbpl_branch != 'Firefox':
-            params.append(('tree', tbpl_branch))
-
+        params.append(('repo', treeherder_repo))
         params.append(('fromchange', vals[0]))
         params.append(('tochange', vals[1]))
-        params.append(('jobname', '%s %s talos %s' % (tbpl_platform, tbpl_tree, tbpl_test)))
-        link = '%s/' % settings.TBPL_URL
+        params.append(('searchQuery', '%s %s talos %s' % (tbpl_platform, tbpl_tree, tbpl_test)))
+        link = settings.TREEHERDER_URL
         delim = '?'
         for key, value in params:
             link = "%s%s%s=%s" % (link, delim, key, value)
