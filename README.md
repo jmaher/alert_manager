@@ -23,31 +23,31 @@ environment going:
 
 2. Add your user to the 'docker' system group. You may need to start a new terminal/session after doing this. Check the output of ``docker ps`` and if you don't see permissions warnings you should be fine.
 
-2. Run the following git clone (specify a directory of your choosing if you like):
+3. Run the following git clone (specify a directory of your choosing if you like):
 
         git clone https://github.com/jmaher/alert_manager.git 
 
-3. Run virtualenv on the git cloned directory to setup the Python virtual environment:
+4. Run virtualenv on the git cloned directory to setup the Python virtual environment:
 
         virtualenv alert_manager
 
-4. cd into the name of the directory into which you cloned the git repository
+5. cd into the name of the directory into which you cloned the git repository
 
         cd alert_manager
 
-5. Activate the virtual environment:
+6. Activate the virtual environment:
 
         source bin/activate
 
-6. Run make to create your local docker containers:
+7. Run make to create your local docker containers:
 
         cd dockerfiles; make all
 
-7. Start the collection of containers!
+8. Start the collection of containers!
 
         fig up
 
-8. Visit [http://localhost:8080/alerts.html][localhost] in your browser and you should be all set.
+9. Visit [http://localhost:8080/alerts.html][localhost] in your browser and you should be all set.
 
 
 ### OSX based Alert Manager development with Docker
