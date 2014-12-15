@@ -17,7 +17,7 @@ APP_CONTAINERS :=web db
 DATA_CONTAINERS :=data
 
 init_data:
-	$(foreach container, $(DATA_CONTAINERS), docker build --rm -t ateam/alert_manager_$(container) alert_manager_$(container);)
+	$(foreach container, $(DATA_CONTAINERS), docker build --no-cache --rm -t ateam/alert_manager_$(container) alert_manager_$(container);)
 	$(foreach container, $(DATA_CONTAINERS), docker run --name alert_manager_$(container) ateam/alert_manager_$(container);)
 
 clean_data:
@@ -29,10 +29,10 @@ clean_data:
 rebuild_data: clean_data init_data
 
 init_containers:
-	docker build --rm -t ateam/alert_manager_db alert_manager_db
+	docker build --no-cache --rm -t ateam/alert_manager_db alert_manager_db
 	fig run --rm database /usr/local/bin/provision_mysql.sh
 	cp ../requirements.txt alert_manager_web/requirements.txt
-	docker build --rm -t ateam/alert_manager_web alert_manager_web
+	docker build --no-cache --rm -t ateam/alert_manager_web alert_manager_web
 	rm alert_manager_web/requirements.txt
 
 clean_containers:
