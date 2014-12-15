@@ -21,6 +21,8 @@ environment going:
 
 1. Visit [Docker][docker] and get docker up and running on  your system.
 
+2. Add your user to the 'docker' system group. You may need to start a new terminal/session after doing this. Check the output of ``docker ps`` and if you don't see permissions warnings you should be fine.
+
 2. Run the following git clone (specify a directory of your choosing if you like):
 
         git clone https://github.com/jmaher/alert_manager.git 
@@ -37,9 +39,9 @@ environment going:
 
         source bin/activate
 
-6. Run the build_docker_images.sh script to create your local docker containers:
+6. Run make to create your local docker containers:
 
-        cd dockerfiles; ./build-docker-images.sh
+        cd dockerfiles; make all
 
 7. Start the collection of containers!
 
@@ -50,7 +52,7 @@ environment going:
 
 ### OSX based Alert Manager development with Docker
 
-1. Visit [Docker][docker] and get docker up and running on your system.
+1. Visit [Docker][docker] and get docker up and running on your system. Ensure you are using version 1.3.3 - 1.4.0 has a [bug][bug] that prevents it from working with many external tools. 
 
 2. Run boot2docker start in a terminal once it is installed. Ensure that you run the
  export DOCKER_HOST=... lines when prompted:
@@ -74,15 +76,15 @@ environment going:
 
         source bin/activate
 
-7. Run the build_docker_images.sh script to create your local docker containers:
+7. Run make to create your local docker containers:
 
-        cd dockerfiles; ./build-docker-images.sh
+        cd dockerfiles; make all
 
 8. Start the collection of containers!:
 
         fig up
 
-9. Visit http://localhost:8080/alerts.html in your browser and you should be all set.
+9. Visit http://localhost:8080/alerts.html in your browser, or http://192.168.59.103:8080/alerts.html if localhost doesn't work and you should be all set.
 
 ### Windows based Alert Manager development with Docker
 
@@ -122,7 +124,7 @@ your package manager and you should be all set.
 [wrapper]: http://www.doughellmann.com/projects/virtualenvwrapper/
 [windows venv]: http://docs.python-guide.org/en/latest/starting/install/win/
 [osx venv]: http://docs.python-guide.org/en/latest/starting/install/osx/
-
+[bug]: https://github.com/docker/docker/issues/9628
 
 ## Git Pre-commit hook (Optional):
 
