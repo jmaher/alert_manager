@@ -180,7 +180,8 @@ function addMergedLinks(showall) {
                 }
 
                 var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
-                $(document.getElementById(mf + "-hdr")).html("<a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);//UI : merged keyrevisions as heading
+                //UI : merged keyrevisions as heading
+                $(document.getElementById(mf + "-hdr")).html("<a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
             }
         }
     }
@@ -434,7 +435,8 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
                     $(document.getElementById(keyrev)).append(newtbl);
                 }
                 var id = "textbox" + keyrev;
-                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3> "+ keyrev + "</h3></a><input id = "+ id +" size=10></input><a href=# onClick=updateVal('"+id+"','"+keyrev+"')>update</a>");//UI : keyrevisions as headings
+                //UI : keyrevisions as headings
+                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3> "+ keyrev + "</h3></a><input id = "+ id +" size=10></input><a href=# onClick=updateVal('"+id+"','"+keyrev+"')>update</a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
             var r = addAlertToUI(tbl, alerts[alert], showall, rev);
