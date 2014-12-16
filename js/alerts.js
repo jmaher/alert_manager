@@ -13,9 +13,9 @@ $(function() {
         oldVal = "none";
     }
     req.onload = function(e) {
-    var raw_data = JSON.parse(req.response);
-    var datas = raw_data.data;
-    var ihtml= $(document.getElementById(rev + "-hdr")).html();
+        var raw_data = JSON.parse(req.response);
+        var datas = raw_data.data;
+    
     }
          
     req.open('get', root_url+'/update_rev?newVal='+newVal+'&oldVal='+oldVal, true);
