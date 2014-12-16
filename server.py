@@ -78,8 +78,8 @@ def updateRev():
     newVal = query_dict['newVal']
     oldVal = query_dict['oldVal']
     vals={}
-    vals['newVal']=newVal
-    vals['oldval']=oldVal
+    vals['newVal'] = newVal
+    vals['oldval'] = oldVal
     db = create_db_connnection()
     cursor = db.cursor()
     sql = "update alerts set keyrevision='%s' where keyrevision='%s';" % (newVal,oldVal)
@@ -114,8 +114,6 @@ def run_graph_flot_query():
     cursor.close()
     db.close()
     return jsonify(alerts=data)
-
-
 
 @app.route('/mergedids')
 def run_mergedids_query():

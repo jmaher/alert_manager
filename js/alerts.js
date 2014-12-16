@@ -2,25 +2,26 @@ var root_url = window.location.protocol + '//' + window.location.host;
 var data,det_row;
 var row_exists = false;
 $(function() {
-            var req = new XMLHttpRequest();
-            var dats = getJsonFromUrl();
-            var newVal = dats['newVal'];
-            var oldVal = dats['oldVal']
-            if (newVal == "" || newVal == null) {
-                newVal = "none";
-            }
-            if (oldVal == "" || oldVal == null) {
-                oldVal = "none";
-            }
-            req.onload = function(e) {
-                var raw_data = JSON.parse(req.response);
-                var datas = raw_data.data;
-                var ihtml= $(document.getElementById(rev + "-hdr")).html();
-            }
+    var req = new XMLHttpRequest();
+    var dats = getJsonFromUrl();
+    var newVal = dats['newVal'];
+    var oldVal = dats['oldVal'];
+    if (newVal == "" || newVal == null) {
+        newVal = "none";
+    }
+    if (oldVal == "" || oldVal == null) {
+        oldVal = "none";
+    }
+    req.onload = function(e) {
+    var raw_data = JSON.parse(req.response);
+    var datas = raw_data.data;
+    var ihtml= $(document.getElementById(rev + "-hdr")).html();
+    }
          
-        req.open('get', root_url+'/update_rev?newVal='+newVal+'&oldVal='+oldVal, true);
-        req.send();
+    req.open('get', root_url+'/update_rev?newVal='+newVal+'&oldVal='+oldVal, true);
+    req.send();
 });
+
 function loadSelectors() {
     $.getJSON(root_url + "/getvalues", function (data) {
 
@@ -432,7 +433,7 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
                     newtbl.id = keyrev + '-tbl';
                     $(document.getElementById(keyrev)).append(newtbl);
                 }
-                var id="textbox"+keyrev;
+                var id = "textbox" + keyrev;
                 $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3> "+ keyrev + "</h3></a><input id = "+ id +" size=10></input><a href=# onClick=updateVal('"+id+"','"+keyrev+"')>update</a>");//UI : keyrevisions as headings
                 tbl = document.getElementById(keyrev + "-tbl");
             }
@@ -476,17 +477,9 @@ function editAlert(id, body) {
 function updateVal(id,oldVal)
 {
     var newVal = document.getElementById(id).value;
-    window.open(root_url+"/alerts.html?newVal="+newVal+"&oldVal="+oldVal);
+    window.open(root_url+"/alerts.html?newVal="+newVal+"&oldVal="+oldVal,"_top");
 }
 
-
-function showUpdate(rev,newrev)
-{
-    if(newrev != rev && newrev != "none")
-        window.alert(newrev);
-    else
-        window.alert("Error : "+rev+",,"+newrev);
-}
 
 function hideDiv(name) {
     document.getElementById(name).style.display = "none";

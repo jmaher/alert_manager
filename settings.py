@@ -20,4 +20,4 @@ for setting in dir(_settings_module):
 del this_module
 
 TEMP_CSET_DIR = 'tmpcset'
-MAILDIR = 'var/spool/news/mozilla/dev/tree-management'
+MAILDIR = '/var/spool/news/mozilla/dev/tree-management'
