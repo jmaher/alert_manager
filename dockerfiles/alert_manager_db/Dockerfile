@@ -7,8 +7,7 @@ VOLUME /var/lib/mysql
 # Don't prompt for input
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get -q -y update
-RUN apt-get -q -y dist-upgrade
+RUN apt-get -q -y update && apt-get -q -y upgrade
 RUN apt-get -q -y install mysql-server supervisor
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
