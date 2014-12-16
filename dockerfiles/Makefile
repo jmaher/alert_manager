@@ -29,10 +29,10 @@ clean_data:
 rebuild_data: clean_data init_data
 
 init_containers:
-	docker build --rm -t ateam/alert_manager_db alert_manager_db
+	docker build --no-cache --rm -t ateam/alert_manager_db alert_manager_db
 	docker run --rm --volumes-from alert_manager_data ateam/alert_manager_db /usr/local/bin/provision_mysql.sh
 	@cp ../requirements.txt alert_manager_web/requirements.txt
-	docker build --rm -t ateam/alert_manager_web alert_manager_web
+	docker build --no-cache --rm -t ateam/alert_manager_web alert_manager_web
 	@rm alert_manager_web/requirements.txt
 
 clean_containers:
