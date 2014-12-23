@@ -269,7 +269,7 @@ def build_tbpl_link(record):
         params.append(('repo', treeherder_repo))
         params.append(('fromchange', vals[0]))
         params.append(('tochange', vals[1]))
-        params.append(('searchQuery', '%s %s talos %s' % (tbpl_platform, tbpl_tree, tbpl_test)))
+        params.append(('filter-searchStr', '%s %s talos %s' % (tbpl_platform, tbpl_tree, tbpl_test)))
         link = settings.TREEHERDER_URL
         delim = '?'
         for key, value in params:
