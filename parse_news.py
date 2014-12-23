@@ -249,7 +249,7 @@ def build_tbpl_link(record):
     tbpl_branch = record.branch.split('-Non-PGO')[0]
     if tbpl_branch == 'Firefox':
         treeherder_repo = 'mozilla-central'
-    else
+    else:
         treeherder_repo = tbpl_branch.lower()
 
     dzdata = get_datazilla_data(tbpl_branch)
