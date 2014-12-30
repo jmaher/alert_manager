@@ -86,71 +86,88 @@
                 </ul>
             </div><!-- /.navbar-collapse -->
         </nav>
-        
-    <div id = "jump" align = "right"></div>
-    <div id="revisions">
+
+        <div id = "jump" align = "right"></div>
+        <div id="revisions">
+        </div>
+
+        <div id="addDuplicatePopup" class="popupForm" style="display: none;">
+          <a class="closePopup" href="javascript:goBack();">close</a>
+          <form id="addDuplicateForm">
+            <h2>Mark as duplicate of original revision</h2>
+            <p>
+            <input required type="text" id="logDuplicateText" value="">
+            <input type="submit" value="Mark as Duplicate">
+          </form>
+        </div>
+
+        <div id="addBugPopup" class="popupForm" style="display: none;">
+          <a class="closePopup" href="javascript:goBack();">close</a>
+          <form id="addBugForm">
+            <h2>Bug that tracks this regression</h2>
+            <p>
+            <input required type="text" id="logBugText" value="">
+            <input type="hidden" id="logBugStatusText" value="">
+            <input type="submit" value="Add Bug">
+          </form>
+        </div>
+
+        <div id="addTBPLPopup" class="popupForm" style="display: none;">
+          <a class="closePopup" href="javascript:goBack();">close</a>
+          <form id="addTBPLForm">
+            <h2>Link to TBPL view of jobs</h2>
+            <p>
+            <input required type="text" id="logTbplText" value="">
+            <input type="submit" value="Add Link">
+          </form>
+        </div>
+
+        <div id="addNotePopup" class="popupForm" style="display: none;">
+          <a class="closePopup" href="javascript:goBack();">close</a>
+          <form id="addNoteForm">
+            <h2>Add a Comment</h2>
+            <table>
+              <tr>
+                <th><label for="logNoteEmail">Name/nick:</label></th>
+                <td><input required type="text" id="logNoteEmail" value=""></td>
+              </tr>
+              <tr>
+                <th><label for="logNoteStatus">Status:</label></th>
+                <td><input type="text" id="logNoteStatus" value=""></td>
+              </tr>
+              <tr>
+                <th><label for="logNoteBug">Bug #:</label></th>
+                <td><input type="text" id="logNoteBug" value=""></td>
+              </tr>
+              <tr>
+                <th><label for="logNoteBody">Alert Content:</label></th>
+                <td id="logNoteBody"><span class="lnBody"></span></td>
+              </tr>
+              <tr>
+                <th><label for="logNoteText">Comment:</label></th>
+                <td><textarea required cols="40" rows="15" id="logNoteText"></textarea></td>
+              </tr>
+            </table>
+            <p><input type="submit" value="Add Comment">
+          </form>
+        </div>
     </div>
 
-<div id="addDuplicatePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
-  <form id="addDuplicateForm">
-    <h2>Mark as duplicate of original revision</h2>
-    <p>
-    <input required type="text" id="logDuplicateText" value="">
-    <input type="submit" value="Mark as Duplicate">
-  </form>
-</div>
-
-<div id="addBugPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
-  <form id="addBugForm">
-    <h2>Bug that tracks this regression</h2>
-    <p>
-    <input required type="text" id="logBugText" value="">
-    <input type="hidden" id="logBugStatusText" value="">
-    <input type="submit" value="Add Bug">
-  </form>
-</div>
-
-<div id="addTBPLPopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
-  <form id="addTBPLForm">
-    <h2>Link to TBPL view of jobs</h2>
-    <p>
-    <input required type="text" id="logTbplText" value="">
-    <input type="submit" value="Add Link">
-  </form>
-</div>
-
-<div id="addNotePopup" class="popupForm" style="display: none;">
-  <a class="closePopup" href="javascript:goBack();">close</a>
-  <form id="addNoteForm">
-    <h2>Add a Comment</h2>
-    <table>
-      <tr>
-        <th><label for="logNoteEmail">Name/nick:</label></th>
-        <td><input required type="text" id="logNoteEmail" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteStatus">Status:</label></th>
-        <td><input type="text" id="logNoteStatus" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteBug">Bug #:</label></th>
-        <td><input type="text" id="logNoteBug" value=""></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteBody">Alert Content:</label></th>
-        <td id="logNoteBody"><span class="lnBody"></span></td>
-      </tr>
-      <tr>
-        <th><label for="logNoteText">Comment:</label></th>
-        <td><textarea required cols="40" rows="15" id="logNoteText"></textarea></td>
-      </tr>
-    </table>
-    <p><input type="submit" value="Add Comment">
-  </form>
-</div>
+    <div id="hide" align="left"></div>
+    <div id="revision" align="center"></div>
+    <div align="center">
+      <table class="sortable" id="data" border="1">
+        <tr>
+        </tr>
+      </table>
+    </div>
+    <div align="center">
+      <table id="detail">
+        <tr>
+        </tr>
+      </table>
+    </div>
+    <p id="warn" align="center"></p>
 
 </body>
 </html>
