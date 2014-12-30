@@ -3,12 +3,25 @@
 from datetime import date, timedelta
 import logging
 
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 
 from bug_check import *
 
 
 DEBUG = True
+
+@app.route('/alerts.html')
+def home():
+    return render_template('alerts.html')
+
+@app.route('/expired.html')
+def expired():
+    return render_template('expired.html')
+
+
+@app.route('/report.html')
+def report():
+    return render_template('report.html')
 
 
 def run_query(where_clause):
