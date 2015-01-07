@@ -5,7 +5,6 @@ from optparse import OptionParser
 import os
 import sys
 from pyLibrary import convert
-from pyLibrary.struct import nvl
 from pyLibrary.times.dates import Date
 
 filename = 'config.ini'
