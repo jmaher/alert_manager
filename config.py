@@ -4,8 +4,7 @@ import ConfigParser
 from optparse import OptionParser
 import os
 import sys
-from pyLibrary.cnv import CNV
-from pyLibrary.struct import nvl
+from pyLibrary import convert
 from pyLibrary.times.dates import Date
 
 filename = 'config.ini'
