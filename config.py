@@ -4,7 +4,7 @@ import ConfigParser
 from optparse import OptionParser
 import os
 import sys
-from pyLibrary.cnv import CNV
+from pyLibrary import convert
 from pyLibrary.struct import nvl
 from pyLibrary.times.dates import Date
 
