@@ -11,7 +11,7 @@ from pyLibrary.times.dates import Date
 filename = 'config.ini'
 db_host = 'database'
 db_name = 'alerts'
-maildir = '/var/spool/news/mozilla/dev/tree-management'
+maildir = '/var/spool/news/mozilla/dev/tree-alerts'
 debug = 'true'
 parser = OptionParser()
 parser.add_option("-u", "--username",

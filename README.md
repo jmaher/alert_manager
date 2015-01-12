@@ -161,7 +161,7 @@ You can create a default config.ini file by running:
 
 Change the username and password for the database as required.
 
-You will also either need a subscription to the mozilla.dev.tree-management
+You will also either need a subscription to the mozilla.dev.tree-alerts
 newsgroup, or make use of the sample data packaged in the sample folder.
 
 
