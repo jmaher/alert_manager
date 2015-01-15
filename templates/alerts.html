@@ -75,6 +75,10 @@
                     cell.onclick = "";                
                 }
                 textNode = value || 0;
+                if (alert['backout'] !=null && fields[i] == "percent"){
+                    url = "http://alertmanager.allizom.org:8080/alerts.html?rev="+alert['backout'];
+                    textNode = "<p title=\"Backout:"+alert['backout']+"\"><a target=\"_blank\" href=\"" + url + "\">"+textNode + "**"+ "</a></p>";
+                }
                 cell.innerHTML = textNode; 
             }
             return 1
