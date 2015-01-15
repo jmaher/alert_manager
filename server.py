@@ -28,7 +28,7 @@ def run_query(where_clause):
     db = create_db_connnection()
     cursor = db.cursor()
 
-    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'push_date', 'mergedfrom', 'duplicate', 'tbplurl']
+    fields = ['id', 'branch', 'test', 'platform', 'percent', 'graphurl', 'changeset', 'keyrevision', 'bugcount', 'comment', 'bug', 'status', 'email', 'push_date', 'mergedfrom', 'duplicate', 'tbplurl', 'backout']
     sql = "select %s from alerts %s;" %(','.join(fields), where_clause.strip())
     cursor.execute(sql)
     alerts = cursor.fetchall()
