@@ -90,7 +90,6 @@ function loadSelectors() {
     });
 }
 
-
 function hideMerged(originalkeyrev, showall) {
     var req = new XMLHttpRequest();
     req.onload = function (e) {
