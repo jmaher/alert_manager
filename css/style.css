@@ -252,3 +252,6 @@ body.details > #details
   font-style: italic;
 }
 
+.table {
+    margin-bottom: 0px !important;
+}

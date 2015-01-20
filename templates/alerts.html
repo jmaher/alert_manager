@@ -22,13 +22,14 @@
             var row = tbl.insertRow(-1);
             row.id = alert["id"] + "-";
             var rev = row.insertCell(0);
+            rev.className="check-alert";
+            rev.innerHTML="<input type=\"checkbox\" id =\"check-"+alert['id']+"\"/>";
 
             for (var i = 0; i < fields.length; i++) {
                 var test = fields[i];
                 cell = row.insertCell(-1);
                 cell.className = cname;
                 cell.setAttribute('field_name', fields[i]);
-                cell.onclick = editAlert(alert["id"], alert["body"]);
                 var value = alert[test];
                 if (fields[i] == "reference") {
                     value = "<p><a href=\"" + alert['graphurl'] + "\">" + 'graphurl' + "</a></p>"+ "<p><a href=\"" + alert['changeset'] + "\">" + 'changeset' + "</a></p>";

@@ -196,6 +196,134 @@ function updateStatus(alertid, duplicate, bugid, mergedfrom) {
     }
 }
 
+
+//function to check whether a name exists in an array
+function containsObject(obj, list) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] === obj) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function performAction() {
+    var action = $(document.getElementById("actions")).val();
+    console.log("Selected action-"+action);
+
+    var status_options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
+
+    //get ids of all the checked alerts
+   var checkedIds = $(":checkbox:checked").map(function() {
+        return this.id;
+    }).get();
+   //Check if atleast one alert is chosen
+   if (checkedIds.length<=0 && action != "Actions") {
+    console.log("No alert chosen");
+    alert("Please Choose atleast one Alert");
+   } else {
+
+        for (alert in checkedIds) {
+            checkedIds[alert] = checkedIds[alert].split('-')[1];
+        }
+        //Check if status has to be changed
+        if (containsObject(action, status_options)) {
+            console.log("change status-"+action);
+            //Update the status one by one by calling updatestatus()
+            for (id in checkedIds) {
+                $.ajax({
+                     url: root_url + "/updatestatus",
+                    type: "POST",
+                    data: {
+                        id: checkedIds[id],
+                        status: action,
+                    }
+                });
+            }
+            location.reload();
+        }
+
+        else if (action == "Change Revision") {
+            var newRev = prompt("Please enter new Revision");
+            for (id in checkedIds) {
+
+                var bug = '1234';
+                if (bug == '') {
+                    bug = $(document.getElementById(alertid + "-bug")).val();
+                }
+    
+                if (newRev != null) {
+                    console.log('new revision-'+newRev);
+                    $.ajax({
+                         url: root_url + "/updaterev",
+                        type: "POST",
+                        data: {
+                            id: checkedIds[id],
+                            revision: newRev,
+                        }
+                    });
+                }
+            }
+            location.reload();
+
+        }
+
+        else if (action == "Add Bug") {
+            var BugID = prompt("Please enter Bug ID");
+            console.log('BUG ID-'+BugID);
+            if (BugID != null) {
+                for (id in checkedIds) {
+                    $.ajax({
+                         url: root_url + "/updatefields?type=bug",
+                        type: "POST",
+                        data: {
+                            id: checkedIds[id],
+                            BugID: BugID,
+                        }
+                    });
+
+                }
+                location.reload();
+            
+            }
+        }
+
+        else if (action == "Add Comment") {
+            $(function() {
+                $("#addCommentpopup").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    buttons: { 
+                        Ok: function() {
+                            var email = $("#commentName").val();
+                            var comment = $("#commentText").val();
+                            for (id in checkedIds) {
+                                console.log("Sending POST for-" + checkedIds[id]);
+                                $.ajax({
+                                         url: root_url + "/submit",
+                                        type: "POST",
+                                        data:{
+                                            id: checkedIds[id],
+                                            comment: comment,
+                                            email: email,
+                                        }
+                                });
+                            }
+                            $(this).dialog("close");
+                       },
+                        Cancel: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+            });
+            $("#addCommentpopup").dialog("open");
+        }   
+   }
+}
+
+
 function updateBug(alertid, bugid, status) {
     var bug = bugid;
     if (bug == '') {
@@ -410,6 +538,7 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
                     var kdiv = document.getElementById(keyrev);
                     var newtbl = document.createElement("table");
                     newtbl.id = keyrev + '-tbl';
+                    newtbl.className='table table-bordered';
                     $(document.getElementById(keyrev)).append(newtbl);
                 }
 

@@ -21,6 +21,8 @@
     <link rel="stylesheet" type="text/css" href="css/custom.css">
     <script src="js/jquery.min.js"></script>
     <script src="js/AddCommentUI.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
     <script src="js/alerts.js"></script>
 
     {% block expired %}
@@ -58,6 +60,25 @@
                 <span class="icon-bar"></span>
               </button>
               <a class="navbar-brand" href="alerts.html">Talos Alert Manager</a>
+
+                        <select class="form-control" id="actions" onchange="performAction()">
+                                <option selected>Actions</option>
+                                <option >Change Revision</option>
+                                <option>Add Bug</option>
+                                <option>Add Comment</option>
+                                <option>NEW</option>
+                                <option>Back Filling</option>
+                                <option>Investigating</option>
+                                <option>Resolved</option>
+                                <option>Shipped</option>
+                                <option>Wont Fix</option>
+                                <option>False Alarm</option>
+                                <option>Ignore</option>
+                                <option>Not Tracking</option>
+                                <option>Too Low</option>
+
+                            </select>
+                
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav top-nav">
@@ -76,7 +97,6 @@
                                 <option value="">Select Platform</option>
                             </select>
                     </li>
-
                     <li >
                         <u>ShowAll</u>
                         <input type="checkbox" id="checkbox" Value="Show All"/>
@@ -109,6 +129,16 @@
             <input required type="text" id="logBugText" value="">
             <input type="hidden" id="logBugStatusText" value="">
             <input type="submit" value="Add Bug">
+          </form>
+        </div>
+
+        <div id="changeRevPopup" class="popupForm" style="display: none;">
+          <a class="closePopup" onclick="document.getElementById('changeRevPopup').style.display='none';">close</a>
+          <form id="changeRevForm">
+            <h2>New Revision</h2>
+            <p>
+            <input required type="text" id="newRev" value="">
+            <input type="submit" value="Update">
           </form>
         </div>
 
@@ -151,6 +181,11 @@
             <p><input type="submit" value="Add Comment">
           </form>
         </div>
+    </div>
+
+    <div  id="addCommentpopup" style="display: none;">
+          <p>Name/email  <input required type="text" id="commentName" value=""></p>
+          <p>Comment <textarea required cols="20" rows="5" id="commentText"></textarea></p>
     </div>
 
     <div id="hide" align="left"></div>
