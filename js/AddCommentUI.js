@@ -86,8 +86,8 @@ var AddCommentUI = {
         id: alertID,
         email: email,
         comment: comment,
-        // status: status,
-        // bug: bugid,
+        status: status,
+        bug: bugid,
       }
     });
   },

@@ -203,11 +203,15 @@ def run_win8only_query():
 
 @app.route("/submit", methods=['POST'])
 def run_submit_data():
+    '''
+    To add comments
+
+    '''
+
     retVal = {}
     data = request.form
-    comment = "[%s] %s" % (data['email'], data['comment'][0])
+    comment = "[%s] %s" % (data['email'], data['comment'])
     sql = "update alerts set comment='%s', email='%s' where id=%s;" % (comment, data['email'], data['id'])
-
     db = create_db_connnection()
     cursor = db.cursor()
     cursor.execute(sql)
@@ -216,6 +220,52 @@ def run_submit_data():
     #TODO: verify via return value in alerts
     return jsonify(**retVal)
 
+@app.route("/updaterev", methods=['POST'])
+def run_updatekeyrev_data():
+    '''
+    To change keyrevision of a particular alert
+
+    '''
+    retVal = {}
+    data = request.form
+    sql = "update alerts set keyrevision='%s' where id=%s;" % (data['revision'], data['id'])
+
+    db = create_db_connnection()
+    cursor = db.cursor()
+    cursor.execute(sql)
+    alerts = cursor.fetchall()
+
+    return jsonify(**retVal)
+
+@app.route("/updatefields", methods=['POST'])
+def run_addfields_data():
+    '''
+    To Add comments, bugs to multiple alerts
+    TODO: implemented only comments as of now
+
+    '''
+    sql=''
+    query_dict = request.args.to_dict()
+    typeVal = ""
+    data = request.form
+    retVal = {}
+
+    if 'type' in query_dict:
+        typeVal = query_dict.pop('type')
+
+    if typeVal == "bug":
+        sql = "update alerts set bug='%s' where id=%s;" %(data['BugID'], data['id'])
+
+    if typeVal == "comment":
+        pass
+
+
+    db = create_db_connnection()
+    cursor = db.cursor()
+    cursor.execute(sql)
+    alerts = cursor.fetchall()
+
+    return jsonify(**retVal)
 
 @app.route("/updatestatus", methods=['POST'])
 def run_updatestatus_data():
