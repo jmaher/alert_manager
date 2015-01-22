@@ -61,6 +61,7 @@ def get_new_tbpl_url(new_revision, new_branch, alert_id):
     sql = "select test, platform from alerts where id=%s" %alert_id
     cursor.execute(sql)
     search_results = cursor.fetchall()
+    search_results = search_results[0]
     test = search_results[0]
     platform = search_results[1]
     record = Record(test, platform, new_branch, new_revision)
@@ -285,9 +286,9 @@ def run_addfields_data():
 
     if typeVal == "branch":
         new_branch = data['branch']
-        new_revision = data['branch']
-        new_tbpl_url = get_new_tbpl_url(new_branch, new_revision, data['id'])
-        sql = "update alerts set branch='%s', revision='%s', tbplurl='%s' where id=%s" %(new_branch, new_revision, new_tbpl_url, data['id'])
+        new_revision = data['revision']
+        new_tbpl_url = get_new_tbpl_url(new_revision, new_branch, data['id'])
+        sql = "update alerts set branch='%s', keyrevision='%s', tbplurl='%s' where id=%s" %(new_branch, new_revision, new_tbpl_url, data['id'])
 
     db = create_db_connnection()
     cursor = db.cursor()
