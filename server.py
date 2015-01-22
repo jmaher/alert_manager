@@ -4,6 +4,7 @@ from datetime import date, timedelta
 import logging
 
 from flask import request, jsonify, render_template
+from parse_news import build_tbpl_link
 
 from bug_check import *
 
@@ -23,6 +24,12 @@ def expired():
 def report():
     return render_template('report.html')
 
+class Record(object):
+    def __init__(self, test, platform, branch, keyrevision):
+        self.test = test
+        self.platform = platform
+        self.branch = branch
+        self.keyrevision = keyrevision
 
 def run_query(where_clause):
     db = create_db_connnection()
@@ -45,6 +52,23 @@ def run_query(where_clause):
         retVal.append(data)
     return retVal
 
+def get_new_tbpl_url(new_revision, new_branch, alert_id):
+    '''
+    To generate new tbpl url when branch is changed
+    '''
+    db = create_db_connnection()
+    cursor = db.cursor()
+    sql = "select test, platform from alerts where id=%s" %alert_id
+    cursor.execute(sql)
+    search_results = cursor.fetchall()
+    test = search_results[0]
+    platform = search_results[1]
+    record = Record(test, platform, new_branch, new_revision)
+    link = build_tbpl_link(record)
+    cursor.close()
+    db.close()
+
+    return link 
 
 @app.route('/conflicted_bugs')
 def get_conflicting_alerts():
@@ -259,6 +283,11 @@ def run_addfields_data():
     if typeVal == "comment":
         pass
 
+    if typeVal == "branch":
+        new_branch = data['branch']
+        new_revision = data['branch']
+        new_tbpl_url = get_new_tbpl_url(new_branch, new_revision, data['id'])
+        sql = "update alerts set branch='%s', revision='%s', tbplurl='%s' where id=%s" %(new_branch, new_revision, new_tbpl_url, data['id'])
 
     db = create_db_connnection()
     cursor = db.cursor()
