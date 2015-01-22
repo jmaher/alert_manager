@@ -5,6 +5,7 @@ import logging
 
 from flask import request, jsonify, render_template
 from parse_news import build_tbpl_link
+from utils import get_details_from_id
 
 from bug_check import *
 
@@ -253,7 +254,10 @@ def run_updatekeyrev_data():
     '''
     retVal = {}
     data = request.form
-    sql = "update alerts set keyrevision='%s' where id=%s;" % (data['revision'], data['id'])
+    alert_details = get_details_from_id(data['id'])
+    record = Record(alert_details['test'], alert_details['platform'], alert_details['branch'], data['revision'])
+    new_tbplurl = build_tbpl_link(record)
+    sql = "update alerts set keyrevision='%s', tbplurl='%s' where id=%s;" % (data['revision'], new_tbplurl, data['id'])
 
     db = create_db_connnection()
     cursor = db.cursor()
