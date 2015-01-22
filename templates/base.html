@@ -64,6 +64,7 @@
                         <select class="form-control" id="actions" onchange="performAction()">
                                 <option selected>Actions</option>
                                 <option >Change Revision</option>
+                                <option >Change Branch</option>
                                 <option>Add Bug</option>
                                 <option>Add Comment</option>
                                 <option>NEW</option>
@@ -186,6 +187,26 @@
     <div  id="addCommentpopup" style="display: none;">
           <p>Name/email  <input required type="text" id="commentName" value=""></p>
           <p>Comment <textarea required cols="20" rows="5" id="commentText"></textarea></p>
+    </div>
+
+    <div  id="changeBranchpopup" style="display: none;">
+          <p>
+            <select class="form-control" id="branchName">
+              <option selected>Select Branch</option>
+              <option>Mozilla-Inbound</option>
+              <option>B2g-Inbound-Non-PGO</option>
+              <option>Firefox</option>
+              <option>Mozilla-Inbound-Non-PGO</option>
+              <option>Firefox-Non-PGO</option>
+              <option>Mozilla-Beta</option>
+              <option>Fx-Team-Non-PGO</option>
+              <option>Mozilla-Aurora</option>
+              <option>Fx-Team</option>
+              <option>B2g-Inbound</option>
+              <option>mobile</option>
+            </select>
+          </p>
+          <p>Revision <input required type="text" id="revisionName" value=""></p>
     </div>
 
     <div id="hide" align="left"></div>

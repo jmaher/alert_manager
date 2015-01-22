@@ -319,6 +319,37 @@ function performAction() {
                 });
             });
             $("#addCommentpopup").dialog("open");
+        }
+            //For changing branch
+        else if (action == "Change Branch") {
+            $(function() {
+                $("#changeBranchpopup").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    buttons: { 
+                        Ok: function() {
+                            var branch = $("#branchName").val();
+                            var rev = $("#revisionName").val();
+                            for (id in checkedIds) {
+                                $.ajax({
+                                         url: root_url + "/updatefields?type=branch",
+                                        type: "POST",
+                                        data:{
+                                            id: checkedIds[id],
+                                            branch: branch,
+                                            revision: rev,
+                                        }
+                                });
+                            }
+                            $(this).dialog("close");
+                       },
+                        Cancel: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+            });
+            $("#changeBranchpopup").dialog("open");
         }   
    }
 }
