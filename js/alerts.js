@@ -1,6 +1,26 @@
 var root_url = window.location.protocol + '//' + window.location.host;
 var data,det_row;
 var row_exists = false;
+$(function() {
+    var req = new XMLHttpRequest();
+    var dats = getJsonFromUrl();
+    var newVal = dats['newVal'];
+    var oldVal = dats['oldVal'];
+    if (newVal == "" || newVal == null) {
+        newVal = "none";
+    }
+    if (oldVal == "" || oldVal == null) {
+        oldVal = "none";
+    }
+    req.onload = function(e) {
+        var raw_data = JSON.parse(req.response);
+        var datas = raw_data.data;
+    
+    }
+         
+    req.open('get', root_url+'/update_rev?newVal='+newVal+'&oldVal='+oldVal, true);
+    req.send();
+});
 
 function loadSelectors() {
     $.getJSON(root_url + "/getvalues", function (data) {
@@ -159,6 +179,7 @@ function addMergedLinks(showall) {
                 }
 
                 var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
+                //UI : merged keyrevisions as heading
                 $(document.getElementById(mf + "-hdr")).html("<a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0><h3>" + mf + "</a></h3>" + mergedfromhtml);
             }
         }
@@ -526,11 +547,11 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
         for (var alert = 0; alert < alerts.length; alert++) {
             if (alerts[alert]["keyrevision"] != keyrev) {
                 keyrev = alerts[alert]["keyrevision"];
+                //window.alert(keyrev);
                 if ($(document.getElementById(keyrev + "-hdr")).html() == null) {
                     var newdiv = document.createElement("div");
                     newdiv.id = keyrev;
                     $("#revisions").append(newdiv);
-
                     $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
 
                 }
@@ -541,8 +562,9 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
                     newtbl.className='table table-bordered';
                     $(document.getElementById(keyrev)).append(newtbl);
                 }
-
-                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
+                var id = "textbox" + keyrev;
+                //UI : keyrevisions as headings
+                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3> "+ keyrev + "</h3></a><input id = "+ id +" size=10></input><a href=# onClick=updateVal('"+id+"','"+keyrev+"')>update</a>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
             var r = addAlertToUI(tbl, alerts[alert], showall, rev);
@@ -581,6 +603,13 @@ function editAlert(id, body) {
         AddCommentUI.openCommentBox(id, body);
     }
 }
+
+function updateVal(id,oldVal)
+{
+    var newVal = document.getElementById(id).value;
+    window.open(root_url+"/alerts.html?newVal="+newVal+"&oldVal="+oldVal,"_top");
+}
+
 
 function hideDiv(name) {
     document.getElementById(name).style.display = "none";
