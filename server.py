@@ -4,8 +4,7 @@ from datetime import date, timedelta
 import logging
 
 from flask import request, jsonify, render_template
-from parse_news import build_tbpl_link
-from utils import get_details_from_id
+from utils import build_tbpl_link, get_details_from_id
 
 from bug_check import *
 

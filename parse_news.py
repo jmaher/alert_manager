@@ -16,7 +16,7 @@ import os
 import re
 import settings
 from lib.decorators import database_conn, memoize
-
+from utils import build_tbpl_link
 
 logger = logging.getLogger('news parser')
 logger.setLevel(settings.LOG_LEVEL)
@@ -243,44 +243,6 @@ def is_merged(record, csets):
 
     return merged
 
-
-def build_tbpl_link(record):
-    # TODO: is branch valid?
-    tbpl_branch = record.branch.split('-Non-PGO')[0]
-    if tbpl_branch == 'Firefox':
-        treeherder_repo = 'mozilla-central'
-    else:
-        treeherder_repo = tbpl_branch.lower()
-
-    dzdata = get_datazilla_data(tbpl_branch)
-    vals = get_revision_range(dzdata, record.keyrevision)
-
-    link = ''
-    if vals:
-        params = []
-
-        tbpl_platform = settings.TBPL_PLATFORMS[record.platform]
-        tbpl_test = settings.TBPL_TESTS[record.test]
-        tbpl_tree = settings.TBPL_TREES[record.branch]
-
-        if 'OSX' in tbpl_platform:
-            tbpl_tree = tbpl_tree.split(' pgo')[0]
-
-        params.append(('repo', treeherder_repo))
-        params.append(('fromchange', vals[0]))
-        params.append(('tochange', vals[1]))
-        params.append(('filter-searchStr', '%s %s talos %s' % (tbpl_platform, tbpl_tree, tbpl_test)))
-        link = settings.TREEHERDER_URL
-        delim = '?'
-        for key, value in params:
-            link = "%s%s%s=%s" % (link, delim, key, value)
-            if delim == '?':
-                delim = '&'
-        link = link.replace(' ', '%20')
-
-    return link
-
-
 def unshorten_url(url):
     """unshortens a shortened url
 
@@ -432,40 +394,6 @@ def mark_merged(db_cursor, id_, original_key_revision):
     if not row:
         query = "UPDATE alerts SET mergedfrom=%s WHERE id=%s"
         db_cursor.execute(query, (original_key_revision, id_))
-
-
-@memoize
-def get_datazilla_data(branch_id):
-    """Returns data retrieved from datazilla.
-
-    Data is cached in memory to avoid redundant
-    requests to datazilla or producing temp files on disk.
-    """
-    url = settings.DATAZILLA_URL_TEMPLATE % {'branch': branch_id, 'days': 21}
-    return requests.get(url).json()
-
-
-def get_revision_range(dzdata, revision):
-    # TODO: switch this to hg instead of datazilla (jmaher)
-    for item in dzdata:
-        if revision in dzdata[item]['revisions']:
-            revid = int(item)
-            break
-    else:
-        logger.info('Unable to find revision: %s' % revision)
-        return
-
-    lower = str(revid - 6)
-    upper = str(revid + 6)
-
-    if lower not in dzdata:
-        logger.info('Unable to get range, missing id: %s' % lower)
-        return
-    if upper not in dzdata:
-        logger.info('Unable to get range, missing id: %s' % upper)
-        return
-
-    return dzdata[lower]['revisions'][-1], dzdata[upper]['revisions'][-1]
 
 
 @memoize
