@@ -162,7 +162,7 @@ def parse_details_to_file_bug(details, oldest_alert):
     elif flags['WinXP x32']:
         try_platform = try_platform + 'win32,'
         add = add + 'WinXP/'
-    elif flag['Win7 x32']:
+    elif flags['Win7 x32']:
         try_platform = try_platform + 'win32,'
         add = add + 'Win7/'
     if flags['MacOS']:
