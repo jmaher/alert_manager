@@ -1,7 +1,9 @@
 from lib.decorators import database_conn, memoize
 from db import *
 import settings
-import requests
+import requests, re
+import logging
+from managed_settings import TBPL_TESTS, HOST_ALERT_MANAGER
 
 def get_revision_range(dzdata, revision):
     # TODO: switch this to hg instead of datazilla (jmaher)
@@ -55,7 +57,7 @@ def build_tbpl_link(record):
         params = []
 
         tbpl_platform = settings.TBPL_PLATFORMS[record.platform]
-        tbpl_test = settings.TBPL_TESTS[record.test]
+        tbpl_test = settings.TBPL_TESTS[record.test]['jobname']
         tbpl_tree = settings.TBPL_TREES[record.branch]
 
         if 'OSX' in tbpl_platform:
@@ -96,4 +98,122 @@ def get_details_from_id(alert_id):
     db.close()
 
     return retVal
+
+def parse_details_to_file_bug(details, oldest_alert):
+    branch = details['branch']
+    test = details['test']
+    platform = details['platform']
+    percent = details['percent']
+    push_date = details['push_date']
+    summary = ''
+
+    #add regression values
+    min_percent = min(percent)
+    max_percent = max(percent)
+    min_percent = re.findall('(?P<number>\d+)', min_percent)[0]
+    max_percent = re.findall('(?P<number>\d+)', max_percent)[0]
+    if int(max_percent) - int(min_percent) <= 1:
+        summary = summary + '%s' %(max_percent) + '% '
+    else:
+        summary = summary + '%s-%s' %(min_percent, max_percent) + '% '
+
+    #add platform
+    flags = {
+        'linux64': 0,
+        'linux32': 0,
+        'Win8 x64': 0,
+        'WinXP x32': 0,
+        'Win7 x32': 0,
+        'Android': 0,
+        'MacOS': 0
+    }
+    for p in platform:
+        if 'Ubuntu HW 12.04 x64' in p:
+            flags['linux64'] = 1
+        elif 'Ubuntu HW 12.04' in p:
+            flags['linux32'] = 1
+        elif 'WINNT 6.2 x64' in p:
+            flags['Win8 x64'] = 1
+        elif 'WINNT 5.1 (ix)' in p:
+            flags['WinXP x32'] = 1
+        elif 'WINNT 6.1 (ix)' in p:
+            flags['Win7 x32'] = 1
+        elif 'Mac' in p:
+            flags['MacOS'] = 1
+        elif 'Android' in p:
+            flags['Android'] = 1
+    add = ''
+    try_platform = ''
+    if flags['linux64'] and flags['linux32']:
+        add = add + 'Linux*/'
+        try_platform = 'linux,'
+    elif flags['linux64']:
+        add = add + 'Linux 64/'
+        try_platform = try_platform + 'linux64,'
+    elif flags['linux32']:
+        try_platform = try_platform + 'linux,'
+        add = add + 'Linux 32/'
+    if  (flags['Win8 x64'] and flags['WinXP x32']) or (flags['Win8 x64'] and flags['Win7 x32']):
+        try_platform = try_platform + 'win64,win32,'
+        add = add + 'Win*/'
+    elif flags['Win8 x64']:
+        try_platform = try_platform + 'win64,'
+        add = add + 'Win8/'
+    elif flags['WinXP x32']:
+        try_platform = try_platform + 'win32,'
+        add = add + 'WinXP/'
+    elif flag['Win7 x32']:
+        try_platform = try_platform + 'win32,'
+        add = add + 'Win7/'
+    if flags['MacOS']:
+        try_platform = try_platform + 'macosx64,'
+        add = add + 'MacOS*/'
+    if flags['Android']:
+        try_platform = try_platform + 'android-api-11,'
+        add = add + 'Android/'
+
+    try_platform = try_platform.strip(',')
+    add = add.strip('/') + ' '
+    summary = summary + add
+
+    #add Test
+    add = ''
+    for t in sorted(set(test)):
+        add = add + t+'/'
+    add = add.strip('/')+' '
+    summary = summary + add
+    summary = summary + 'regression on '
+    #add branch
+    add = oldest_alert[0]
+    add = add+' '
+    summary = summary + add
+    summary = summary + 'on '
+    #add date
+    summary = summary + oldest_alert[4].strftime("%B %d, %Y") + ' from push %s' %details['keyrev']
+
+    #Creating Description
+    desc = """We have verified a regression, here is a list to all the regressions and improvements that we know of so far:
+    %s/alerts.html?rev=%s&showAll=1
+    Viewing the above alerts in alert manager you can view each alert as well as a link to the graph 
+    showing the regression. There is also a link to treeherder showing the jobs in a pushlog format.
+    To learn more about this test, please visit: https://wiki.mozilla.org/Buildbot/Talos/Tests#%s
+    to run this locally, follow these instructions to get setup:
+    https://wiki.mozilla.org/Buildbot/Talos/Running#Running_locally_-_Source_Code
+    and then run:
+    talos --develop -e <path>/firefox -a %s
+
+    If you want to push to try, you can use this syntax:
+    try: -b o -p %s -u none -t %s
+
+    As the patch author we need your feedback to help us determine what the next steps are:
+                * If this doesn't seem possible that it could be related to your bug, let us know ASAP
+                * If this is possible that you caused a regression, but not all of this, let us know ASAP
+                * Otherwise, we would like to know by <Tuesday> if:
+                ** this is expected, and we should accept the regression. Please provide documentation and we will close this bug
+                ** this is unexpected, but is limited in scope and scale- to investigate and fix this would be not worthwhile based on how long it would take to sort out
+                ** this is unexpected, but after a brief look at the code it is likely you could fix this; do let us know and provide a general timeline
+                ** this is unexpected and we are not sure what to do, we should backout for now.
+            """ %(HOST_ALERT_MANAGER,details['keyrev'], TBPL_TESTS[oldest_alert[1]]['wikiname'], TBPL_TESTS[oldest_alert[1]]['testname'], try_platform, TBPL_TESTS[oldest_alert[1]]['testname'])
+
+    return ({'summary':summary,'desc':desc})
 

@@ -5,7 +5,7 @@ import settings
 
 def create_buildername(platform, branch, test):
     tbpl_platform = settings.TBPL_PLATFORMS[platform]
-    tbpl_test = settings.TBPL_TESTS[test]
+    tbpl_test = settings.TBPL_TESTS[test]['jobname']
     tbpl_tree = settings.TBPL_TREES[branch]
 
     if 'OSX' in tbpl_platform:
@@ -20,7 +20,7 @@ def get_active_alerts():
     db = create_db_connection()
     cursor = db.cursor()
 
-    query = "select platform, branch, test, keyrevision from alerts where (status='' or status='NEW' or status='Back Filling')
+    query = "select platform, branch, test, keyrevision from alerts where (status='' or status='NEW' or status='Back Filling')"
     cursor.execute(query)
     alerts = cursor.fetchall()
 
