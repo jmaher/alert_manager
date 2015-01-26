@@ -354,6 +354,39 @@ function performAction() {
    }
 }
 
+function fileBug (keyrev) {
+    console.log("File bug for-"+keyrev.split('-')[1]);
+    var req = new XMLHttpRequest();
+    req.onload = function (e) {
+        var raw_data = JSON.parse(req.response);
+        console.log(raw_data);
+        $("#summaryText").val(raw_data['summary'])
+        $("#descriptionText").val(raw_data['desc'])
+        
+        $(function() {
+        $("#fileBugpopup").dialog({
+            autoOpen: false,
+            modal: true,
+            width: 900,
+            height: 600,
+            buttons: { 
+                Ok: function() {
+                    console.log("Done Filling");
+                    $(this).dialog("close");
+               },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    });
+    $("#fileBugpopup").dialog("open");
+
+    }
+    req.open('get', root_url + '/file_bug?keyrev=' + keyrev.split('-')[1], true);
+    req.send();
+
+}
 
 function updateBug(alertid, bugid, status) {
     var bug = bugid;
@@ -561,7 +594,6 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
                     var newdiv = document.createElement("div");
                     newdiv.id = keyrev;
                     $("#revisions").append(newdiv);
-
                     $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a></span>");
 
                 }
@@ -573,7 +605,7 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
                     $(document.getElementById(keyrev)).append(newtbl);
                 }
 
-                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a>");
+                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h3>" + keyrev + "</h3></a><span id=\"file-"+keyrev+"\" onclick=\"fileBug(this.id)\">File Bug</span>");
                 tbl = document.getElementById(keyrev + "-tbl");
             }
             var r = addAlertToUI(tbl, alerts[alert], showall, rev);

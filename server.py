@@ -4,7 +4,7 @@ from datetime import date, timedelta
 import logging
 
 from flask import request, jsonify, render_template
-from utils import build_tbpl_link, get_details_from_id
+from utils import build_tbpl_link, get_details_from_id, parse_details_to_file_bug
 
 from bug_check import *
 
@@ -86,6 +86,38 @@ def get_conflicting_alerts():
     db.close()
     return jsonify(bugs=alerts)
 
+@app.route('/file_bug')
+def get_details_from_revision():
+    
+    keyrev = request.args['keyrev']
+    db = create_db_connnection()
+    cursor = db.cursor()
+    branch = []
+    test = []
+    platform = []
+    percent = []
+    push_date = []
+    query = "select branch,test,platform,percent,push_date from alerts  where keyrevision = '%s'" % keyrev
+    cursor.execute(query)
+    search_results = cursor.fetchall()
+    for sr in search_results:
+        branch.append(sr[0])
+        test.append(sr[1])
+        platform.append(sr[2])
+        percent.append(sr[3])
+        push_date.append(sr[4])
+
+    oldest_alert_time = min(push_date)
+
+    for sr in search_results:
+        if sr[4] == oldest_alert_time:
+            oldest_alert = sr
+
+    cursor.close()
+    db.close()
+    details = {'branch':branch,'test':test,'platform':platform, 'percent':percent, 'push_date':push_date,'keyrev':keyrev}
+    retVal = parse_details_to_file_bug(details,oldest_alert)
+    return jsonify(retVal)
 
 @app.route('/alert')
 def run_alert_query():
