@@ -206,14 +206,14 @@ def parse_details_to_file_bug(details, oldest_alert):
     try: -b o -p %s -u none -t %s
 
     As the patch author we need your feedback to help us determine what the next steps are:
-                * If this doesn't seem possible that it could be related to your bug, let us know ASAP
-                * If this is possible that you caused a regression, but not all of this, let us know ASAP
-                * Otherwise, we would like to know by <Tuesday> if:
-                ** this is expected, and we should accept the regression. Please provide documentation and we will close this bug
-                ** this is unexpected, but is limited in scope and scale- to investigate and fix this would be not worthwhile based on how long it would take to sort out
-                ** this is unexpected, but after a brief look at the code it is likely you could fix this; do let us know and provide a general timeline
-                ** this is unexpected and we are not sure what to do, we should backout for now.
-            """ %(HOST_ALERT_MANAGER,details['keyrev'], TBPL_TESTS[oldest_alert[1]]['wikiname'], TBPL_TESTS[oldest_alert[1]]['testname'], try_platform, TBPL_TESTS[oldest_alert[1]]['testname'])
+        * If this doesn't seem possible that it could be related to your bug, let us know ASAP
+        * If this is possible that you caused a regression, but not all of this, let us know ASAP
+        * Otherwise, we would like to know by <Tuesday> if:
+        ** this is expected, and we should accept the regression. Please provide documentation and we will close this bug
+        ** this is unexpected, but is limited in scope and scale- to investigate and fix this would be not worthwhile based on how long it would take to sort out
+        ** this is unexpected, but after a brief look at the code it is likely you could fix this; do let us know and provide a general timeline
+        ** this is unexpected and we are not sure what to do, we should backout for now.
+            """ %(HOST_ALERT_MANAGER,details['keyrev'], TBPL_TESTS[oldest_alert[1]]['wikiname'], TBPL_TESTS[oldest_alert[1]]['testname'], try_platform, TBPL_TESTS[oldest_alert[1]]['jobname'])
 
     return ({'summary':summary,'desc':desc})
 
