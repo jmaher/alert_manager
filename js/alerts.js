@@ -212,7 +212,7 @@ function performAction() {
     var action = $(document.getElementById("actions")).val();
     console.log("Selected action-"+action);
 
-    var status_options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
+    var status_options = ["NEW", "Back Filling", "Investigating", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Too Low"];
 
     //get ids of all the checked alerts
    var checkedIds = $(":checkbox:checked").map(function() {
@@ -350,6 +350,36 @@ function performAction() {
                 });
             });
             $("#changeBranchpopup").dialog("open");
+        }
+
+        //Duplicates
+        else if (action == 'Duplicate') {
+            $(function() {
+                $("#markDuplicatepopup").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    buttons: { 
+                        Ok: function() {
+                            var new_rev = $("#markDuplicateRev").val();
+                            for (id in checkedIds) {
+                                $.ajax({
+                                         url: root_url + "/updatefields?type=duplicate",
+                                        type: "POST",
+                                        data:{
+                                            id: checkedIds[id],
+                                            rev: new_rev,
+                                        }
+                                });
+                            }
+                            $(this).dialog("close");
+                       },
+                        Cancel: function () {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+            });
+            $("#markDuplicatepopup").dialog("open");
         }   
    }
 }

@@ -319,6 +319,9 @@ def run_addfields_data():
     if typeVal == "comment":
         pass
 
+    if typeVal == "duplicate":
+        sql = "update alerts set mergedfrom='%s', duplicate='%s', status='Duplicate' where id=%s;" %(data['rev'], data['rev'], data['id'])
+
     if typeVal == "branch":
         new_branch = data['branch']
         new_revision = data['revision']
