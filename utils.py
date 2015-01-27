@@ -4,6 +4,9 @@ import settings
 import requests, re
 import logging
 from managed_settings import TBPL_TESTS, HOST_ALERT_MANAGER
+import datetime
+
+WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',  'Friday', 'Saturday', 'Sunday']
 
 def get_revision_range(dzdata, revision):
     # TODO: switch this to hg instead of datazilla (jmaher)
@@ -99,7 +102,7 @@ def get_details_from_id(alert_id):
 
     return retVal
 
-def parse_details_to_file_bug(details, oldest_alert):
+def parse_details_to_file_bug(details, oldest_alert, bugnum='BUGNUM'):
     branch = details['branch']
     test = details['test']
     platform = details['platform']
@@ -189,9 +192,14 @@ def parse_details_to_file_bug(details, oldest_alert):
     #add date
     summary = summary + oldest_alert[4].strftime("%B %d, %Y") + ' from push %s' % details['keyrev']
 
-    #TODO: <bug> <tuesday>
-    bugnum = 'BUGNUM'
-    duedate = 'Tuesday'
+    day = datetime.datetime.now()
+    n_days = 3
+    if day.weekday()>2:
+        n_days+=2
+
+    due_date = (day + datetime.timedelta(days=n_days)).weekday()
+    duedate = WEEK[due_date]
+
     #Creating Description
     desc = """
 Talos has detected a Firefox performance regression from your commit %s in bug %s.  We need you to address this regression.
@@ -242,4 +250,17 @@ Making a decision:
                   TBPL_TESTS[oldest_alert[1]]['testname'], duedate)
 
     return ({'summary':summary,'desc':desc})
+
+def find_bugnum_from_body(keyrev):
+    db = create_db_connnection()
+    cursor = db.cursor()
+    query = "select id,body from alerts  where keyrevision = '%s'" % keyrev
+    cursor.execute(query)
+    search_results = cursor.fetchall()
+    bugs=set(re.findall(r'- [Bb]ug ([0-9]+)', str(search_results)))
+    logging.debug(sorted(bugs))
+    cursor.close()
+    db.close()
+
+    return list(bugs)
 

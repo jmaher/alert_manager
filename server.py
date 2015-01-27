@@ -4,7 +4,7 @@ from datetime import date, timedelta
 import logging
 
 from flask import request, jsonify, render_template
-from utils import build_tbpl_link, get_details_from_id, parse_details_to_file_bug
+from utils import build_tbpl_link, get_details_from_id, parse_details_to_file_bug, find_bugnum_from_body
 
 from bug_check import *
 
@@ -115,8 +115,9 @@ def get_details_from_revision():
 
     cursor.close()
     db.close()
+    bug = find_bugnum_from_body(keyrev)
     details = {'branch':branch,'test':test,'platform':platform, 'percent':percent, 'push_date':push_date,'keyrev':keyrev}
-    retVal = parse_details_to_file_bug(details,oldest_alert)
+    retVal = parse_details_to_file_bug(details, oldest_alert, bug[0])
     return jsonify(retVal)
 
 @app.route('/alert')

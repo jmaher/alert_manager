@@ -400,13 +400,10 @@ function fileBug (keyrev) {
             width: 900,
             height: 600,
             buttons: { 
-                Ok: function() {
+                Dismiss: function() {
                     console.log("Done Filling");
                     $(this).dialog("close");
-               },
-                Cancel: function () {
-                    $(this).dialog("close");
-                }
+               }
             }
         });
     });
