@@ -7,6 +7,7 @@ from managed_settings import TBPL_TESTS, HOST_ALERT_MANAGER
 import datetime
 
 WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',  'Friday', 'Saturday', 'Sunday']
+logger = None
 
 def get_revision_range(dzdata, revision):
     # TODO: switch this to hg instead of datazilla (jmaher)
