@@ -204,44 +204,32 @@ def parse_details_to_file_bug(details, oldest_alert, bugnum='BUGNUM'):
     desc = """
 Talos has detected a Firefox performance regression from your commit %s in bug %s.  We need you to address this regression.
 
-    *** Please let us know your plans by %s, or the offending patch will be backed out! ***
+This is a list of all known regressions and improvements related to your bug:
+%s/alerts.html?rev=%s&showAll=1
 
-Details of the regression:
+On the page above you can see Talos alert for each affected platform as well as a link to a graph showing the history of scores for this test. There is also a link to a treeherder page showing the Talos jobs in a pushlog format.
 
-  This is a list of all known regressions and improvements related to your bug:
-  %s/alerts.html?rev=%s&showAll=1
-
-  On the page above you can see Talos alert for each affected platform as well as a link to a graph
-showing the history of scores for this test. There is also a link to a treeherder page showing 
-the Talos jobs in a pushlog format.
-
-  To learn more about the regressing test, please see: https://wiki.mozilla.org/Buildbot/Talos/Tests#%s
+To learn more about the regressing test, please see: https://wiki.mozilla.org/Buildbot/Talos/Tests#%s
 
 Reproducing and debugging the regression:
+If you would like to re-run this Talos test on a potential fix, use try with the following syntax:
+try: -b o -p %s -u none -t %s  # add "mozharness: --spsProfile" to generate profile data
 
-  If you would like to re-run this Talos test on a potential fix, use try with the following syntax:
-  try: -b o -p %s -u none -t %s
+To run the test locally and do a more in-depth investigation, first set up a local Talos environment:
+https://wiki.mozilla.org/Buildbot/Talos/Running#Running_locally_-_Source_Code
 
-  * if you want to see sps profiling, please adjust your try syntax to be:
-    try: -b o -p %s -u none -t %s mozharness: --spsProfile
-
-  To run the test locally and do a more in-depth investigation, first set up a local Talos environment:
-  https://wiki.mozilla.org/Buildbot/Talos/Running#Running_locally_-_Source_Code
-
-  Then run the following command from the directory where you set up Talos:
-  talos --develop -e <path>/firefox -a %s
+Then run the following command from the directory where you set up Talos:
+talos --develop -e <path>/firefox -a %s
 
 Making a decision:
+As the patch author we need your feedback to help us handle this regression.
+*** Please let us know your plans by %s, or the offending patch will be backed out! ***
 
-  As the patch author we need your feedback to help us handle this regression.
-
-  *** Please let us know your plans by %s, or the offending patch will be backed out! ***
-
-  Some options to consider:
-    1) If you are planning to investigate and fix this regression, let us know a time frame. You can also just back out this patch now and do the investigation later.
-    2) If it seems impossible that this regression is caused by your patch, let us know ASAP.
-    3) If this regression is expected, and we should accept this regression, please explain why and we will close the bug.
-    4) If the scope and scale of the regression does not justify the time & effort required for an investigation, let us know and we can close the bug.
+Some options to consider:
+1) If you are planning to investigate and fix this regression, let us know a time frame. You can also just back out this patch now and do the investigation later.
+2) If it seems impossible that this regression is caused by your patch, let us know ASAP.
+3) If this regression is expected, and we should accept this regression, please explain why and we will close the bug.
+4) If the scope and scale of the regression does not justify the time & effort required for an investigation, let us know and we can close the bug.
             """ %(details['keyrev'], bugnum, duedate,
                   HOST_ALERT_MANAGER, details['keyrev'],
                   TBPL_TESTS[oldest_alert[1]]['wikiname'],
