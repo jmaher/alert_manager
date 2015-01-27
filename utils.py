@@ -179,24 +179,24 @@ def parse_details_to_file_bug(details, oldest_alert):
     #add Test
     add = ''
     for t in sorted(set(test)):
-        add = add + t+'/'
-    add = add.strip('/')+' '
+        add = add + TBPL_TESTS[t]['testname'] + '/'
+    add = add.strip('/') + ' '
     summary = summary + add
     summary = summary + 'regression on '
     #add branch
-    add = oldest_alert[0]
-    add = add+' '
-    summary = summary + add
-    summary = summary + 'on '
+    add = oldest_alert[0] + ' '
+    summary = summary + add + ' on '
     #add date
     summary = summary + oldest_alert[4].strftime("%B %d, %Y") + ' from push %s' % details['keyrev']
 
     #TODO: <bug> <tuesday>
+    bugnum = 'BUGNUM'
+    duedate = 'Tuesday'
     #Creating Description
     desc = """
-Talos has detected a Firefox performance regression from your commit %s in bug <bug#>.  We need you to address this regression.
+Talos has detected a Firefox performance regression from your commit %s in bug %s.  We need you to address this regression.
 
-    *** Please let us know your plans by <Tuesday>, or the offending patch will be backed out! ***
+    *** Please let us know your plans by %s, or the offending patch will be backed out! ***
 
 Details of the regression:
 
@@ -227,14 +227,19 @@ Making a decision:
 
   As the patch author we need your feedback to help us handle this regression.
 
-  *** Please let us know your plans by <Tuesday>, or the offending patch will be backed out! ***
+  *** Please let us know your plans by %s, or the offending patch will be backed out! ***
 
   Some options to consider:
     1) If you are planning to investigate and fix this regression, let us know a time frame. You can also just back out this patch now and do the investigation later.
     2) If it seems impossible that this regression is caused by your patch, let us know ASAP.
     3) If this regression is expected, and we should accept this regression, please explain why and we will close the bug.
     4) If the scope and scale of the regression does not justify the time & effort required for an investigation, let us know and we can close the bug.
-            """ %(details['keyrev'], HOST_ALERT_MANAGER, details['keyrev'], TBPL_TESTS[oldest_alert[1]]['wikiname'], try_platform, TBPL_TESTS[oldest_alert[1]]['jobname'], try_platform, TBPL_TESTS[oldest_alert[1]]['jobname'], TBPL_TESTS[oldest_alert[1]]['testname'])
+            """ %(details['keyrev'], bugnum, duedate,
+                  HOST_ALERT_MANAGER, details['keyrev'],
+                  TBPL_TESTS[oldest_alert[1]]['wikiname'],
+                  try_platform, TBPL_TESTS[oldest_alert[1]]['jobname'],
+                  try_platform, TBPL_TESTS[oldest_alert[1]]['jobname'],
+                  TBPL_TESTS[oldest_alert[1]]['testname'], duedate)
 
     return ({'summary':summary,'desc':desc})
 
