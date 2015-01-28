@@ -32,44 +32,44 @@
                 cell.setAttribute('field_name', fields[i]);
                 var value = alert[test];
                 if (fields[i] == "reference") {
-                    value = "<p><a href=\"" + alert['graphurl'] + "\">" + 'graphurl' + "</a></p>"+ "<p><a href=\"" + alert['changeset'] + "\">" + 'changeset' + "</a></p>";
+                    value = "<p><a href=\"" + alert['graphurl'] + "\">" + 'graphurl' + "</a>"+ "  ||  <a href=\"" + alert['changeset'] + "\">" + 'changeset' + "</a></p>";
                     cell.onclick = "";
 
                 } else if (fields[i] == "status") {
-                    value = "<select class='form-control' id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
-                    var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
-                    for (var j = 0; j < options.length; j++) {
-                        value += "<option ";
-                        if (alert['status'] == options[j]) {
-                            value += "selected";
-                        }
-                        value += ">" + options[j] + "</option>";
-                    }
-                    value += "</select>";
-                    cell.onclick = "";
+                    // value = "<select class='form-control' id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
+                    // var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
+                    // for (var j = 0; j < options.length; j++) {
+                    //     value += "<option ";
+                    //     if (alert['status'] == options[j]) {
+                    //         value += "selected";
+                    //     }
+                    //     value += ">" + options[j] + "</option>";
+                    // }
+                    // value += "</select>";
+                    // cell.onclick = "";
                 } else if (fields[i] == "investigate") {
                     var investigate = '';
-                    var defaultValue = "<p><a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a></p>";
+                    var defaultValue = "<p><a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\">add bug #</a>";
                     if (nvl(alert['bug'], "") != "") {
                         var bugz = alert['bug'].split(',');
                         defaultValue = "";
                         for (var b = 0; b < bugz.length; b++) {
                             var bugid = bugz[b].trim();
                             defaultValue += "<a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=" + bugid + "\">" + bugid + "</a>";
-                            defaultValue += "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\"> + </a><br />";
+                            defaultValue += "<a href=\"#\" onClick=\"updateBug(" + alert['id'] + ", '" + alert['bug'] + "', '" + alert['status'] + "');\"> + </a>";
                         }
                     }
                     investigate += defaultValue;
-                    defaultValue = "<p><a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a></p>";
+                    defaultValue = "  ||  <a href=\"#\" onClick=\"updateTbplURL(" + alert['id'] + ", '" + alert['tbplurl'] + "');\">add tbpl link</a>";
                     if (alert['tbplurl'] != "") {
                         if (!(alert['branch'].endsWith("Non-PGO")) && (alert['tbplurl'] != null)) {
                             var url = alert['tbplurl'].split("talos");
                             alert['tbplurl'] = url[0] + "pgo%20talos" + url[1];
-                            defaultValue = "<p><a href=\"" + alert['tbplurl'] + "\">tbplurl</a><p>";
+                            defaultValue = "   ||   <a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                         } else {
-                            defaultValue = "<p><a href=\"" + alert['tbplurl'] + "\">tbplurl</a></p>";
+                            defaultValue = "   ||   <a href=\"" + alert['tbplurl'] + "\">tbplurl</a></p>";
                         }
-                        defaultValue = "<a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
+                        defaultValue = "   ||   <a href=\"" + alert['tbplurl'] + "\">tbplurl</a>";
                     }
                     investigate += defaultValue;
                     value = investigate;
