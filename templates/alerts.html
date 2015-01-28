@@ -36,6 +36,11 @@
                     cell.onclick = "";
 
                 } else if (fields[i] == "status") {
+                    if (!alert['status']) {
+                        value = "NEW";
+                    } else {
+                        value = alert['status'];
+                    }
                     // value = "<select class='form-control' id=\"" + alert["id"] + "-status\" onChange=\"updateStatus(" + alert['id'] + ", '" + alert['duplicate'] + "', '" + alert['bug'] + "', '" + alert['mergedfrom'] + "');\">";
                     // var options = ["NEW", "Back Filling", "Investigating", "Duplicate", "Resolved", "Shipped", "Wont Fix", "False Alarm", "Ignore", "Not Tracking", "Backout", "Too Low"];
                     // for (var j = 0; j < options.length; j++) {
