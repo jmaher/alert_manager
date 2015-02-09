@@ -223,10 +223,15 @@ function performAction() {
     console.log("No alert chosen");
     alert("Please Choose atleast one Alert");
    } else {
+        var ids = {};
+        for (var alertid in checkedIds) {
+            if (checkedIds[alertid] == 'checkbox')
+                continue;
 
-        for (alert in checkedIds) {
-            checkedIds[alert] = checkedIds[alert].split('-')[1];
+            ids[alertid] = checkedIds[alertid].split('-')[1];
         }
+        checkedIds = ids;
+
         //Check if status has to be changed
         if (containsObject(action, status_options)) {
             console.log("change status-"+action);
