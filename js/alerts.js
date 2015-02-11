@@ -650,37 +650,45 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
         var keyrev = "";
         var tbl = "";
         // insert revisions into lower table
-        for (var alert = 0; alert < alerts.length; alert++) {
-            if (alerts[alert]["keyrevision"] != keyrev) {
-                keyrev = alerts[alert]["keyrevision"];
-                if ($(document.getElementById(keyrev + "-hdr")).html() == null) {
-                    var newdiv = document.createElement("div");
-                    newdiv.id = keyrev;
-                    $("#revisions").append(newdiv);
-                    $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + keyrev + "</h4></a></span>");
+        if (alerts.length != 0) {
+            for (var alert = 0; alert < alerts.length; alert++) {
+                if (alerts[alert]["keyrevision"] != keyrev) {
+                    keyrev = alerts[alert]["keyrevision"];
+                    if ($(document.getElementById(keyrev + "-hdr")).html() == null) {
+                        var newdiv = document.createElement("div");
+                        newdiv.id = keyrev;
+                        $("#revisions").append(newdiv);
+                        $(document.getElementById(keyrev)).append("<span id=\"" + keyrev + "-hdr\"><a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + keyrev + "</h4></a></span>");
 
-                }
-                if ($(document.getElementById(keyrev + "-tbl")).html() == null) {
-                    var kdiv = document.getElementById(keyrev);
-                    var newtbl = document.createElement("table");
-                    newtbl.id = keyrev + '-tbl';
-                    newtbl.className='table table-bordered';
-                    $(document.getElementById(keyrev)).append(newtbl);
-                }
+                    }
+                    if ($(document.getElementById(keyrev + "-tbl")).html() == null) {
+                        var kdiv = document.getElementById(keyrev);
+                        var newtbl = document.createElement("table");
+                        newtbl.id = keyrev + '-tbl';
+                        newtbl.className='table table-bordered';
+                        $(document.getElementById(keyrev)).append(newtbl);
+                    }
 
-                $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + keyrev + "</h4></a><span id=\"file-"+keyrev+"\" onclick=\"fileBug(this.id)\">File Bug</span>");
-                tbl = document.getElementById(keyrev + "-tbl");
+                    $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + keyrev + "</h4></a><span id=\"file-"+keyrev+"\" onclick=\"fileBug(this.id)\">File Bug</span>");
+                    tbl = document.getElementById(keyrev + "-tbl");
+                }
+                var r = addAlertToUI(tbl, alerts[alert], showall, rev);
+                if ($(document.getElementById(keyrev + '-tbl')).find('tr').size() == 0) {
+                    $(document.getElementById(keyrev + "-hdr")).html("");
+                }
             }
-            var r = addAlertToUI(tbl, alerts[alert], showall, rev);
-            if ($(document.getElementById(keyrev + '-tbl')).find('tr').size() == 0) {
-                $(document.getElementById(keyrev + "-hdr")).html("");
-            }
+            addMergedLinks(showall);
+            AddCommentUI.init();
+            AddDuplicateUI.init();
+            AddBugUI.init();
+            AddTbplUI.init();
+        
+        } else {
+            var newdiv = document.createElement("div");
+            newdiv.id = "not-found";
+            $("#revisions").append(newdiv);
+            $(document.getElementById("not-found")).append("<h4> No alerts for " + rev + " Found </p>");
         }
-        addMergedLinks(showall);
-        AddCommentUI.init();
-        AddDuplicateUI.init();
-        AddBugUI.init();
-        AddTbplUI.init();
     }
     url = '/' + queryname;
     if (current == "true") {
