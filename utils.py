@@ -226,11 +226,8 @@ Making a decision:
 As the patch author we need your feedback to help us handle this regression.
 *** Please let us know your plans by %s, or the offending patch will be backed out! ***
 
-Some options to consider:
-1) If you are planning to investigate and fix this regression, let us know a time frame. You can also just back out this patch now and do the investigation later.
-2) If it seems impossible that this regression is caused by your patch, let us know ASAP.
-3) If this regression is expected, and we should accept this regression, please explain why and we will close the bug.
-4) If the scope and scale of the regression does not justify the time & effort required for an investigation, let us know and we can close the bug.
+Our wiki page oulines the common responses and expectations:
+https://wiki.mozilla.org/Buildbot/Talos/RegressionBugsHandling
             """ %(details['keyrev'], bugnum,
                   HOST_ALERT_MANAGER, details['keyrev'],
                   TBPL_TESTS[oldest_alert[1]]['wikiname'],
