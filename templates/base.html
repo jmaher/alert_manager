@@ -86,17 +86,17 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav top-nav">
                     <li class="dropdown">
-                        <select class="form-control" id="rev">
+                        <select class="form-control" id="rev" onchange="updateSelectors('rev')">
                                 <option value="">Select Revision</option>
                         </select>
                     </li>
                     <li class="dropdown">
-                        <select class="form-control" id="test">
+                        <select class="form-control" id="test" onchange="updateSelectors('test')">
                             <option value="">Select Test</option>
                         </select>
                     </li >
                     <li class="dropdown">
-                          <select class="form-control" id="platform">
+                          <select class="form-control" id="platform" onchange="updateSelectors('platform')">
                                 <option value="">Select Platform</option>
                             </select>
                     </li>

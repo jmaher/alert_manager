@@ -2,8 +2,55 @@ var root_url = window.location.protocol + '//' + window.location.host;
 var data,det_row;
 var row_exists = false;
 
+function filterOnClick() {
+    //to update the options according to revision selected to maintain unique index[testindex and platindex]
+    updateSelectors('rev',function() {
+        //after the options are updated according to revision, indexes can be picked
+        var rev = $('#rev').val();
+        var test = $('#test').val();
+        var platform = $('#platform').val();
+        var showall = 0;
+        var testIndex = $("select[id='test'] option:selected").index();
+        var platIndex = $("select[id='platform'] option:selected").index();
+        if ($('#checkbox').is(":checked")) {
+            console.log("checked");
+            showall = 1;
+        }
+        document.cookie = "platform = " + platform;
+        document.cookie = "test = " + test;
+
+        var href = "alerts.html";
+        var flag = '?';
+        if (rev && rev != '') {
+            href += flag + "rev=" + rev;
+            flag = '&';
+        }
+        if (showall && showall != '') {
+            href += flag + "showAll=" + showall;
+            flag = '&';
+        }
+        if (testIndex && testIndex != '') {
+            href += flag + "testIndex=" + testIndex;
+            flag = '&';
+        }
+        if (platIndex && platIndex != '') {
+            href += flag + "platIndex=" + platIndex;
+            flag = '&';
+        }
+        location.href = href;
+
+    });
+
+    
+}
 function loadSelectors() {
-    $.getJSON(root_url + "/getvalues", function (data) {
+
+    get_params = { 
+                'name': [ 'keyrevision' ],
+                'value': [ results['rev'] ]
+            }
+    
+    $.getJSON(root_url + "/getvalues", $.param(get_params, true), function (data) {
 
         function compare(a, b) {
             a = a.toString().toLowerCase();
@@ -53,41 +100,101 @@ function loadSelectors() {
 
     });
 
-    $('#button').click(function () {
-        var rev = $('#rev').val();
-        var test = $('#test').val();
-        var platform = $('#platform').val();
-        var showall = 0;
-        var testIndex = $("select[id='test'] option:selected").index();
-        var platIndex = $("select[id='platform'] option:selected").index();
-        if ($('#checkbox').is(":checked")) {
-            console.log("checked");
-            showall = 1;
-        }
-        document.cookie = "platform = " + platform;
-        document.cookie = "test = " + test;
+    $('#button').bind("click", filterOnClick);
+}
 
-        var href = "alerts.html";
-        var flag = '?';
-        if (rev && rev != '') {
-            href += flag + "rev=" + rev;
-            flag = '&';
-        }
-        if (showall && showall != '') {
-            href += flag + "showAll=" + showall;
-            flag = '&';
-        }
-        if (testIndex && testIndex != '') {
-            href += flag + "testIndex=" + testIndex;
-            flag = '&';
-        }
-        if (platIndex && platIndex != '') {
-            href += flag + "platIndex=" + platIndex;
-            flag = '&';
-        }
-        location.href = href;
+//used for lexical sorting
+function compare(a, b) {
+    a = a.toString().toLowerCase();
+    b = b.toString().toLowerCase();
+    if (a < b)
+        return -1;
+    if (a > b)
+        return 1;
+    return 0;
+}
 
+function resetOptions(data,id) {
+    for (var i in data) {
+        var newoption = document.createElement("option");
+        newoption.id = id;
+        var value = data[i];
+        $("#"+id).append("<option value=\"" + value + "\">" + value + "</option>");
+    }
+}
+
+function updateSelectors(changedElementId, callback) {
+    
+    //to prevent selecting the button while the options are being updated [ to avoid irregular indexes of options ]
+    $('#button').unbind("click", filterOnClick).attr('disabled','disabled');
+    
+    rev = $('#rev').val() || "";
+    test = $('#test').val() || "";
+    platform = $('#platform').val() || "";
+    
+    if ( callback && typeof(callback) === "function") {
+        //callback function is used only when filter button click event happens
+        //we want to re-order the list of options according to the revision selection only
+        // so that the indexes i.e. testindex and platindex are uniform when the result is loaded using URL
+        var get_params = {
+            'name': ['keyrevision'],
+            'value': [rev]
+        };
+    } else {
+       var get_params = { 
+            'name': [ 'keyrevision', 'test', 'platform' ],
+            'value': [ rev, test, platform ]
+        }; 
+    }
+    
+    var elements = { 'rev': '#rev', 'test': '#test', 'platform': '#platform' };
+    var attribute = elements[changedElementId];
+
+    //to prevent from choosing value while options are being updated
+    for (var key in elements) {
+        if (key != changedElementId)
+            $(elements[key]).attr('disabled','disabled');
+    }
+    
+    $.getJSON(root_url+"/getvalues", $.param(get_params, true),function(data) {
+        
+        var sorted_data = { 
+            'rev': data['rev'], 
+            'test': data['test'].sort(compare), 
+            'platform': data['platform'].sort(compare) 
+        };
+
+        var select_phrase = { 'rev': 'Revision', 'test': 'Test', 'platform': 'Platform'};
+        
+        for (var key in elements) {
+            if(key != changedElementId) {
+                $("#"+key).children().remove().end().append('<option value="">Select ' + select_phrase[key] +'</option>');
+                resetOptions(sorted_data[key],key);
+            }
+        }
+
+        try {
+            $('#rev').val(rev);
+            $('#test').val(test);
+            $('#platform').val(platform);
+        } catch (e) {
+            throw e;
+        }
+
+        //after changes are finalised, button is safe to click
+        $('#button').bind("click", filterOnClick).removeAttr('disabled');
+
+        //after the changes are made updated options are ready to be choosed
+        for (var key in elements) {
+            if (key != changedElementId)
+                $(elements[key]).removeAttr('disabled');
+        }
+
+        if (callback && typeof(callback)==="function") {
+            callback();
+        }
     });
+
 }
 
 function hideMerged(originalkeyrev, showall) {
