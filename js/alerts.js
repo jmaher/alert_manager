@@ -132,17 +132,16 @@ function updateSelectors(changedElementId, callback) {
     test = $('#test').val() || "";
     platform = $('#platform').val() || "";
     
-    if ( callback && typeof(callback)==="function") {
+    if ( callback && typeof(callback) === "function") {
         //callback function is used only when filter button click event happens
         //we want to re-order the list of options according to the revision selection only
         // so that the indexes i.e. testindex and platindex are uniform when the result is loaded using URL
-        get_params = {
+        var get_params = {
             'name': ['keyrevision'],
             'value': [rev]
         };
-    }
-    else {
-       get_params = { 
+    } else {
+       var get_params = { 
             'name': [ 'keyrevision', 'test', 'platform' ],
             'value': [ rev, test, platform ]
         }; 
@@ -159,23 +158,19 @@ function updateSelectors(changedElementId, callback) {
     
     $.getJSON(root_url+"/getvalues", $.param(get_params, true),function(data) {
         
-        var tests = data['test'].sort(compare);
-        var revs = data['rev'];
-        var platforms = data['platform'].sort(compare);
+        var sorted_data = { 
+            'rev': data['rev'], 
+            'test': data['test'].sort(compare), 
+            'platform': data['platform'].sort(compare) 
+        };
 
-        if (changedElementId != "rev") {
-            $("#rev").children().remove().end().append('<option value="">Select Revision</option>');
-            resetOptions(revs,"rev");
-        }
+        var select_phrase = { 'rev': 'Revision', 'test': 'Test', 'platform': 'Platform'};
         
-        if (changedElementId != "test") {
-            $("#test").children().remove().end().append('<option value="">Select Test</option>');
-            resetOptions(tests,"test");           
-        }
-
-        if (changedElementId != "platform") {
-            $("#platform").children().remove().end().append('<option value="">Select Platform</option>');
-            resetOptions(platforms,"platform");         
+        for (var key in elements) {
+            if(key != changedElementId) {
+                $("#"+key).children().remove().end().append('<option value="">Select ' + select_phrase[key] +'</option>');
+                resetOptions(sorted_data[key],key);
+            }
         }
 
         try {
