@@ -223,6 +223,9 @@ def run_alertsbyrev_query():
 
 @app.route("/getvalues")
 def run_values_query():
+    col_name = request.args.getlist('name', None)
+    col_value = request.args.getlist('value', None)
+
     db = create_db_connnection()
     cursor = db.cursor()
 
@@ -234,13 +237,21 @@ def run_values_query():
 
     now = app.config["now"]()
 
+    where_clause = ""
+
+    if col_name is not None and col_value is not None:
+        for (field, value) in zip(col_name, col_value):
+            if (field is not None) and (len(field) != 0) and (field is not None) and (len(field) != 0):
+                where_clause += "%s = '%s' AND " % (field, value)
+
     cursor.execute("""
-        select DISTINCT 'test' AS name, test AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
+        select DISTINCT 'test' AS name, test AS value FROM alerts WHERE {where}push_date > %s - INTERVAL 127 DAY
         UNION ALL
-        select DISTINCT 'platform' AS name, platform AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
+        select DISTINCT 'platform' AS name, platform AS value FROM alerts WHERE {where}push_date > %s - INTERVAL 127 DAY
         UNION ALL
-        select DISTINCT 'rev' AS name, keyrevision AS value FROM alerts WHERE push_date > %s - INTERVAL 127 DAY
-        """, (now,now,now))
+        select DISTINCT 'rev' AS name, keyrevision AS value FROM alerts WHERE {where}push_date > %s - INTERVAL 127 DAY
+        """.format(where=where_clause), (now, now, now))
+
     data = cursor.fetchall()
     for d in data:
         retVal[d[0]].append(d[1])
@@ -251,7 +262,7 @@ def run_values_query():
 def run_mergedalerts_query():
     keyrev = request.args['keyrev']
 
-    where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by push_date,keyrevision ASC" % keyrev;
+    where_clause = "where mergedfrom='%s' and (status='' or status='NEW' or status='Investigating') order by push_date,keyrevision ASC" % keyrev
     return jsonify(alerts=run_query(where_clause))
 
 @app.route("/win8only")
