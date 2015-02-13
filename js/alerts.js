@@ -132,8 +132,7 @@ function updateSelectors(changedElementId, callback) {
     test = $('#test').val() || "";
     platform = $('#platform').val() || "";
     
-    if ( callback && typeof(callback)==="function")
-    {
+    if ( callback && typeof(callback)==="function") {
         //callback function is used only when filter button click event happens
         //we want to re-order the list of options according to the revision selection only
         // so that the indexes i.e. testindex and platindex are uniform when the result is loaded using URL
@@ -142,134 +141,64 @@ function updateSelectors(changedElementId, callback) {
             'value': [rev]
         };
     }
-    else
-    {
+    else {
        get_params = { 
             'name': [ 'keyrevision', 'test', 'platform' ],
             'value': [ rev, test, platform ]
         }; 
     }
     
-    
+    var elements = { 'rev': '#rev', 'test': '#test', 'platform': '#platform' };
+    var attribute = elements[changedElementId];
+
     //to prevent from choosing value while options are being updated
-    $('#rev').attr('disabled','disabled');
-    $('#test').attr('disabled','disabled');
-    $('#platform').attr('disabled','disabled');
-
-    console.log("element id : "+changedElementId);
+    for (var key in elements) {
+        if (key != changedElementId)
+            $(elements[key]).attr('disabled','disabled');
+    }
     
-    if(changedElementId == "rev")
-    {
-        //if this column is changed
-
-        //we can allow changing of the options of recently changed dropdown
-        $('#rev').removeAttr('disabled');
-
-        $.getJSON(root_url+"/getvalues", $.param(get_params, true),function(data) {
-            
-            var tests = data['test'].sort(compare);
-            var revs = data['rev'];
-            var platforms = data['platform'].sort(compare);
-
-            $("#test").children().remove().end().append('<option value="">Select Test</option>');
-            resetOptions(tests,"test");
-            
-            $("#platform").children().remove().end().append('<option value="">Select Platform</option>');
-            resetOptions(platforms,"platform");
-
-            try {
-                $('#rev').val(rev);
-                $('#test').val(test);
-                $('#platform').val(platform);
-            } catch (e) {
-                throw e;
-            }
-
-            //after changes are finalised, button is safe to click
-            $('#button').bind("click", filterOnClick).removeAttr('disabled');
-
-            //after the changes are made updated options are ready to be choosed
-            $('#test').removeAttr('disabled');
-            $('#platform').removeAttr('disabled');
-
-
-            if (callback && typeof(callback)==="function") 
-            {
-                callback();
-            }
-        });
-
-    }
-    else if(changedElementId == "test")
-    {
-        $('#test').removeAttr('disabled');
+    $.getJSON(root_url+"/getvalues", $.param(get_params, true),function(data) {
         
-        $.getJSON(root_url+"/getvalues", $.param(get_params, true), function(data) {
-           
-            var tests = data['test'].sort(compare);
-            var revs = data['rev'];
-            var platforms = data['platform'].sort(compare);
-            
+        var tests = data['test'].sort(compare);
+        var revs = data['rev'];
+        var platforms = data['platform'].sort(compare);
+
+        if (changedElementId != "rev") {
             $("#rev").children().remove().end().append('<option value="">Select Revision</option>');
             resetOptions(revs,"rev");
-            
-            $("#platform").children().remove().end().append('<option value="">Select Platform</option>');
-            resetOptions(platforms,"platform");
-
-            try {
-                $('#rev').val(rev);
-                $('#test').val(test);
-                $('#platform').val(platform);
-            } catch (e) {
-                throw e;
-            }
-            $('#button').bind("click", filterOnClick).removeAttr('disabled');
-            
-            $('#rev').removeAttr('disabled');
-            $('#platform').removeAttr('disabled');
-
-            if (callback && typeof(callback)==="function") 
-            {
-                callback();
-            }
-        });
-
-    }
-    else if(changedElementId == "platform")
-    {
-        $('#platform').removeAttr('disabled');
+        }
         
-        $.getJSON(root_url+"/getvalues", $.param(get_params, true),function(data) {
-           
-            var tests = data['test'].sort(compare);
-            var revs = data['rev'];
-            var platforms = data['platform'].sort(compare);
-
-            $("#rev").children().remove().end().append('<option value="">Select Revision</option>');
-            resetOptions(revs,"rev");
-            
+        if (changedElementId != "test") {
             $("#test").children().remove().end().append('<option value="">Select Test</option>');
-            resetOptions(tests,"test");
+            resetOptions(tests,"test");           
+        }
 
-            try {
-                $('#rev').val(rev);
-                $('#test').val(test);
-                $('#platform').val(platform);
-            } catch (e) {
-                throw e;
-            }
-            $('#button').bind("click", filterOnClick).removeAttr('disabled');
-            
-            $('#rev').removeAttr('disabled');
-            $('#test').removeAttr('disabled');
-            
-            if (callback && typeof(callback)==="function") 
-            {
-                callback();
-            }
-        });
+        if (changedElementId != "platform") {
+            $("#platform").children().remove().end().append('<option value="">Select Platform</option>');
+            resetOptions(platforms,"platform");         
+        }
 
-    }
+        try {
+            $('#rev').val(rev);
+            $('#test').val(test);
+            $('#platform').val(platform);
+        } catch (e) {
+            throw e;
+        }
+
+        //after changes are finalised, button is safe to click
+        $('#button').bind("click", filterOnClick).removeAttr('disabled');
+
+        //after the changes are made updated options are ready to be choosed
+        for (var key in elements) {
+            if (key != changedElementId)
+                $(elements[key]).removeAttr('disabled');
+        }
+
+        if (callback && typeof(callback)==="function") {
+            callback();
+        }
+    });
 
 }
 

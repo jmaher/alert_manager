@@ -238,7 +238,6 @@ def run_values_query():
     now = app.config["now"]()
 
     where_clause = ""
-
     if col_name is not None and col_value is not None:
         for (field, value) in zip(col_name, col_value):
             if (field is not None) and (len(field) != 0) and (value is not None) and (len(value) != 0):
