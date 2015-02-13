@@ -44,7 +44,13 @@ function filterOnClick() {
     
 }
 function loadSelectors() {
-    $.getJSON(root_url + "/getvalues",{ 'name': ['keyrevision'], 'value': [results['rev']] }, function (data) {
+
+    get_params = { 
+                'name': [ 'keyrevision' ],
+                'value': [ results['rev'] ]
+            }
+    
+    $.getJSON(root_url + "/getvalues", $.param(get_params, true), function (data) {
 
         function compare(a, b) {
             a = a.toString().toLowerCase();
@@ -126,6 +132,25 @@ function updateSelectors(changedElementId, callback) {
     test = $('#test').val() || "";
     platform = $('#platform').val() || "";
     
+    if ( callback && typeof(callback)==="function")
+    {
+        //callback function is used only when filter button click event happens
+        //we want to re-order the list of options according to the revision selection only
+        // so that the indexes i.e. testindex and platindex are uniform when the result is loaded using URL
+        get_params = {
+            'name': ['keyrevision'],
+            'value': [rev]
+        };
+    }
+    else
+    {
+       get_params = { 
+            'name': [ 'keyrevision', 'test', 'platform' ],
+            'value': [ rev, test, platform ]
+        }; 
+    }
+    
+    
     //to prevent from choosing value while options are being updated
     $('#rev').attr('disabled','disabled');
     $('#test').attr('disabled','disabled');
@@ -139,13 +164,12 @@ function updateSelectors(changedElementId, callback) {
 
         //we can allow changing of the options of recently changed dropdown
         $('#rev').removeAttr('disabled');
-        
-        $.getJSON(root_url+"/getvalues",{ 'name': ['keyrevision','test','platform'], 'value': [ rev, test, platform ] },function(data) {
+
+        $.getJSON(root_url+"/getvalues", $.param(get_params, true),function(data) {
             
             var tests = data['test'].sort(compare);
             var revs = data['rev'];
             var platforms = data['platform'].sort(compare);
-            //console.log("rev update : "+revs+tests+platforms);
 
             $("#test").children().remove().end().append('<option value="">Select Test</option>');
             resetOptions(tests,"test");
@@ -154,9 +178,9 @@ function updateSelectors(changedElementId, callback) {
             resetOptions(platforms,"platform");
 
             try {
-                document.getElementById("rev").value = rev;
-                document.getElementById("test").value = test;
-                document.getElementById("platform").value = platform;
+                $('#rev').val(rev);
+                $('#test').val(test);
+                $('#platform').val(platform);
             } catch (e) {
                 throw e;
             }
@@ -180,13 +204,12 @@ function updateSelectors(changedElementId, callback) {
     {
         $('#test').removeAttr('disabled');
         
-        $.getJSON(root_url+"/getvalues",{ 'name': ['keyrevision','test','platform'], 'value': [ rev, test, platform ] },function(data) {
+        $.getJSON(root_url+"/getvalues", $.param(get_params, true), function(data) {
            
             var tests = data['test'].sort(compare);
             var revs = data['rev'];
             var platforms = data['platform'].sort(compare);
-            //console.log("test update : "+revs+tests+platforms);
-
+            
             $("#rev").children().remove().end().append('<option value="">Select Revision</option>');
             resetOptions(revs,"rev");
             
@@ -194,9 +217,9 @@ function updateSelectors(changedElementId, callback) {
             resetOptions(platforms,"platform");
 
             try {
-                document.getElementById("rev").value = rev;
-                document.getElementById("test").value = test;
-                document.getElementById("platform").value = platform;
+                $('#rev').val(rev);
+                $('#test').val(test);
+                $('#platform').val(platform);
             } catch (e) {
                 throw e;
             }
@@ -216,12 +239,11 @@ function updateSelectors(changedElementId, callback) {
     {
         $('#platform').removeAttr('disabled');
         
-        $.getJSON(root_url+"/getvalues",{ 'name': ['keyrevision','test','platform'], 'value': [ rev, test, platform ] },function(data) {
+        $.getJSON(root_url+"/getvalues", $.param(get_params, true),function(data) {
            
             var tests = data['test'].sort(compare);
             var revs = data['rev'];
             var platforms = data['platform'].sort(compare);
-            //console.log("platform update : "+revs+tests+platforms);
 
             $("#rev").children().remove().end().append('<option value="">Select Revision</option>');
             resetOptions(revs,"rev");
@@ -230,9 +252,9 @@ function updateSelectors(changedElementId, callback) {
             resetOptions(tests,"test");
 
             try {
-                document.getElementById("rev").value = rev;
-                document.getElementById("test").value = test;
-                document.getElementById("platform").value = platform;
+                $('#rev').val(rev);
+                $('#test').val(test);
+                $('#platform').val(platform);
             } catch (e) {
                 throw e;
             }

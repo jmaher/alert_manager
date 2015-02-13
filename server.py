@@ -241,7 +241,7 @@ def run_values_query():
 
     if col_name is not None and col_value is not None:
         for (field, value) in zip(col_name, col_value):
-            if (field is not None) and (len(field) != 0) and (field is not None) and (len(field) != 0):
+            if (field is not None) and (len(field) != 0) and (value is not None) and (len(value) != 0):
                 where_clause += "%s = '%s' AND " % (field, value)
 
     cursor.execute("""
