@@ -221,7 +221,7 @@ function hideMerged(originalkeyrev, showall) {
         }
         var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
 
-        $(document.getElementById(originalkeyrev + "-hdr")).html("<a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + originalkeyrev + "</h4></a>" + mergedfromhtml);
+        $(document.getElementById(originalkeyrev + "-hdr")).html("<h4><a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h4>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
     req.send();
@@ -266,7 +266,7 @@ function addMergedLinks(showall) {
                 }
 
                 var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
-                $(document.getElementById(mf + "-hdr")).html("<a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0><h4>" + mf + "</a></h4>" + mergedfromhtml);
+                $(document.getElementById(mf + "-hdr")).html("<h4><a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0>" + mf + "</a></h4>" + mergedfromhtml);
             }
         }
     }
@@ -794,7 +794,7 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
             var newdiv = document.createElement("div");
             newdiv.id = "not-found";
             $("#revisions").append(newdiv);
-            $(document.getElementById("not-found")).append("<h4> No alerts for " + rev + " Found </p>");
+            $(document.getElementById("not-found")).append("<h4> No alerts for " + rev + " Found </h4>");
         }
     }
     url = '/' + queryname;
