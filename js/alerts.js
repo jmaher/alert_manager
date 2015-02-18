@@ -128,9 +128,10 @@ function updateSelectors(changedElementId, callback) {
     //to prevent selecting the button while the options are being updated [ to avoid irregular indexes of options ]
     $('#button').unbind("click", filterOnClick).attr('disabled','disabled');
     
-    rev = $('#rev').val() || "";
-    test = $('#test').val() || "";
-    platform = $('#platform').val() || "";
+    var selected = {};
+    selected['rev'] = $('#rev').val() || "";
+    selected['test'] = $('#test').val() || "";
+    selected['platform'] = $('#platform').val() || "";
     
     if ( callback && typeof(callback) === "function") {
         //callback function is used only when filter button click event happens
@@ -138,12 +139,12 @@ function updateSelectors(changedElementId, callback) {
         // so that the indexes i.e. testindex and platindex are uniform when the result is loaded using URL
         var get_params = {
             'name': ['keyrevision'],
-            'value': [rev]
+            'value': [selected['rev']]
         };
     } else {
        var get_params = { 
             'name': [ 'keyrevision', 'test', 'platform' ],
-            'value': [ rev, test, platform ]
+            'value': [ selected['rev'], selected['test'], selected['platform'] ]
         }; 
     }
     
@@ -167,16 +168,16 @@ function updateSelectors(changedElementId, callback) {
         var select_phrase = { 'rev': 'Revision', 'test': 'Test', 'platform': 'Platform'};
         
         for (var key in elements) {
-            if(key != changedElementId) {
+            if(key != changedElementId || selected[key]=="") {
                 $("#"+key).children().remove().end().append('<option value="">Select ' + select_phrase[key] +'</option>');
                 resetOptions(sorted_data[key],key);
             }
         }
 
         try {
-            $('#rev').val(rev);
-            $('#test').val(test);
-            $('#platform').val(platform);
+            $('#rev').val(selected['rev']);
+            $('#test').val(selected['test']);
+            $('#platform').val(selected['platform']);
         } catch (e) {
             throw e;
         }
