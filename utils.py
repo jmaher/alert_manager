@@ -195,10 +195,10 @@ def parse_details_to_file_bug(details, oldest_alert, bugnum='BUGNUM'):
 
     day = datetime.datetime.now()
     n_days = 3
-    if day.weekday()>2:
-        n_days+=2
-
     due_date = (day + datetime.timedelta(days=n_days)).weekday()
+    if day.weekday()>=2:
+        due_date = 0
+
     duedate = WEEK[due_date]
 
     #Creating Description
