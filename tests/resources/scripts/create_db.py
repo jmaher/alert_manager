@@ -7,7 +7,7 @@
 # Author: Kyle Lahnakoski (kyle@lahnakoski.com)
 #
 import sys
-
+sys.path.append("../alert_manager")
 from config import get_config
 from pyLibrary.sql.db import DB
 
