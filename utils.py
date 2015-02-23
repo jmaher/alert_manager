@@ -5,45 +5,19 @@ import requests, re
 import logging
 from managed_settings import TBPL_TESTS, HOST_ALERT_MANAGER
 import datetime
+from mozci.sources.buildapi import query_repo_url
+from mozci.sources.pushlog import query_revisions_range_from_revision_and_delta
 
 WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',  'Friday', 'Saturday', 'Sunday']
 logger = None
 
-def get_revision_range(dzdata, revision):
-    # TODO: switch this to hg instead of datazilla (jmaher)
-    for item in dzdata:
-        if revision in dzdata[item]['revisions']:
-            revid = int(item)
-            break
-    else:
-        if logger:
-            logger.info('Unable to find revision: %s' % revision)
-        return
-
-    lower = str(revid - 6)
-    upper = str(revid + 6)
-
-    if lower not in dzdata:
-        if logger:
-            logger.info('Unable to get range, missing id: %s' % lower)
-        return
-    if upper not in dzdata:
-        if logger:
-            logger.info('Unable to get range, missing id: %s' % upper)
-        return
-
-    return dzdata[lower]['revisions'][-1], dzdata[upper]['revisions'][-1]
-
-@memoize
-def get_datazilla_data(branch_id):
-    """Returns data retrieved from datazilla.
-
-    Data is cached in memory to avoid redundant
-    requests to datazilla or producing temp files on disk.
+def get_revision_range(repo_name, revision):
     """
-    url = settings.DATAZILLA_URL_TEMPLATE % {'branch': branch_id, 'days': 21}
-    return requests.get(url).json()
-
+    Query pushlog in mozci and return revisions in a range of six.
+    """
+    repo_url = query_repo_url(repo_name)
+    revlist = query_revisions_range_from_revision_and_delta(repo_url, revision, delta=6)
+    return revlist[0], revlist[-1]
 
 def build_tbpl_link(record):
     # TODO: is branch valid?
@@ -53,8 +27,7 @@ def build_tbpl_link(record):
     else:
         treeherder_repo = tbpl_branch.lower()
 
-    dzdata = get_datazilla_data(tbpl_branch)
-    vals = get_revision_range(dzdata, record.keyrevision)
+    vals = get_revision_range(treeherder_repo, record.keyrevision)
 
     link = ''
     if vals:
