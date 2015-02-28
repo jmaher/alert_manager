@@ -15,8 +15,16 @@ def get_revision_range(repo_name, revision):
     """
     Query pushlog in mozci and return revisions in a range of six.
     """
-    repo_url = query_repo_url(repo_name)
-    revlist = query_revisions_range_from_revision_and_delta(repo_url, revision, delta=6)
+    try:
+        if repo_name == 'mobile':
+            repo_name = 'mozilla-central'
+
+        repo_url = query_repo_url(repo_name)
+        revlist = query_revisions_range_from_revision_and_delta(repo_url, revision, delta=6)
+    except:
+        print "exception while getting repo: %s, revision: %s" % (repo_name, revision)
+        raise
+
     return revlist[0], revlist[-1]
 
 def build_tbpl_link(record):
