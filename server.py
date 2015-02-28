@@ -325,7 +325,7 @@ def run_addfields_data():
         typeVal = query_dict.pop('type')
 
     if typeVal == "bug":
-        sql = "update alerts set bug='%s',status='Investigating' where id=%s;" %(data['BugID'], data['id'])
+        sql = "update alerts set bug='%s',status='Investigating' where id IN(%s);" %(data['BugID'], data['id'])
 
     if typeVal == "comment":
         pass
