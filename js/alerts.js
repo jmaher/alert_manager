@@ -696,7 +696,6 @@ function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_impr
                  prevVal = parseHTML(value);                 
             }
             //The new data is added if it is not a duplicate of existing data
-           // window.alert(prevVal+"=="+curVal);
             if (curVal != prevVal) {           
                 var strike_value = data[i]['percent'];
                 if (!(checkStatusActive(data[i]['status']))) {
