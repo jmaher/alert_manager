@@ -385,20 +385,20 @@ function performAction() {
         else if (action == "Add Bug") {
             var BugID = prompt("Please enter Bug ID");
             console.log('BUG ID-'+BugID);
+            var alertids = $.map(checkedIds, function(value, index) {
+                    return [value];
+                }).join(",");
             if (BugID != null) {
-                for (id in checkedIds) {
-                    $.ajax({
-                         url: root_url + "/updatefields?type=bug",
-                        type: "POST",
-                        data: {
-                            id: checkedIds[id],
-                            BugID: BugID,
-                        }
-                    });
+                $.ajax({
+                     url: root_url + "/updatefields?type=bug",
+                    type: "POST",
+                    data: {
+                        id: alertids,
+                        BugID: BugID
+                    }
+                });
 
-                }
                 location.reload();
-            
             }
         }
 
