@@ -339,33 +339,27 @@ function performAction() {
             ids[alertid] = checkedIds[alertid].split('-')[1];
         }
         checkedIds = ids;
-
+        var alertids = $.map(checkedIds, function(value, index) {
+                    return [value];
+                }).join(",");
         //Check if status has to be changed
         if (containsObject(action, status_options)) {
             console.log("change status-"+action);
-            //Update the status one by one by calling updatestatus()
-            for (id in checkedIds) {
-                $.ajax({
-                     url: root_url + "/updatestatus",
-                    type: "POST",
-                    data: {
-                        id: checkedIds[id],
-                        status: action,
-                    }
-                });
-            }
+            $.ajax({
+                 url: root_url + "/updatefields?type=status",
+                type: "POST",
+                data: {
+                    id: alertids,
+                    status: action,
+                }
+            });
+
             location.reload();
         }
 
         else if (action == "Change Revision") {
-            var newRev = prompt("Please enter new Revision");
-            for (id in checkedIds) {
-
-                var bug = '1234';
-                if (bug == '') {
-                    bug = $(document.getElementById(alertid + "-bug")).val();
-                }
-    
+            var newRev = prompt("Please enter new Revision");    
+            for (id in checkedIds) {    
                 if (newRev != null) {
                     console.log('new revision-'+newRev);
                     $.ajax({
@@ -385,9 +379,6 @@ function performAction() {
         else if (action == "Add Bug") {
             var BugID = prompt("Please enter Bug ID");
             console.log('BUG ID-'+BugID);
-            var alertids = $.map(checkedIds, function(value, index) {
-                    return [value];
-                }).join(",");
             if (BugID != null) {
                 $.ajax({
                      url: root_url + "/updatefields?type=bug",
@@ -411,18 +402,16 @@ function performAction() {
                         Ok: function() {
                             var email = $("#commentName").val();
                             var comment = $("#commentText").val();
-                            for (id in checkedIds) {
-                                console.log("Sending POST for-" + checkedIds[id]);
-                                $.ajax({
-                                         url: root_url + "/submit",
-                                        type: "POST",
-                                        data:{
-                                            id: checkedIds[id],
-                                            comment: comment,
-                                            email: email,
-                                        }
-                                });
-                            }
+                            $.ajax({
+                                     url: root_url + "/submit",
+                                    type: "POST",
+                                    data:{
+                                        id: alertids,
+                                        comment: comment,
+                                        email: email,
+                                    }
+                            });
+
                             $(this).dialog("close");
                        },
                         Cancel: function () {
@@ -474,16 +463,15 @@ function performAction() {
                     buttons: { 
                         Ok: function() {
                             var new_rev = $("#markDuplicateRev").val();
-                            for (id in checkedIds) {
-                                $.ajax({
-                                         url: root_url + "/updatefields?type=duplicate",
-                                        type: "POST",
-                                        data:{
-                                            id: checkedIds[id],
-                                            rev: new_rev,
-                                        }
-                                });
-                            }
+                            $.ajax({
+                                     url: root_url + "/updatefields?type=duplicate",
+                                    type: "POST",
+                                    data:{
+                                        id: alertids,
+                                        rev: new_rev,
+                                    }
+                            });
+                            
                             $(this).dialog("close");
                        },
                         Cancel: function () {
@@ -504,17 +492,15 @@ function performAction() {
                     buttons: { 
                         Ok: function() {
                             var bug = $("#BackoutPopupText").val();
-                            for (id in checkedIds) {
-                                $.ajax({
-                                         url: root_url + "/updatestatus?type=bug",
-                                        type: "POST",
-                                        data:{
-                                            id: checkedIds[id],
-                                            bug: bug,
-                                            status: "Backout",
-                                        }
-                                });
-                            }
+                            $.ajax({
+                                     url: root_url + "/updatefields?type=backout",
+                                    type: "POST",
+                                    data:{
+                                        id: alertids,
+                                        bug: bug,
+                                        status: "Backout",
+                                    }
+                            });
                             $(this).dialog("close");
                        },
                         Cancel: function () {
