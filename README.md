@@ -152,7 +152,7 @@ To enable your own development settings you need to:
 3. `export TARGET_ENVIRONMENT=development`
 
 
-## Creating an config.ini file
+## Creating a config.ini file
 
 The alert_manager uses a config.ini file to store identification and options.
 You can create a default config.ini file by running:
