@@ -351,10 +351,10 @@ function performAction() {
                 data: {
                     id: alertids,
                     status: action,
-                }
+                },
+                success: location.reload()
             });
 
-            location.reload();
         }
 
         else if (action == "Change Revision") {
@@ -386,10 +386,9 @@ function performAction() {
                     data: {
                         id: alertids,
                         BugID: BugID
-                    }
+                    },
+                    success: location.reload()
                 });
-
-                location.reload();
             }
         }
 
