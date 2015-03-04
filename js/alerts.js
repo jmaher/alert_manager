@@ -354,29 +354,21 @@ function performAction() {
                 },
                 success: location.reload()
             });
-
-        }
-
-        else if (action == "Change Revision") {
+        } else if (action == "Change Revision") {
             var newRev = prompt("Please enter new Revision");    
-            for (id in checkedIds) {    
-                if (newRev != null) {
-                    console.log('new revision-'+newRev);
-                    $.ajax({
-                         url: root_url + "/updaterev",
-                        type: "POST",
-                        data: {
-                            id: checkedIds[id],
-                            revision: newRev,
-                        }
-                    });
-                }
+            if (newRev != null) {
+                console.log('new revision-'+newRev);
+                $.ajax({
+                    url: root_url + "/updaterev",
+                    type: "POST",
+                    data: {
+                        id: alertids,
+                        revision: newRev,
+                    },
+                    success: location.reload()
+                });
             }
-            location.reload();
-
-        }
-
-        else if (action == "Add Bug") {
+        } else if (action == "Add Bug") {
             var BugID = prompt("Please enter Bug ID");
             console.log('BUG ID-'+BugID);
             if (BugID != null) {
@@ -420,9 +412,7 @@ function performAction() {
                 });
             });
             $("#addCommentpopup").dialog("open");
-        }
-            //For changing branch
-        else if (action == "Change Branch") {
+        } else if (action == "Change Branch") {
             $(function() {
                 $("#changeBranchpopup").dialog({
                     autoOpen: false,
@@ -431,17 +421,15 @@ function performAction() {
                         Ok: function() {
                             var branch = $("#branchName").val();
                             var rev = $("#revisionName").val();
-                            for (id in checkedIds) {
-                                $.ajax({
-                                         url: root_url + "/updatefields?type=branch",
-                                        type: "POST",
-                                        data:{
-                                            id: checkedIds[id],
-                                            branch: branch,
-                                            revision: rev,
-                                        }
-                                });
-                            }
+                            $.ajax({
+                                    url: root_url + "/updatefields?type=branch",
+                                    type: "POST",
+                                    data:{
+                                        id: alertids,
+                                        branch: branch,
+                                        revision: rev,
+                                    }
+                            });
                             $(this).dialog("close");
                        },
                         Cancel: function () {
@@ -451,10 +439,7 @@ function performAction() {
                 });
             });
             $("#changeBranchpopup").dialog("open");
-        }
-
-        //Duplicates
-        else if (action == 'Duplicate') {
+        } else if (action == 'Duplicate') {
             $(function() {
                 $("#markDuplicatepopup").dialog({
                     autoOpen: false,
@@ -463,7 +448,7 @@ function performAction() {
                         Ok: function() {
                             var new_rev = $("#markDuplicateRev").val();
                             $.ajax({
-                                     url: root_url + "/updatefields?type=duplicate",
+                                    url: root_url + "/updatefields?type=duplicate",
                                     type: "POST",
                                     data:{
                                         id: alertids,
@@ -480,10 +465,7 @@ function performAction() {
                 });
             });
             $("#markDuplicatepopup").dialog("open");
-        }
-
-        //Backout
-        else if (action == 'Backout') {
+        } else if (action == 'Backout') {
             $(function() {
                 $("#BackoutPopup").dialog({
                     autoOpen: false,
