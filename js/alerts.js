@@ -220,7 +220,7 @@ function hideMerged(originalkeyrev, showall) {
                 row.remove();
             }
         }
-        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
+        var mergedfromhtml = "<span><button id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</button><button id=\"file-"+originalkeyrev+"\" onclick=\"fileBug(this.id)\">File Bug</button></span>";
 
         $(document.getElementById(originalkeyrev + "-hdr")).html("<h4><a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h4>" + mergedfromhtml);
     }
@@ -243,7 +243,7 @@ function showMerged(originalkeyrev, showall) {
             tbl = document.getElementById(originalkeyrev + "-tbl");
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
-        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
+        var mergedfromhtml = "<span><button id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</button><button id=\"file-"+originalkeyrev+"\" onclick=\"fileBug(this.id)\">File Bug</button></span>";
         $(document.getElementById(originalkeyrev + "-hdr")).html("<h4><a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h4>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
@@ -266,7 +266,7 @@ function addMergedLinks(showall) {
                     continue;
                 }
 
-                var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
+                var mergedfromhtml = "<span><button id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</button><button id=\"file-"+alerts[alert]['mergedfrom']+"\" onclick=\"fileBug(this.id)\">File Bug</button></span>";
                 $(document.getElementById(mf + "-hdr")).html("<h4><a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0>" + mf + "</a></h4>" + mergedfromhtml);
             }
         }
@@ -518,7 +518,6 @@ function fileBug (keyrev) {
     var req = new XMLHttpRequest();
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
-        console.log(raw_data);
         $("#summaryText").val(raw_data['summary'])
         $("#descriptionText").val(raw_data['desc'])
         
@@ -761,7 +760,7 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
                         $(document.getElementById(keyrev)).append(newtbl);
                     }
 
-                    $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + keyrev + "</h4></a><span id=\"file-"+keyrev+"\" onclick=\"fileBug(this.id)\">File Bug</span>");
+                    $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + keyrev + "</h4></a><span><button id=\"file-"+keyrev+"\" onclick=\"fileBug(this.id)\">File Bug</button></span>");
                     tbl = document.getElementById(keyrev + "-tbl");
                 }
                 var r = addAlertToUI(tbl, alerts[alert], showall, rev);
