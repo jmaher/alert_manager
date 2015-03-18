@@ -23,7 +23,11 @@ TREES = ('Mozilla-Inbound',
 
 PLATFORMS = ('XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
              'WINNT 5.2', 'WINNT 6.1 (ix)', 'WINNT 6.2 x64', 'WINNT 5.1 (ix)',
-             'MacOSX 10.7', 'MacOSX 10.8', 'MacOSX 10.6 (rev4)', 'Android 4.0.4')
+             'MacOSX 10.7', 'MacOSX 10.8', 'MacOSX 10.10', 'MacOSX 10.6 (rev4)',
+             'Ubuntu HW 12.04 x64 (e10s)', 'Ubuntu HW 12.04 (e10s)',
+             'WINNT 6.1 (ix) (e10s)', 'WINNT 6.2 x64 (e10s)', 'WINNT 5.1 (ix) (e10s)',
+             'MacOSX 10.10 (e10s)', 'MacOSX 10.6 (rev4) (e10s)',
+             'Android 4.0.4')
 
 
 TBPL_PLATFORMS = {
@@ -35,7 +39,15 @@ TBPL_PLATFORMS = {
     'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
     'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
     'MacOSX 10.8': 'Rev5 MacOSX Mountain Lion 10.8',
-    'Android 4.0.4': 'Android 4.0 Tegra'
+    'MacOSX 10.10': 'Rev5 MacOSX Yosemite 10.10',
+    'Android 4.0.4': 'Android 4.0 Tegra',
+    'WINNT 5.1 (ix) (e10s)': 'Windows XP 32-bit (e10s)',
+    'WINNT 6.1 (ix) (e10s)': 'Windows 7 32-bit (e10s)',
+    'WINNT 6.2 x64 (e10s)': 'Windows 8 64-bit (e10s)',
+    'Ubuntu HW 12.04 (e10s)': 'Ubuntu HW 12.04 (e10s)',
+    'Ubuntu HW 12.04 x64 (e10s)': 'Ubuntu HW 12.04 x64 (e10s)',
+    'MacOSX 10.6 (rev4) (e10s)': 'Rev4 MacOSX Snow Leopard 10.6 (e10s)',
+    'MacOSX 10.10 (e10s)': 'Rev5 MacOSX Yosemite 10.10 (e10s)',
 }
 
 
