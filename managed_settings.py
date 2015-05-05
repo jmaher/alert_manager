@@ -24,7 +24,8 @@ TREES = ('Mozilla-Inbound',
 PLATFORMS = ('XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
              'WINNT 5.2', 'WINNT 6.1 (ix)', 'WINNT 6.2 x64', 'WINNT 5.1 (ix)',
              'MacOSX 10.7', 'MacOSX 10.10', 'MacOSX 10.6 (rev4)', 'Android 4.0.4',
-             'WINNT 6.2 x64 (e10s)', 'WINNT 6.1 (ix) (e10s)', 'WINNT 5.1 (ix) (e10s)')
+             'WINNT 6.2 x64 (e10s)', 'WINNT 6.1 (ix) (e10s)', 'WINNT 5.1 (ix) (e10s)',
+             'Ubuntu HW 12.04 (e10s)', 'Ubuntu HW 12.04 x64 (e10s)')
 
 
 TBPL_PLATFORMS = {
@@ -34,12 +35,14 @@ TBPL_PLATFORMS = {
     'WINNT 6.2 x64': 'Windows 8 64-bit',
     'Ubuntu HW 12.04': 'Ubuntu HW 12.04',
     'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
+    'Ubuntu HW 12.04 (e10s)': 'Ubuntu HW 12.04',
+    'Ubuntu HW 12.04 x64 (e10s)': 'Ubuntu HW 12.04 x64',
     'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
     'MacOSX 10.10': 'Rev5 MacOSX Yosemite 10.10',
     'Android 4.0.4': 'Android 4.0 Tegra',
-    'WINNT 6.2 x64 (e10s)': 'Windows 8 64-bit e10s',
-    'WINNT 6.1 (ix) (e10s)': 'Windows 7 32-bit e10s',
-    'WINNT 5.1 (ix) (e10s)': 'Windows XP 32-bit e10s'
+    'WINNT 6.2 x64 (e10s)': 'Windows 8 64-bit',
+    'WINNT 6.1 (ix) (e10s)': 'Windows 7 32-bit',
+    'WINNT 5.1 (ix) (e10s)': 'Windows XP 32-bit'
 }
 
 
@@ -115,7 +118,9 @@ TBPL_TESTS = {
     'TP5 Scroll': {'testname': 'tp5o_scroll', 'wikiname': 'tp5o_scroll', 'jobname': 'g1'},
     'WEBGL Terrain': {'testname': 'glterrain', 'wikiname': 'glterrain', 'jobname': 'g1'},
     'Devtools At Maximum Performance': {'testname': 'damp', 'wikiname': 'DAMP', 'jobname': 'g2'},
-    'Tp5 Optimized (XRes)': {'testname': 'tp5o', 'wikiname': 'tp5o', 'jobname': 'tp'}
+    'Tp5 Optimized (XRes)': {'testname': 'tp5o', 'wikiname': 'tp5o', 'jobname': 'tp'},
+    'Number of Constructors': {'testname': 'build', 'wikiname': 'Other_data', 'jobname': 'undefined'},
+    'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)': {'testname': 'xperf', 'wikiname': 'xperf', 'jobname': 'xperf'}
 }
 
 
@@ -137,6 +142,7 @@ TESTS = (
     'Tp5 Optimized (Main RSS)',
     'Tp5 Optimized (Content RSS)',
     'Tp5 Optimized (%CPU)',
+    'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)',
     'Tp5 No Network Row major MozAfterPaint (Main Startup File I/O Bytes)',
     'Tp5 No Network Row Major MozAfterPaint (Non-Main Startup File IO Bytes)',
     'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal Network IO Bytes)',
@@ -172,4 +178,5 @@ TESTS = (
     'TP5 Scroll',
     'Devtools At Maximum Performance',
     'WEBGL Terrain',
+    'Number of Constructors',
     'WebRTC Media Performance Tests')
