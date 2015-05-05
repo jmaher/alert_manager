@@ -23,7 +23,8 @@ TREES = ('Mozilla-Inbound',
 
 PLATFORMS = ('XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
              'WINNT 5.2', 'WINNT 6.1 (ix)', 'WINNT 6.2 x64', 'WINNT 5.1 (ix)',
-             'MacOSX 10.7', 'MacOSX 10.10', 'MacOSX 10.6 (rev4)', 'Android 4.0.4')
+             'MacOSX 10.7', 'MacOSX 10.10', 'MacOSX 10.6 (rev4)', 'Android 4.0.4',
+             'WINNT 6.2 x64 (e10s)', 'WINNT 6.1 (ix) (e10s)', 'WINNT 5.1 (ix) (e10s)')
 
 
 TBPL_PLATFORMS = {
@@ -35,7 +36,10 @@ TBPL_PLATFORMS = {
     'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
     'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
     'MacOSX 10.10': 'Rev5 MacOSX Yosemite 10.10',
-    'Android 4.0.4': 'Android 4.0 Tegra'
+    'Android 4.0.4': 'Android 4.0 Tegra',
+    'WINNT 6.2 x64 (e10s)': 'Windows 8 64-bit e10s',
+    'WINNT 6.1 (ix) (e10s)': 'Windows 7 32-bit e10s',
+    'WINNT 5.1 (ix) (e10s)': 'Windows XP 32-bit e10s'
 }
 
 
@@ -109,7 +113,9 @@ TBPL_TESTS = {
     'Session Restore Test': {'testname': 'sessionrestore', 'wikiname': 'sessionrestore.2Fsessionrestore_no_auto_restore', 'jobname': 'other'},
     'WebRTC Media Performance Tests': {'testname': 'media_tests', 'wikiname': 'media_tests', 'jobname': 'other'},
     'TP5 Scroll': {'testname': 'tp5o_scroll', 'wikiname': 'tp5o_scroll', 'jobname': 'g1'},
-    'WEBGL Terrain': {'testname': 'glterrain', 'wikiname': 'glterrain', 'jobname': 'g1'}
+    'WEBGL Terrain': {'testname': 'glterrain', 'wikiname': 'glterrain', 'jobname': 'g1'},
+    'Devtools At Maximum Performance': {'testname': 'damp', 'wikiname': 'DAMP', 'jobname': 'g2'},
+    'Tp5 Optimized (XRes)': {'testname': 'tp5o', 'wikiname': 'tp5o', 'jobname': 'tp'}
 }
 
 
@@ -139,6 +145,7 @@ TESTS = (
     'Tp5 Optimized (Modified Page List Bytes)',
     'Tp5 Optimized Responsiveness',
     'Tp5 Optimized MozAfterPaint',
+    'Tp5 Optimized (XRes)',
     'a11y Row Major MozAfterPaint',
     'Tp4 Mobile',
     'LibXUL Memory during link',
@@ -163,5 +170,6 @@ TESTS = (
     'Session Restore no Auto Restore Test',
     'Session Restore Test',
     'TP5 Scroll',
+    'Devtools At Maximum Performance',
     'WEBGL Terrain',
     'WebRTC Media Performance Tests')
