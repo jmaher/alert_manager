@@ -25,7 +25,7 @@ def get_revision_range(repo_name, revision):
         print "exception while getting repo: %s, revision: %s" % (repo_name, revision)
         raise
 
-    return revlist[0], revlist[-1]
+    return revlist[-1], revlist[0]
 
 def build_tbpl_link(record):
     # TODO: is branch valid?

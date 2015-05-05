@@ -23,7 +23,7 @@ TREES = ('Mozilla-Inbound',
 
 PLATFORMS = ('XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
              'WINNT 5.2', 'WINNT 6.1 (ix)', 'WINNT 6.2 x64', 'WINNT 5.1 (ix)',
-             'MacOSX 10.7', 'MacOSX 10.8', 'MacOSX 10.6 (rev4)', 'Android 4.0.4')
+             'MacOSX 10.7', 'MacOSX 10.10', 'MacOSX 10.6 (rev4)', 'Android 4.0.4')
 
 
 TBPL_PLATFORMS = {
@@ -34,7 +34,7 @@ TBPL_PLATFORMS = {
     'Ubuntu HW 12.04': 'Ubuntu HW 12.04',
     'Ubuntu HW 12.04 x64': 'Ubuntu HW 12.04 x64',
     'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
-    'MacOSX 10.8': 'Rev5 MacOSX Mountain Lion 10.8',
+    'MacOSX 10.10': 'Rev5 MacOSX Yosemite 10.10',
     'Android 4.0.4': 'Android 4.0 Tegra'
 }
 
