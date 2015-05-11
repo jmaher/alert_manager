@@ -5,6 +5,7 @@ flask-compress
 requests==2.3.0
 pyLibrary==0.3.14288
 mozci
+fig
 
 # optional package for pre-commit hook
 flake8==2.2.2
