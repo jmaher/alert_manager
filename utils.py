@@ -6,7 +6,7 @@ import logging
 from managed_settings import TBPL_TESTS, HOST_ALERT_MANAGER
 import datetime
 from mozci.sources.buildapi import query_repo_url
-from mozci.sources.pushlog import query_revisions_range_from_revision_and_delta
+from mozci.sources.pushlog import query_revisions_range_from_revision_before_and_after
 
 WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',  'Friday', 'Saturday', 'Sunday']
 logger = None
@@ -20,7 +20,7 @@ def get_revision_range(repo_name, revision):
             repo_name = 'mozilla-central'
 
         repo_url = query_repo_url(repo_name)
-        revlist = query_revisions_range_from_revision_and_delta(repo_url, revision, delta=6)
+        revlist = query_revisions_range_from_revision_before_and_after(repo_url, revision, 6, 6)
     except:
         print "exception while getting repo: %s, revision: %s" % (repo_name, revision)
         raise

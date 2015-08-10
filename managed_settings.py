@@ -25,7 +25,8 @@ PLATFORMS = ('XP', 'Win7', 'Ubuntu HW 12.04 x64', 'Ubuntu HW 12.04', 'Linux',
              'WINNT 5.2', 'WINNT 6.1 (ix)', 'WINNT 6.2 x64', 'WINNT 5.1 (ix)',
              'MacOSX 10.7', 'MacOSX 10.10', 'MacOSX 10.6 (rev4)', 'Android 4.0.4',
              'WINNT 6.2 x64 (e10s)', 'WINNT 6.1 (ix) (e10s)', 'WINNT 5.1 (ix) (e10s)',
-             'Ubuntu HW 12.04 (e10s)', 'Ubuntu HW 12.04 x64 (e10s)')
+             'Ubuntu HW 12.04 (e10s)', 'Ubuntu HW 12.04 x64 (e10s)', 'WINNT 5.1 (e10s)',
+             'MacOSX 10.10 (e10s)')
 
 
 TBPL_PLATFORMS = {
@@ -39,10 +40,12 @@ TBPL_PLATFORMS = {
     'Ubuntu HW 12.04 x64 (e10s)': 'Ubuntu HW 12.04 x64',
     'MacOSX 10.6 (rev4)': 'Rev4 MacOSX Snow Leopard 10.6',
     'MacOSX 10.10': 'Rev5 MacOSX Yosemite 10.10',
+    'MacOSX 10.10 (e10s)': 'Rev5 MacOSX Yosemite 10.10',
     'Android 4.0.4': 'Android 4.0 Tegra',
     'WINNT 6.2 x64 (e10s)': 'Windows 8 64-bit',
     'WINNT 6.1 (ix) (e10s)': 'Windows 7 32-bit',
-    'WINNT 5.1 (ix) (e10s)': 'Windows XP 32-bit'
+    'WINNT 5.1 (ix) (e10s)': 'Windows XP 32-bit',
+    'WINNT 5.1 (e10s)': 'Windows XP 32-bit'
 }
 
 
@@ -120,6 +123,7 @@ TBPL_TESTS = {
     'Devtools At Maximum Performance': {'testname': 'damp', 'wikiname': 'DAMP', 'jobname': 'g2'},
     'Tp5 Optimized (XRes)': {'testname': 'tp5o', 'wikiname': 'tp5o', 'jobname': 'tp'},
     'Number of Constructors': {'testname': 'build', 'wikiname': 'Other_data', 'jobname': 'undefined'},
+    'Talos Page Switch': {'testname': 'tps', 'wikiname': 'tps', 'jobname': 'g2'},
     'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)': {'testname': 'xperf', 'wikiname': 'xperf', 'jobname': 'xperf'}
 }
 
@@ -178,5 +182,6 @@ TESTS = (
     'TP5 Scroll',
     'Devtools At Maximum Performance',
     'WEBGL Terrain',
+    'Talos Page Switch',
     'Number of Constructors',
     'WebRTC Media Performance Tests')
