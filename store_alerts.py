@@ -5,13 +5,12 @@ import settings
 def create_db_connnection(dbname):
     return MySQLdb.connect(host="localhost",
                            user="root",
-                           passwd="",
+                           passwd="root",
                            db=dbname)
 
 
 def build_buildername(branch, test, platform):
-    # This was leading to an error as there was no mapping.
-    # Ask Joel for these platforms.
+    # This was leading to an error as there was no mapping, we don't run these anymore
     if platform in ["Android 2.2 (Native)", 'MacOSX 10.8', 'MacOSX 10.6 (rev4)']:
         return ''
 
@@ -24,6 +23,12 @@ def build_buildername(branch, test, platform):
     th_tree = settings.TBPL_TREES[branch]
     if 'OSX' in th_platform:
         th_tree = th_tree.split(' pgo')[0]
+
+    if th_test == "other":
+        if th_platform == 'Ubuntu HW 12.04 x64':
+            th_test = "other_l64"
+        else:
+            th_test = "other_nol64"
 
     buildername = '%s %s talos %s' % (th_platform, th_tree, th_test)
     return buildername
@@ -91,4 +96,5 @@ def updateAlert(id, revision, buildername, test, stage, loop, user):
     cursor_alertbot.execute(query)
 
 
-if __name__ == "__main__": saveAlerts()
+if __name__ == "__main__":
+    saveAlerts()
