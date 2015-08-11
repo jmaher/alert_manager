@@ -45,6 +45,7 @@ def saveAlerts():
     cursor_alerts.execute(query)
     db_alertbot = create_db_connnection("alertbot")
     cursor_alertbot = db_alertbot.cursor()
+    print "Filling the alertbot table"
     for row in cursor_alerts.fetchall():
         branch = row[0]
         test = row[1]
@@ -59,6 +60,8 @@ def saveAlerts():
 
         query = 'INSERT into alertbot (`revision`, `buildername`, `test`, `stage`, `loop`, `user`) values ("%s", "%s", "%s", %d, %d, "%s")' %       (revision, buildername, test, stage, loop, user)
         cursor_alertbot.execute(query)
+
+    print "Alertbot table filled with new alerts."
 
 
 def getAlerts():
