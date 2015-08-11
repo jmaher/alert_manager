@@ -8,6 +8,7 @@ from mozci.platforms import build_talos_buildernames_for_repo
 from thclient import TreeherderClient
 from store_alerts import getAlerts, updateAlert
 from mozci.utils.misc import setup_logging
+from managed_settings import TBPL_TESTS
 
 LOG = setup_logging(logging.INFO)
 TIME_TO_BUILD = 2
@@ -23,7 +24,7 @@ SIGNATURE_URL = "https://treeherder.mozilla.org/api/project/%s/performance-data/
 PERFORMANCE_DATA = "https://treeherder.mozilla.org/api/project/%s/performance-data/get_performance_data/?interval_seconds=%s&signatures=%s"
 OPTION_COLLECTION_HASH = "https://treeherder.mozilla.org/api/optioncollectionhash/"
 SUCCESS = 0
-DRY_RUN = True
+DRY_RUN = False
 REVERSE_TESTS = ['dromaeo_css', 'dromaeo_dom', 'v8_7', 'canvasmark']
 
 # TODO: Ask about e10s
@@ -108,7 +109,7 @@ def compare(test, buildername, revision, previous_revision):
 
         # Ignoring e10s here.
         # TODO: Revisit this later
-        if test.lower() == value['suite'].lower() and TREEHERDER_PLATFORM[value["machine_platform"]] in buildername and 'test_options' not in value:
+        if TBPL_TESTS[test]['testname'].lower() == value['suite'].lower() and TREEHERDER_PLATFORM[value["machine_platform"]] in buildername and 'test_options' not in value:
             test_signature = signature
         else:
             continue
@@ -212,7 +213,7 @@ def main():
             # Reset the loop for upcoming stages
             alert['loop'] = 0
             for i in range(1, len(revisionList)):
-                results = compare(alert['test'], alert['buidlername'], revisionList[i], revisionList[i-1])
+                results = compare(alert['test'], alert['buildername'], revisionList[i], revisionList[i-1])
                 if results < -2.0:
                     badRevisions.append(revisionList[i])
 
