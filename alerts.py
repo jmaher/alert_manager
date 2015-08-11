@@ -163,6 +163,7 @@ def main():
         # new alert
         if alert['stage'] == 0:
             if checkMerge(alert['revision'], alert['buildername']) or 'pgo' in alert['buildername']:
+                LOG.info("We are ignoring this alert since it is either a merge or a pgo job.")
                 alert['stage'] = -1 # We need to have manual inspection in this case.
                 alert['user'] = 'human'
             else:
@@ -170,6 +171,7 @@ def main():
 
         # trigger jobs for backfill
         if alert['stage'] == 1:
+            LOG.info("We are in stage 1, and going to backfill jobs.")
             revisionList = getRevisions(alert['revision'], alert['buildername'], start=-2, end=2)
             trigger_range(alert['buildername'], revisionList, times=6, dry_run=DRY_RUN)
             alert['stage'] = 2
@@ -179,6 +181,7 @@ def main():
 
         # verify jobs for backfill
         if alert['stage'] == 2:
+            LOG.info("We are in stage 2, and going to verify if jobs are backfilled.")
             revisionList = getRevisions(alert['revision'], alert['buildername'], start=-2, end=2)
             for revision in revisionList:
                 dataPoints = getSuccessfulJobs(revision, alert['buildername'])
@@ -223,6 +226,7 @@ def main():
 
         # Trigger all talos stage
         if alert['stage'] == 3:
+            LOG.info("We are in stage 3, and going to trigger all_talos jobs.")
             repo_name = query_repo_name_from_buildername(alert['buildername'])
             trigger_all_talos_jobs(repo_name, alert['revision'], times=6, dry_run=DRY_RUN)
             previousRevision = getRevisions(alert['revision'], alert['buildername'], start=-1, end=-1)[0]
@@ -232,6 +236,7 @@ def main():
 
         # Verify All talos stage is completed
         if alert['stage'] == 4:
+            LOG.info("We are in stage 4, and going to verify if all_talos ran successfully.")
             previousRevision = getRevisions(alert['revision'], alert['buildername'], start=-1, end=-1)[0]
             repo_name = query_repo_name_from_buildername(alert['buildername'])
             all_buildernames = build_talos_buildernames_for_repo(repo_name)
