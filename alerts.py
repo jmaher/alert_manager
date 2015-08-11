@@ -166,6 +166,8 @@ def main():
                 LOG.info("We are ignoring this alert since it is either a merge or a pgo job.")
                 alert['stage'] = -1 # We need to have manual inspection in this case.
                 alert['user'] = 'human'
+                updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
+                            alert['stage'], alert['loop'], alert['user'])
             else:
                 alert['stage'] = 1
 
@@ -176,6 +178,8 @@ def main():
             trigger_range(alert['buildername'], revisionList, times=6, dry_run=DRY_RUN)
             alert['stage'] = 2
             # We want some time interval between stage 1 and 2, so we exit.
+            updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
+                            alert['stage'], alert['loop'], alert['user'])
             continue
 
 
@@ -200,6 +204,8 @@ def main():
                     break
 
             if alert['stage'] != 2:
+                updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
+                            alert['stage'], alert['loop'], alert['user'])
                 continue
 
             badRevisions = []
@@ -213,6 +219,8 @@ def main():
             if len(badRevisions) != 1:
                 alert['stage'] = -1 # too noisy, something bad happened
                 alert['user'] = 'human'
+                updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
+                            alert['stage'], alert['loop'], alert['user'])
                 continue
 
             if checkMerge(badRevisions[0], alert['buildername']):
@@ -232,6 +240,8 @@ def main():
             previousRevision = getRevisions(alert['revision'], alert['buildername'], start=-1, end=-1)[0]
             trigger_all_talos_jobs(repo_name, previousRevision, times=6, dry_run=DRY_RUN)
             alert['stage'] = 4
+            updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
+                            alert['stage'], alert['loop'], alert['user'])
             continue
 
         # Verify All talos stage is completed
@@ -258,6 +268,8 @@ def main():
                     break
 
             if alert['stage'] != 4:
+                updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
+                            alert['stage'], alert['loop'], alert['user'])
                 continue
 
             alert['stage'] = 5  # final stage, sheriff will check for this.
