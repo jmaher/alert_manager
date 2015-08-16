@@ -220,7 +220,7 @@ function hideMerged(originalkeyrev, showall) {
                 row.remove();
             }
         }
-        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</span>";
+        var mergedfromhtml = "<span><button id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"showMerged('" + originalkeyrev + "', " + showall + ");\">view merged alerts</button><button id=\"file-"+originalkeyrev+"\" onclick=\"fileBug(this.id)\">File Bug</button></span>";
 
         $(document.getElementById(originalkeyrev + "-hdr")).html("<h4><a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h4>" + mergedfromhtml);
     }
@@ -243,7 +243,7 @@ function showMerged(originalkeyrev, showall) {
             tbl = document.getElementById(originalkeyrev + "-tbl");
             addAlertToUI(tbl, alerts[alert], showall, originalkeyrev);
         }
-        var mergedfromhtml = "<span id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</span>";
+        var mergedfromhtml = "<span><button id=\"mergedfrom-" + originalkeyrev + "\" onclick=\"hideMerged('" + originalkeyrev + "', " + showall + ");\">hide merged alerts</button><button id=\"file-"+originalkeyrev+"\" onclick=\"fileBug(this.id)\">File Bug</button></span>";
         $(document.getElementById(originalkeyrev + "-hdr")).html("<h4><a href=?rev=" + originalkeyrev + "&showAll=1&testIndex=0&platIndex=0>" + originalkeyrev + "</a></h4>" + mergedfromhtml);
     }
     req.open('get', root_url + '/mergedalerts?keyrev=' + originalkeyrev, true);
@@ -266,7 +266,7 @@ function addMergedLinks(showall) {
                     continue;
                 }
 
-                var mergedfromhtml = "<span id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</span>";
+                var mergedfromhtml = "<span><button id=\"mergedfrom-" + mf + "\" onclick=\"showMerged('" + mf + "', " + showall + ");\">view merged alerts</button><button id=\"file-"+alerts[alert]['mergedfrom']+"\" onclick=\"fileBug(this.id)\">File Bug</button></span>";
                 $(document.getElementById(mf + "-hdr")).html("<h4><a href=?rev=" + mf + "&showAll=1&testIndex=0&platIndex=0>" + mf + "</a></h4>" + mergedfromhtml);
             }
         }
@@ -339,66 +339,48 @@ function performAction() {
             ids[alertid] = checkedIds[alertid].split('-')[1];
         }
         checkedIds = ids;
-
+        var alertids = $.map(checkedIds, function(value, index) {
+                    return [value];
+                }).join(",");
         //Check if status has to be changed
         if (containsObject(action, status_options)) {
             console.log("change status-"+action);
-            //Update the status one by one by calling updatestatus()
-            for (id in checkedIds) {
+            $.ajax({
+                 url: root_url + "/updatefields?type=status",
+                type: "POST",
+                data: {
+                    id: alertids,
+                    status: action,
+                },
+                success: location.reload()
+            });
+        } else if (action == "Change Revision") {
+            var newRev = prompt("Please enter new Revision");    
+            if (newRev != null) {
+                console.log('new revision-'+newRev);
                 $.ajax({
-                     url: root_url + "/updatestatus",
+                    url: root_url + "/updaterev",
                     type: "POST",
                     data: {
-                        id: checkedIds[id],
-                        status: action,
-                    }
+                        id: alertids,
+                        revision: newRev,
+                    },
+                    success: location.reload()
                 });
             }
-            location.reload();
-        }
-
-        else if (action == "Change Revision") {
-            var newRev = prompt("Please enter new Revision");
-            for (id in checkedIds) {
-
-                var bug = '1234';
-                if (bug == '') {
-                    bug = $(document.getElementById(alertid + "-bug")).val();
-                }
-    
-                if (newRev != null) {
-                    console.log('new revision-'+newRev);
-                    $.ajax({
-                         url: root_url + "/updaterev",
-                        type: "POST",
-                        data: {
-                            id: checkedIds[id],
-                            revision: newRev,
-                        }
-                    });
-                }
-            }
-            location.reload();
-
-        }
-
-        else if (action == "Add Bug") {
+        } else if (action == "Add Bug") {
             var BugID = prompt("Please enter Bug ID");
             console.log('BUG ID-'+BugID);
             if (BugID != null) {
-                for (id in checkedIds) {
-                    $.ajax({
-                         url: root_url + "/updatefields?type=bug",
-                        type: "POST",
-                        data: {
-                            id: checkedIds[id],
-                            BugID: BugID,
-                        }
-                    });
-
-                }
-                location.reload();
-            
+                $.ajax({
+                     url: root_url + "/updatefields?type=bug",
+                    type: "POST",
+                    data: {
+                        id: alertids,
+                        BugID: BugID
+                    },
+                    success: location.reload()
+                });
             }
         }
 
@@ -411,18 +393,16 @@ function performAction() {
                         Ok: function() {
                             var email = $("#commentName").val();
                             var comment = $("#commentText").val();
-                            for (id in checkedIds) {
-                                console.log("Sending POST for-" + checkedIds[id]);
-                                $.ajax({
-                                         url: root_url + "/submit",
-                                        type: "POST",
-                                        data:{
-                                            id: checkedIds[id],
-                                            comment: comment,
-                                            email: email,
-                                        }
-                                });
-                            }
+                            $.ajax({
+                                     url: root_url + "/submit",
+                                    type: "POST",
+                                    data:{
+                                        id: alertids,
+                                        comment: comment,
+                                        email: email,
+                                    }
+                            });
+
                             $(this).dialog("close");
                        },
                         Cancel: function () {
@@ -432,9 +412,7 @@ function performAction() {
                 });
             });
             $("#addCommentpopup").dialog("open");
-        }
-            //For changing branch
-        else if (action == "Change Branch") {
+        } else if (action == "Change Branch") {
             $(function() {
                 $("#changeBranchpopup").dialog({
                     autoOpen: false,
@@ -443,17 +421,15 @@ function performAction() {
                         Ok: function() {
                             var branch = $("#branchName").val();
                             var rev = $("#revisionName").val();
-                            for (id in checkedIds) {
-                                $.ajax({
-                                         url: root_url + "/updatefields?type=branch",
-                                        type: "POST",
-                                        data:{
-                                            id: checkedIds[id],
-                                            branch: branch,
-                                            revision: rev,
-                                        }
-                                });
-                            }
+                            $.ajax({
+                                    url: root_url + "/updatefields?type=branch",
+                                    type: "POST",
+                                    data:{
+                                        id: alertids,
+                                        branch: branch,
+                                        revision: rev,
+                                    }
+                            });
                             $(this).dialog("close");
                        },
                         Cancel: function () {
@@ -463,10 +439,7 @@ function performAction() {
                 });
             });
             $("#changeBranchpopup").dialog("open");
-        }
-
-        //Duplicates
-        else if (action == 'Duplicate') {
+        } else if (action == 'Duplicate') {
             $(function() {
                 $("#markDuplicatepopup").dialog({
                     autoOpen: false,
@@ -474,16 +447,15 @@ function performAction() {
                     buttons: { 
                         Ok: function() {
                             var new_rev = $("#markDuplicateRev").val();
-                            for (id in checkedIds) {
-                                $.ajax({
-                                         url: root_url + "/updatefields?type=duplicate",
-                                        type: "POST",
-                                        data:{
-                                            id: checkedIds[id],
-                                            rev: new_rev,
-                                        }
-                                });
-                            }
+                            $.ajax({
+                                    url: root_url + "/updatefields?type=duplicate",
+                                    type: "POST",
+                                    data:{
+                                        id: alertids,
+                                        rev: new_rev,
+                                    }
+                            });
+                            
                             $(this).dialog("close");
                        },
                         Cancel: function () {
@@ -493,10 +465,7 @@ function performAction() {
                 });
             });
             $("#markDuplicatepopup").dialog("open");
-        }
-
-        //Backout
-        else if (action == 'Backout') {
+        } else if (action == 'Backout') {
             $(function() {
                 $("#BackoutPopup").dialog({
                     autoOpen: false,
@@ -504,17 +473,15 @@ function performAction() {
                     buttons: { 
                         Ok: function() {
                             var bug = $("#BackoutPopupText").val();
-                            for (id in checkedIds) {
-                                $.ajax({
-                                         url: root_url + "/updatestatus?type=bug",
-                                        type: "POST",
-                                        data:{
-                                            id: checkedIds[id],
-                                            bug: bug,
-                                            status: "Backout",
-                                        }
-                                });
-                            }
+                            $.ajax({
+                                     url: root_url + "/updatefields?type=backout",
+                                    type: "POST",
+                                    data:{
+                                        id: alertids,
+                                        bug: bug,
+                                        status: "Backout",
+                                    }
+                            });
                             $(this).dialog("close");
                        },
                         Cancel: function () {
@@ -533,7 +500,6 @@ function fileBug (keyrev) {
     var req = new XMLHttpRequest();
     req.onload = function (e) {
         var raw_data = JSON.parse(req.response);
-        console.log(raw_data);
         $("#summaryText").val(raw_data['summary'])
         $("#descriptionText").val(raw_data['desc'])
         
@@ -696,7 +662,6 @@ function loadAllAlertsTable_raw(showall, rev, test, platform, current, show_impr
                  prevVal = parseHTML(value);                 
             }
             //The new data is added if it is not a duplicate of existing data
-           // window.alert(prevVal+"=="+curVal);
             if (curVal != prevVal) {           
                 var strike_value = data[i]['percent'];
                 if (!(checkStatusActive(data[i]['status']))) {
@@ -777,7 +742,7 @@ function loadAllAlerts_raw(showall, rev, test, platform, current, queryname) {
                         $(document.getElementById(keyrev)).append(newtbl);
                     }
 
-                    $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + keyrev + "</h4></a><span id=\"file-"+keyrev+"\" onclick=\"fileBug(this.id)\">File Bug</span>");
+                    $(document.getElementById(keyrev + "-hdr")).html("<a href=?rev=" + keyrev + "&showAll=1&testIndex=0&platIndex=0><h4>" + keyrev + "</h4></a><span><button id=\"file-"+keyrev+"\" onclick=\"fileBug(this.id)\">File Bug</button></span>");
                     tbl = document.getElementById(keyrev + "-tbl");
                 }
                 var r = addAlertToUI(tbl, alerts[alert], showall, rev);

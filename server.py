@@ -279,7 +279,7 @@ def run_submit_data():
     retVal = {}
     data = request.form
     comment = "[%s] %s" % (data['email'], data['comment'])
-    sql = "update alerts set comment='%s', email='%s' where id=%s;" % (comment, data['email'], data['id'])
+    sql = "update alerts set comment='%s', email='%s' where id IN(%s);" % (comment, data['email'], data['id'])
     db = create_db_connnection()
     cursor = db.cursor()
     cursor.execute(sql)
@@ -325,13 +325,19 @@ def run_addfields_data():
         typeVal = query_dict.pop('type')
 
     if typeVal == "bug":
-        sql = "update alerts set bug='%s',status='Investigating' where id=%s;" %(data['BugID'], data['id'])
+        sql = "update alerts set bug='%s',status='Investigating' where id IN(%s);" %(data['BugID'], data['id'])
 
     if typeVal == "comment":
         pass
 
     if typeVal == "duplicate":
-        sql = "update alerts set mergedfrom='%s', duplicate='%s', status='Duplicate' where id=%s;" %(data['rev'], data['rev'], data['id'])
+        sql = "update alerts set mergedfrom='%s', duplicate='%s', status='Duplicate' where id IN(%s);" %(data['rev'], data['rev'], data['id'])
+
+    if typeVal == "status":
+        sql = "update alerts set status='%s' where id IN(%s)" %(data['status'], data['id'])
+
+    if typeVal == "backout":
+        sql = "update alerts set status='Backout',bug='%s' where id IN(%s)" %(data['bug'], data['id'])
 
     if typeVal == "branch":
         new_branch = data['branch']

@@ -317,6 +317,8 @@ def chop_graph_url(graphurl):
     """
 
     try:
+        graphurl = graphurl.replace("%5B", "[")
+        graphurl = graphurl.replace("%5D", "]")
         url_head, tail = graphurl.split("[[")
         data, url_tail = tail.split("]]")
         ## data is currently an illformed string
