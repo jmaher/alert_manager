@@ -25,9 +25,13 @@ def parse_args(argv=None):
                         dest="changeset",
                         type=str,
                         help="Current changeset.")
+    parser.add_argument("-p", "--patch",
+                        dest="patch",
+                        type=str,
+                        help="Topmost additional patch in series to push before trypatch.")
     parser.add_argument("--cwd",
                         dest="cwd",
-                        #required=True,
+                        required=True,
                         type=str,
                         help="Path for mozilla repo.")
     parser.add_argument("--repo",
@@ -67,7 +71,10 @@ def main():
         LOG.info("Updating and pushing the revision %s to try" % revision)
         commands = [
             ['hg', 'qpop', '-a'],
-            ['hg', 'update', '%s' % revision],
+            ['hg', 'update', '%s' % revision]]
+        if options.patch:
+            commands += [['hg', 'qpush', '%s' % options.patch]]
+        commands += [
             ['hg', 'qnew', 'trypatch'],
             ['hg', 'qpush', 'trypatch'],
             ['hg', 'qref', '-m', 'hg update %s; %s' % (revision, options.try_syntax)],
