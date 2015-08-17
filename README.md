@@ -52,39 +52,36 @@ environment going:
 
 ### OSX based Alert Manager development with Docker
 
-1. Visit [Docker][docker] and get docker up and running on your system. Ensure you are using version 1.3.3 - 1.4.0 has a [bug][bug] that prevents it from working with many external tools. 
-
-2. Run boot2docker start in a terminal once it is installed. Ensure that you run the
+1. Visit [Docker][docker] and get docker up and running on your system. And ensure that you run the
  export DOCKER_HOST=... lines when prompted:
 
-        boot2docker start
         export DOCKER_HOST=tcp://192.168.59.103:2375
 
-3. Run the following git clone to a directory of your choosing:
+2. Run the following git clone to a directory of your choosing:
 
         git clone https://github.com/jmaher/alert_manager.git 
 
-4. Run virtualenv on the git cloned directory to setup the Python virtual environment:
+3. Run virtualenv on the git cloned directory to setup the Python virtual environment:
 
         virtualenv alert_manager
 
-5. cd into the name of the directory into which you cloned the git repository
+4. cd into the name of the directory into which you cloned the git repository
 
         cd alert_manager
 
-6. Activate the virtual environment:
+5. Activate the virtual environment:
 
         source bin/activate
 
-7. Run make to create your local docker containers:
+6. Run make to create your local docker containers:
 
         cd dockerfiles; make all
 
-8. Start the collection of containers!:
+7. Start the collection of containers! (Note: maybe you need to install fig by pip install fig before you run it):
 
         fig up
 
-9. Visit http://localhost:8080/alerts.html in your browser, or http://192.168.59.103:8080/alerts.html if localhost doesn't work and you should be all set.
+8. Visit http://localhost:8080/alerts.html in your browser, or http://192.168.59.103:8080/alerts.html if localhost doesn't work and you should be all set. One thing need to point out is the IP address you visit is not restricted to "192.168.59.103", just keep it same as your docker environment host(DOCKER_HOST) which been setted in step 1.
 
 ### Windows based Alert Manager development with Docker
 
