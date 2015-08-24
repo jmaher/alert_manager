@@ -2,7 +2,8 @@
 # These are the times for non-pgo
 import requests
 import logging
-from mozci.mozci import query_repo_url_from_buildername, query_repo_name_from_buildername, trigger_all_talos_jobs, trigger_range
+from mozci.mozci import query_repo_url_from_buildername, query_repo_name_from_buildername, \
+        trigger_all_talos_jobs, trigger_range, set_query_source
 from mozci.query_jobs import TreeherderApi
 from mozci.platforms import build_talos_buildernames_for_repo
 from thclient import TreeherderClient
@@ -176,6 +177,8 @@ def main():
         if alert['stage'] == 1:
             LOG.info("We are in stage 1, and going to backfill jobs.")
             revisionList = getRevisions(alert['revision'], alert['buildername'], start=-2, end=2)
+            # Setting Treeherder as the source for querying.
+            set_query_source("treeherder")
             trigger_range(alert['buildername'], revisionList, times=6, dry_run=DRY_RUN)
             alert['stage'] = 2
             # We want some time interval between stage 1 and 2, so we exit.
@@ -237,6 +240,8 @@ def main():
         if alert['stage'] == 3:
             LOG.info("We are in stage 3, and going to trigger all_talos jobs.")
             repo_name = query_repo_name_from_buildername(alert['buildername'])
+            # Setting Treeherder as the source for querying.
+            set_query_source("treeherder")
             trigger_all_talos_jobs(repo_name, alert['revision'], times=6, dry_run=DRY_RUN)
             previousRevision = getRevisions(alert['revision'], alert['buildername'], start=-1, end=-1)[0]
             trigger_all_talos_jobs(repo_name, previousRevision, times=6, dry_run=DRY_RUN)
