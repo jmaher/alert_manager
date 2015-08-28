@@ -163,7 +163,7 @@ def main():
     alerts = getAlerts()
     for alert in alerts:
         # new alert
-        LOG.info("Running alert for: [%s, %s, %s]" % alert['test'], alert['buildername'], alert['revision'])
+        LOG.info("Running alert for: [%s, %s, %s]" % (alert['test'], alert['buildername'], alert['revision']))
         if alert['stage'] == 0:
             LOG.info("We are in stage 0.")
             if checkMerge(alert['revision'], alert['buildername']) or 'pgo' in alert['buildername']:
