@@ -6,12 +6,15 @@ from mozci.mozci import query_repo_url_from_buildername, query_repo_name_from_bu
         trigger_all_talos_jobs, trigger_range, set_query_source
 from mozci.query_jobs import TreeherderApi
 from mozci.platforms import build_talos_buildernames_for_repo
+from mozci.utils import transfer
 from thclient import TreeherderClient
 from store_alerts import getAlerts, updateAlert
 from mozci.utils.misc import setup_logging
 from managed_settings import TBPL_TESTS
 
 LOG = setup_logging(logging.INFO)
+# Use memory-saving mode
+transfer.MEMORY_SAVING_MODE = True
 TIME_TO_BUILD = 2
 TIME_TO_TEST = 1
 PENDING_TIME = 1
