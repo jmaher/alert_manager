@@ -164,6 +164,7 @@ def main():
     for alert in alerts:
         # new alert
         if alert['stage'] == 0:
+            LOG.info("We are in stage 0.")
             if checkMerge(alert['revision'], alert['buildername']) or 'pgo' in alert['buildername']:
                 LOG.info("We are ignoring this alert since it is either a merge or a pgo job.")
                 alert['stage'] = -1 # We need to have manual inspection in this case.
@@ -200,6 +201,7 @@ def main():
                     # And if they don't then we mark them for manual intervention/
                     alert['loop'] += 1
                     if alert['loop'] > (TIME_TO_BUILD + TIME_TO_TEST + PENDING_TIME) / CYCLE_TIME:
+                        LOG.info("The jobs did not complete backfilling in time, assigning for human inspection.")
                         alert['stage'] = -1
                         alert['user'] = 'human'
                     else:
@@ -221,6 +223,7 @@ def main():
                     badRevisions.append(revisionList[i])
 
             if len(badRevisions) != 1:
+                LOG.info("There are too many bad revisions, assigning for human inspection.")
                 alert['stage'] = -1 # too noisy, something bad happened
                 alert['user'] = 'human'
                 updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
@@ -228,10 +231,14 @@ def main():
                 continue
 
             if checkMerge(badRevisions[0], alert['buildername']):
+                LOG.info("The bad revision %s identified for %s buildername is a merge, "
+                         "assigning for human inspection" % (badRevisions[0], alert['buildername']))
                 alert['stage'] = -1 # A merge revision is a bad revision, manually inspect
                 alert['user'] = 'human'
 
             if alert['revision'] != badRevisions[0]:
+                LOG.info("Alert_Manager misreported the bad revision. The actual bad revision is %s "
+                         "for regression on %s buildername." % (badRevisions[0], alert['buildername']))
                 alert['revision'] = badRevisions[0] # we misreported initially, change the actual regression revision
 
             alert['stage'] = 3
@@ -264,6 +271,7 @@ def main():
                         # And if they don't then we mark them for manual intervention
                         alert['loop'] += 1
                         if alert['loop'] > (TIME_TO_BUILD + TIME_TO_TEST + PENDING_TIME + TIME_TO_WAIT) / CYCLE_TIME:
+                            LOG.info("The all talos jobs did not complete in time, assigning for human inspection.")
                             alert['stage'] = -1
                             alert['user'] = 'human'
                         else:
@@ -279,6 +287,8 @@ def main():
                 continue
 
             alert['stage'] = 5  # final stage, sheriff will check for this.
+            alert['user'] = 'human'
+            LOG.info("All automated parts are complete.")
 
         updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'], alert['stage'], alert['loop'], alert['user'])
 
