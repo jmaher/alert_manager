@@ -206,6 +206,7 @@ def main():
                         alert['stage'] = -1
                         alert['user'] = 'human'
                     else:
+                        LOG.info("The jobs have not completed backfilling. Looping back to stage 1.")
                         alert['stage'] = 1
 
                     break
