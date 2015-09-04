@@ -152,6 +152,8 @@ def compare(test, buildername, revision, previous_revision):
     if revision_perfdata and previous_revision_perfdata:
         mean_revision_perfdata = sum(revision_perfdata) / float(len(revision_perfdata))
         mean_previous_revision_perfdata = sum(previous_revision_perfdata) / float(len(previous_revision_perfdata))
+    else:
+        return None
 
 
     if test in REVERSE_TESTS:
@@ -222,10 +224,16 @@ def main():
             badRevisions = []
             # Reset the loop for upcoming stages
             alert['loop'] = 0
+            results = None
             for i in range(1, len(revisionList)):
                 results = compare(alert['test'], alert['buildername'], revisionList[i], revisionList[i-1])
                 if results < -2.0:
                     badRevisions.append(revisionList[i])
+
+            if results is None:
+                LOG.info("We did not find perf data for the revisions for alert %s on buildername %s. "
+                         "Will loop once again." % (alert['test'], alert['buildername']))
+                continue
 
             if len(badRevisions) != 1:
                 LOG.info("There are too many bad revisions: %s for alert %s on buildername %s, "
