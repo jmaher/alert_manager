@@ -57,7 +57,7 @@ def main():
     elif options.changeset:
         url = "%s?changeset=%s" % (JSON_PUSHES % {"repo_url": repo_url}, options.changeset)
     else:
-        raise Exception("You need to enter either -start-rev and --end-rev or --changeset")
+        raise Exception("You need to enter either --start-rev and --end-rev or --changeset")
 
     response = requests.get(url).json()
     total_revisions = []
