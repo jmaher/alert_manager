@@ -342,7 +342,7 @@ def run_addfields_data():
     if typeVal == "branch":
         new_branch = data['branch']
         new_revision = data['revision']
-        new_tbpl_url = get_new_tbpl_url(new_revision, new_branch, data['id'])
+        new_tbpl_url = get_new_tbpl_url(new_revision, new_branch, new_revision)
         sql = "update alerts set branch='%s', keyrevision='%s', tbplurl='%s' where id=%s" %(new_branch, new_revision, new_tbpl_url, data['id'])
 
     db = create_db_connnection()

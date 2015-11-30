@@ -121,7 +121,7 @@ TBPL_TESTS = {
     'TP5 Scroll': {'testname': 'tp5o_scroll', 'wikiname': 'tp5o_scroll', 'jobname': 'g1'},
     'WEBGL Terrain': {'testname': 'glterrain', 'wikiname': 'glterrain', 'jobname': 'g1'},
     'Devtools At Maximum Performance': {'testname': 'damp', 'wikiname': 'DAMP', 'jobname': 'g2'},
-    'Tp5 Optimized (XRes)': {'testname': 'tp5o', 'wikiname': 'tp5o', 'jobname': 'tp'},
+    'Tp5 Optimized (XRes)': {'testname': 'tp5o', 'wikiname': 'tp5o', 'jobname': 'tp5o'},
     'Number of Constructors': {'testname': 'build', 'wikiname': 'Other_data', 'jobname': 'undefined'},
     'Talos Page Switch': {'testname': 'tps', 'wikiname': 'tps', 'jobname': 'g2'},
     'Tp5 No Network Row Major MozAfterPaint (Non-Main Normal File IO Bytes)': {'testname': 'xperf', 'wikiname': 'xperf', 'jobname': 'xperf'}

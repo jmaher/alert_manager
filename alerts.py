@@ -24,8 +24,8 @@ JSON_PUSHES = "%(repo_url)s/json-pushes"
 WEEK = 604800
 TWO_WEEKS = 1209600
 SIXTY_DAYS = 5184000
-SIGNATURE_URL = "https://treeherder.mozilla.org/api/project/%s/performance-data/get_performance_series_summary/?interval=%s"
-PERFORMANCE_DATA = "https://treeherder.mozilla.org/api/project/%s/performance-data/get_performance_data/?interval_seconds=%s&signatures=%s"
+SIGNATURE_URL = "https://treeherder.mozilla.org/api/project/%s/performance/signatures/?interval=%s"
+PERFORMANCE_DATA = "https://treeherder.mozilla.org/api/project/%s/performance/data/?interval=%s&signatures=%s"
 OPTION_COLLECTION_HASH = "https://treeherder.mozilla.org/api/optioncollectionhash/"
 SUCCESS = 0
 DRY_RUN = False
@@ -77,7 +77,7 @@ def getRevisions(revision, buildername, start=0, end=0):
     response = req["pushes"]
     revisionList = []
     for push in sorted(response.keys()):
-        revisionList.append(response[push]["changesets"][0][0:12])
+        revisionList.append(response[push]["changesets"][0][0:40])
 
     return revisionList
 
@@ -113,7 +113,9 @@ def compare(test, buildername, revision, previous_revision):
 
         # Ignoring e10s here.
         # TODO: Revisit this later
-        if TBPL_TESTS[test]['testname'].lower() == value['suite'].lower() and TREEHERDER_PLATFORM[value["machine_platform"]] in buildername and 'test_options' not in value:
+        if TBPL_TESTS[test]['testname'].lower() == value['suite'].lower() and \
+           TREEHERDER_PLATFORM[value["machine_platform"]] in buildername and \
+           'test_options' not in value:
             test_signature = signature
         else:
             continue
@@ -136,7 +138,7 @@ def compare(test, buildername, revision, previous_revision):
 
     # Using TWO_WEEKS as interval, may change it afterwards
     req = requests.get(PERFORMANCE_DATA % (repo_name, TWO_WEEKS, test_signature)).json()
-    performance_data = req[0]["blob"]
+    performance_data = req[test_signature]
     treeherder_client = TreeherderClient()
     revision_resultset_id = treeherder_client.get_resultsets(repo_name, revision=revision)[0]["id"]
     previous_revision_resultset_id = treeherder_client.get_resultsets(repo_name, revision=previous_revision)[0]["id"]
@@ -145,14 +147,17 @@ def compare(test, buildername, revision, previous_revision):
 
     for data in performance_data:
         if data["result_set_id"] == revision_resultset_id:
-            revision_perfdata.append(data["geomean"])
+            revision_perfdata.append(data["value"])
         elif data["result_set_id"] == previous_revision_resultset_id:
-            previous_revision_perfdata.append(data["geomean"])
+            previous_revision_perfdata.append(data["value"])
 
     if revision_perfdata and previous_revision_perfdata:
         mean_revision_perfdata = sum(revision_perfdata) / float(len(revision_perfdata))
         mean_previous_revision_perfdata = sum(previous_revision_perfdata) / float(len(previous_revision_perfdata))
-
+    else:
+        print "previous_revision_perfdata: %s" % previous_revision_perfdata
+        print "revision_perfdata: %s" % revision_perfdata
+        return 0
 
     if test in REVERSE_TESTS:
         # lower value results in regression
@@ -201,6 +206,7 @@ def main():
 
                 # If dataPoints are less than 6, it means that builds/jobs are still running.
                 if dataPoints < 6:
+                    print "data points <6 for revision: %s" % revision
                     # We wait for 6 hours for all triggered tests to complete,
                     # And if they don't then we mark them for manual intervention/
                     alert['loop'] += 1
@@ -214,6 +220,7 @@ def main():
                     break
 
             if alert['stage'] != 2:
+                print "updating alert and then continue, not stage 2"
                 updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
                             alert['stage'], alert['loop'], alert['user'])
                 continue
@@ -222,8 +229,11 @@ def main():
             # Reset the loop for upcoming stages
             alert['loop'] = 0
             for i in range(1, len(revisionList)):
+                print "getting results for revision number: %s" % i
                 results = compare(alert['test'], alert['buildername'], revisionList[i], revisionList[i-1])
+                print "compare returned: %s" % results
                 if results < -2.0:
+                    print "appending bad revision to list: %s"% revisionList[i]
                     badRevisions.append(revisionList[i])
 
             if len(badRevisions) != 1:
@@ -231,6 +241,7 @@ def main():
                          "assigning for human inspection." % (badRevisions, alert['test'], alert['buildername']))
                 alert['stage'] = -1 # too noisy, something bad happened
                 alert['user'] = 'human'
+                print "too many bad revisions, update alert to human"
                 updateAlert(alert['id'], alert['revision'], alert['buildername'], alert['test'],
                             alert['stage'], alert['loop'], alert['user'])
                 continue
@@ -246,6 +257,7 @@ def main():
                          "for alert %s on %s buildername." % (badRevisions[0], alert['test'], alert['buildername']))
                 alert['revision'] = badRevisions[0] # we misreported initially, change the actual regression revision
 
+            print "setting stage = 3!"
             alert['stage'] = 3
 
         # Trigger all talos stage

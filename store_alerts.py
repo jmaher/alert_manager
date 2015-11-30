@@ -24,11 +24,8 @@ def build_buildername(branch, test, platform):
     if 'OSX' in th_platform:
         th_tree = th_tree.split(' pgo')[0]
 
-    if th_test == "other":
-        if th_platform == 'Ubuntu HW 12.04 x64':
-            th_test = "other_l64"
-        else:
-            th_test = "other_nol64"
+    if 'e10s' in platform:
+        th_test += '-e10s'
 
     buildername = '%s %s talos %s' % (th_platform, th_tree, th_test)
     return buildername
@@ -41,7 +38,7 @@ def saveAlerts():
     date = str(datetime.date.today() - datetime.timedelta(days=14))
     # We need to get only NEW alerts
     # WHERE if want alerts after >=some_date
-    query = "SELECT branch, test, platform, keyrevision FROM alerts where push_date>='%s'" % date
+    query = "SELECT branch, test, platform, keyrevision FROM alerts where push_date>='%s' and percent<0 and status=''" % date
     cursor_alerts.execute(query)
     db_alertbot = create_db_connnection("alertbot")
     cursor_alertbot = db_alertbot.cursor()

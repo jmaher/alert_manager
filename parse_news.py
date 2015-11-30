@@ -186,7 +186,7 @@ def parse_body(msg, graphurl_re=GRAPHURL_RE, cset_re=CSET_RE):
 
         new_parts = []
         for param, value in query_parts:
-            new_value = value.zfill(12)
+            new_value = value.zfill(40)
             if param == 'tochange':
                 key_revision = new_value
 
