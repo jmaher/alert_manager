@@ -64,7 +64,7 @@ def saveAlerts():
 def getAlerts():
     db_alertbot = create_db_connnection("alertbot")
     cursor_alertbot = db_alertbot.cursor()
-    query = "SELECT `id`, `revision`, `buildername`, `test`, `stage`, `loop`, `user` FROM alertbot WHERE stage>=0 AND user='bot' ORDER BY `id` DESC LIMIT 1"
+    query = "SELECT * FROM alertbot WHERE stage>=0 AND user='bot' ORDER BY `id` DESC LIMIT 1"
     cursor_alertbot.execute(query)
     alerts = []
     for row in cursor_alertbot.fetchall():
