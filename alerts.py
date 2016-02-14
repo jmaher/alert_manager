@@ -9,6 +9,7 @@ from mozci.platforms import build_talos_buildernames_for_repo
 from mozci.utils import transfer
 from thclient import TreeherderClient
 from store_alerts import getAlerts, updateAlert
+from utils import fetch_json
 from mozci.utils.misc import setup_logging
 from managed_settings import TBPL_TESTS
 
@@ -103,8 +104,8 @@ def compare(test, buildername, revision, previous_revision):
     repo_name = query_repo_name_from_buildername(buildername)
     # Using TWO_WEEKS as interval, may change it afterwards
     signature_request_url = SIGNATURE_URL % (repo_name, TWO_WEEKS)
-    signatures = requests.get(signature_request_url).json()
-    options_collection_hash_list = requests.get(OPTION_COLLECTION_HASH).json()
+    signatures = fetch_json(signature_request_url)
+    options_collection_hash_list = fetch_json(OPTION_COLLECTION_HASH)
 
     for signature, value in signatures.iteritems():
         # Skip processing subtests. They are identified by 'test' key in the dicitonary.
@@ -137,7 +138,7 @@ def compare(test, buildername, revision, previous_revision):
             continue
 
     # Using TWO_WEEKS as interval, may change it afterwards
-    req = requests.get(PERFORMANCE_DATA % (repo_name, TWO_WEEKS, test_signature)).json()
+    req = fetch_json(PERFORMANCE_DATA % (repo_name, TWO_WEEKS, test_signature))
     performance_data = req[test_signature]
     treeherder_client = TreeherderClient()
     revision_resultset_id = treeherder_client.get_resultsets(repo_name, revision=revision)[0]["id"]
