@@ -39,6 +39,7 @@ TREEHERDER_PLATFORM = {
     'windows7-32': 'Windows 7 32-bit',
     'windows8-64': 'Windows 8 64-bit',
     'osx-10-10': 'Rev5 MacOSX Yosemite 10.10',
+    'osx-10-10-5': 'Rev7 MacOSX Yosemite 10.10.5',
     'android-4-0-armv7-api11': 'Android 4.0 Tegra',
 }
 

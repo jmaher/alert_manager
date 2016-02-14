@@ -207,7 +207,7 @@ Making a decision:
 As the patch author we need your feedback to help us handle this regression.
 *** Please let us know your plans by %s, or the offending patch will be backed out! ***
 
-Our wiki page oulines the common responses and expectations:
+Our wiki page outlines the common responses and expectations:
 https://wiki.mozilla.org/Buildbot/Talos/RegressionBugsHandling
             """ %(details['keyrev'], bugnum,
                   HOST_ALERT_MANAGER, details['keyrev'],

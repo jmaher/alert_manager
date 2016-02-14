@@ -17,6 +17,7 @@ pmap['WinXP'] = 'winnt 5.1 (ix)'
 pmap['OSX64'] = 'MacOSX 10.6 (rev4)'
 pmap['OSX10.8'] = 'MacOSX 10.8'
 pmap['OSX10.10'] = 'MacOSX 10.10'
+pmap['OSX10.105'] = 'MacOSX 10.10.5'
 pmap['Android'] = 'Android 4.0.4'
 
 
