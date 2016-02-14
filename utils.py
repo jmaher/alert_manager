@@ -11,6 +11,17 @@ from mozci.sources.pushlog import query_revisions_range_from_revision_before_and
 WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',  'Friday', 'Saturday', 'Sunday']
 logger = None
 
+
+def fetch_json(url, params=None):
+    headers = {
+        'Accept': 'application/json',
+        'User-Agent': 'alert-manager',
+    }
+    response = requests.get(url, params=params, headers=headers, timeout=30)
+    response.raise_for_status()
+    return response.json()
+
+
 def get_revision_range(repo_name, revision):
     """
     Query pushlog in mozci and return revisions in a range of six.
